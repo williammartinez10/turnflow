@@ -1,0 +1,18 @@
+/* ============= Global colors ============= */
+
+:root {
+    --color-sky: #CAEBF2;
+    --color-carbon: #A9A9A9;
+    --color-watermelon: #FF3B3F;
+    --color-neutral: #EFEFEF;
+}
+
+/* ============= Global reset ============= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}

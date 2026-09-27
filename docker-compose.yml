@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: turnflow
+      POSTGRES_PASSWORD: turnflow
+      POSTGRES_DB: turnflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - turnflow_data:/var/lib/postgresql/data
+volumes:
+  turnflow_data:

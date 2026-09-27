@@ -20,9 +20,7 @@ function Home() {
 
           <h1>Your time matters.</h1>
 
-          <p className="home-description">
-            Join a virtual queue and get real-time updates.
-          </p>
+          <p className="home-description">Join a virtual queue and get real-time updates.</p>
 
           <button
             className="customer-button"
@@ -36,9 +34,7 @@ function Home() {
 
           <div className="home-divider" />
 
-          <p className="staff-link">
-            Staff or Admin? <a href="/login">Here</a>
-          </p>
+          <p className="staff-link">Staff or Admin? <a href="/login">Here</a> </p>
         </div>
       </main>
     </div>

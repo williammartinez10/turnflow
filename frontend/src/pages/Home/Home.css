@@ -1,0 +1,156 @@
+
+/* ============= Page and background ============= */
+
+
+.home-page {
+    position: relative;
+    min-height: 100vh;
+    color: white;
+}
+
+.home-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url("/queue-background.jpg") center / cover no-repeat;
+}
+
+
+/* ============= Header ============= */
+
+.home-header {
+    position: fixed;
+    width: 100%;
+    padding: 28px 6%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.home-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+}
+
+.home-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--color-sky);
+    color: #303030;
+}
+
+
+/* ============= Main section ============= */
+
+.home-main {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+}
+
+.home-content {
+    width: 100%;
+    max-width: 760px;
+    text-align: center;
+}
+
+.home-eyebrow {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--color-sky);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.home-title {
+    margin: 0;
+    font-size: clamp(42px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -2.5px;
+}
+
+.home-description {
+    margin: 22px auto 0;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+
+/* ============= Customer button ============= */
+
+.customer-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-width: 260px;
+    margin-top: 38px;
+    padding: 17px 28px;
+    border: none;
+    border-radius: 11px;
+    background: var(--color-watermelon);
+    color: white;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.customer-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.customer-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+.home-note {
+    margin-top: 14px;
+    font-size: 13px;
+}
+
+
+/* ============= Staff / Admin ============= */
+
+.home-divider {
+    width: 280px;
+    height: 1px;
+    margin: 38px auto 25px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.staff-link {
+    font-size: 14px;
+}
+
+.staff-login-link {
+    margin-left: 4px;
+    color: var(--color-sky);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.staff-login-link:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+

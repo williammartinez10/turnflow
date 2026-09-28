@@ -18,7 +18,7 @@ function Home() {
         <div className="home-content">
           <span className="home-eyebrow">WELCOME TO TURNFLOW</span>
 
-          <h1>Your time matters.</h1>
+          <h1 className="home-title">Your time matters.</h1>
 
           <p className="home-description">Join a virtual queue and get real-time updates.</p>
 
@@ -34,7 +34,9 @@ function Home() {
 
           <div className="home-divider" />
 
-          <p className="staff-link">Staff or Admin? <a href="/login">Here</a> </p>
+          <p className="staff-link">Staff or Admin? 
+            <a className="staff-login-link" href="/login">Here</a>
+          </p>
         </div>
       </main>
     </div>

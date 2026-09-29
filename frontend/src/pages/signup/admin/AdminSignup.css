@@ -1,0 +1,107 @@
+
+/* ============= Page ============= */
+
+.admin-signup-page {
+    min-height: 100vh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Header ============= */
+
+.admin-signup-header {
+    padding: 28px 6%;
+    border-bottom: 1px solid #dddddd;
+}
+
+.admin-signup-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+    text-decoration: none;
+}
+
+.admin-signup-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--color-sky);
+}
+
+
+/* ============= Main section ============= */
+
+.admin-signup-main {
+    display: flex;
+    justify-content: center;
+    padding: 50px 24px;
+}
+
+.admin-signup-content {
+    width: 100%;
+    max-width: 420px;
+}
+
+.admin-signup-title {
+    margin: 0;
+    font-size: 36px;
+}
+
+.admin-signup-description {
+    margin: 12px 0 28px;
+    color: #666666;
+}
+
+
+/* ============= Form ============= */
+
+.admin-signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-signup-form-label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.admin-signup-form-input {
+    padding: 14px;
+    border: 1px solid var(--color-carbon);
+    border-radius: 8px;
+    background: white;
+    font: inherit;
+}
+
+.admin-signup-form-button {
+     margin-top: 12px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: white;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-signup-form-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);}
+
+.admin-signup-form-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+

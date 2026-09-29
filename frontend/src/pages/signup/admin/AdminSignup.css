@@ -48,6 +48,7 @@
 .admin-signup-content {
     width: 100%;
     max-width: 420px;
+    animation: slide-up 0.40s ease-out;
 }
 
 .admin-signup-title {
@@ -105,3 +106,17 @@
     outline-offset: 4px;
 }
 
+
+/* ============= Animations ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

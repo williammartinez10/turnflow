@@ -48,6 +48,7 @@
 .staff-code-content {
     width: 100%;
     max-width: 420px;
+    animation: slide-up 0.40s ease-out;
 }
 
 .staff-code-title {
@@ -104,4 +105,16 @@
 .staff-code-form-button:focus-visible {
     outline: 3px solid var(--color-watermelon);
     outline-offset: 4px;
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

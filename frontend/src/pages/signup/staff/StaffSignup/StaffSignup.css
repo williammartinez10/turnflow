@@ -7,35 +7,6 @@
 }
 
 
-/* ============= Header ============= */
-
-.staff-signup-header {
-    padding: 28px 6%;
-    border-bottom: 1px solid #dddddd;
-}
-
-.staff-signup-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    color: inherit;
-    font-size: 23px;
-    font-weight: 800;
-    letter-spacing: -0.7px;
-    text-decoration: none;
-}
-
-.staff-signup-brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: var(--color-sky);
-}
-
-
 /* ============= Main section ============= */
 
 .staff-signup-main {

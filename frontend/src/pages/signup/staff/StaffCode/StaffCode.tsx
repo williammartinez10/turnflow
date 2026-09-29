@@ -1,20 +1,14 @@
 import "./StaffCode.css";
 import { ClockCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import Header from "../../../../components/Header/Header";
 
 function StaffCode() {
   const navigate = useNavigate();
 
   return (
     <div className="staff-code-page">
-      <header className="staff-code-header">
-        <Link className="staff-code-brand" to="/">
-          <span className="staff-code-brand-icon">
-            <ClockCheck size={24} />
-          </span>
-          <span>TurnFlow</span>
-        </Link>
-      </header>
+      <Header />
 
       <main className="staff-code-main">
         <div className="staff-code-content">

@@ -1,18 +1,12 @@
 import "./Login.css";
 import { ClockCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import Header from "../../components/Header/Header";
 
 function Login() {
   return (
     <div className="login-page">
-      <header className="login-header">
-        <Link className="login-brand" to="/">
-          <span className="login-brand-icon">
-            <ClockCheck size={24} />
-          </span>
-          <span>TurnFlow</span>
-        </Link>
-      </header>
+      <Header />
 
       <main className="login-main">
         <div className="login-content">

@@ -1,15 +1,17 @@
-
 import "./Home.css";
 import { ClockCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <div className="home-page">
       <header className="home-header">
         <div className="home-brand">
-            <span className="home-brand-icon">
-                <ClockCheck size={24} />
-            </span>
+          <span className="home-brand-icon">
+            <ClockCheck size={24} />
+          </span>
           <span>TurnFlow</span>
         </div>
       </header>
@@ -25,7 +27,7 @@ function Home() {
           <button
             className="customer-button"
             type="button"
-            onClick={() => (window.location.href = "/join-queue")}
+            onClick={() => navigate("/join-queue")}
           >
             Continue as Customer <span aria-hidden="true">→</span>
           </button>
@@ -34,8 +36,8 @@ function Home() {
 
           <div className="home-divider" />
 
-          <p className="staff-link">Staff or Admin? 
-            <a className="staff-login-link" href="/login">Here</a>
+          <p className="staff-link">Staff or Admin?{" "}
+            <Link className="staff-login-link" to="/login">Here</Link>
           </p>
         </div>
       </main>

@@ -1,16 +1,17 @@
 import "./StaffSignup.css";
 import { ClockCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function StaffSignup() {
   return (
     <div className="staff-signup-page">
       <header className="staff-signup-header">
-        <a className="staff-signup-brand" href="/">
+        <Link className="staff-signup-brand" to="/">
           <span className="staff-signup-brand-icon">
             <ClockCheck size={24} />
           </span>
           <span>TurnFlow</span>
-        </a>
+        </Link>
       </header>
 
       <main className="staff-signup-main">

@@ -1,16 +1,19 @@
 import "./StaffCode.css";
 import { ClockCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 function StaffCode() {
+  const navigate = useNavigate();
+
   return (
     <div className="staff-code-page">
       <header className="staff-code-header">
-        <a className="staff-code-brand" href="/">
+        <Link className="staff-code-brand" to="/">
           <span className="staff-code-brand-icon">
             <ClockCheck size={24} />
           </span>
           <span>TurnFlow</span>
-        </a>
+        </Link>
       </header>
 
       <main className="staff-code-main">
@@ -25,7 +28,7 @@ function StaffCode() {
             className="staff-code-form"
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.href = "/signup/staff";
+              navigate("/signup/staff");
             }}
           >
             <label className="staff-code-form-label" htmlFor="invitation-code">

@@ -1,16 +1,17 @@
 import "./Login.css";
 import { ClockCheck } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Login() {
   return (
     <div className="login-page">
       <header className="login-header">
-        <a className="login-brand" href="/">
+        <Link className="login-brand" to="/">
           <span className="login-brand-icon">
             <ClockCheck size={24} />
           </span>
           <span>TurnFlow</span>
-        </a>
+        </Link>
       </header>
 
       <main className="login-main">
@@ -49,19 +50,19 @@ function Login() {
           <p className="login-signup-label">Don't have an account?</p>
 
           <div className="login-signup-links">
-            <a
+            <Link
               className="login-signup-link"
-              href="/signup/staff/staff_code"
+              to="/signup/staff/staff_code"
             >
               Sign Up as Staff
-            </a>
+            </Link>
 
-            <a
+            <Link
               className="login-signup-link"
-              href="/signup/admin"
+              to="/signup/admin"
             >
               Sign Up as Admin
-            </a>
+            </Link>
           </div>
         </div>
       </main>

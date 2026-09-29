@@ -1,32 +1,49 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Login from "./Login";
 
 describe("Login", () => {
   it("renders the email and password fields", () => {
-    render(<Login />);
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
 
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
   });
 
   it("requires email and password", () => {
-    render(<Login />);
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
 
     expect(screen.getByLabelText("Email")).toBeRequired();
     expect(screen.getByLabelText("Password")).toBeRequired();
   });
 
   it("renders the login button", () => {
-    render(<Login />);
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
 
     expect(
-        screen.getByRole("button", { name: "Log In" })
+      screen.getByRole("button", { name: "Log In" })
     ).toBeInTheDocument();
   });
 
   it("provides Staff and Admin signup links", () => {
-    render(<Login />);
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
 
     expect(
       screen.getByRole("link", { name: "Sign Up as Staff" })

@@ -1,26 +1,37 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Home from "./Home";
 
 describe("Home", () => {
   it("renders the TurnFlow branding", () => {
-    render(<Home />);
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>
+    );
 
-    expect(
-        screen.getByText("TurnFlow")
-    ).toBeInTheDocument();
+    expect(screen.getByText("TurnFlow")).toBeInTheDocument();
   });
 
   it("renders the customer button", () => {
-    render(<Home />);
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>
+    );
 
     expect(
-        screen.getByRole("button", { name: /continue as customer/i })
+      screen.getByRole("button", { name: /continue as customer/i })
     ).toBeInTheDocument();
   });
 
   it("provides a link to login", () => {
-    render(<Home />);
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>
+    );
 
     const loginLink = screen.getByRole("link", { name: "Here" });
 

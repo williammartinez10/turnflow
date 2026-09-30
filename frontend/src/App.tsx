@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home/Home";
+import CustomerJoinQueue from "./pages/customer/access/CustomerJoinQueue";
+import CustomerFindTicket from "./pages/customer/access/CustomerFindTicket";
 import Login from "./pages/login/Login";
 import AdminSignup from "./pages/signup/admin/AdminSignup";
 import StaffCode from "./pages/signup/staff/StaffCode/StaffCode";
@@ -10,6 +12,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/join-queue" element={<CustomerJoinQueue />}/>
+      <Route path="/find-ticket" element={<CustomerFindTicket />}/>
       <Route path="/login" element={<Login />} />
       <Route path="/signup/admin" element={<AdminSignup />} />
       <Route path="/signup/staff/staff_code" element={<StaffCode />} />

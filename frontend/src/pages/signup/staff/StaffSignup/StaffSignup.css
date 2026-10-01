@@ -1,0 +1,93 @@
+/* ============= Page ============= */
+
+.staff-signup-page {
+    min-height: 100vh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Main section ============= */
+
+.staff-signup-main {
+    display: flex;
+    justify-content: center;
+    padding: 50px 24px;
+}
+
+.staff-signup-content {
+    width: 100%;
+    max-width: 420px;
+    animation: slide-up 0.40s ease-out;
+}
+
+.staff-signup-title {
+    margin: 0;
+    font-size: 36px;
+}
+
+.staff-signup-description {
+    margin: 12px 0 28px;
+    color: #666666;
+}
+
+
+/* ============= Form ============= */
+
+.staff-signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.staff-signup-form-label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.staff-signup-form-input {
+    padding: 14px;
+    border: 1px solid var(--color-carbon);
+    border-radius: 8px;
+    background: white;
+    font: inherit;
+}
+
+.staff-signup-form-button {
+    margin-top: 12px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: white;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.staff-signup-form-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.staff-signup-form-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+
+/* ============= Animations ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

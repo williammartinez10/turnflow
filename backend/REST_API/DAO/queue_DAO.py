@@ -21,13 +21,13 @@ class QueueDAO:
   def add_customer3(self, new_customer: Customer):
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
-      #the rest is history lol
       query = """
       INSERT INTO queue
       (phone_number, queue_code, time)
       VALUES (%s, %s, NOW())
       RETURNING ticket_id, time
       """
+      #set up query to make call to database
       cur.execute(query, (new_customer.phone_number, new_customer.queue_code))
       cashe = cur.fetchone()
       new_customer.ticket_id = cashe[0]
@@ -35,4 +35,5 @@ class QueueDAO:
       conn.commit()
       cur.close()
       self.pool.putconn(conn)
+      #store and return entry just created in database
       return new_customer

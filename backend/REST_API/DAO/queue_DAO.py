@@ -37,3 +37,48 @@ class QueueDAO:
       self.pool.putconn(conn)
       #store and return entry just created in database
       return new_customer
+
+  def list_customers3(self, queue: str):
+      customer_list: list[Customer] = []
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      SELECT * FROM queue
+      WHERE queue_code = %s
+      """
+      #set up query to make call to database
+      cur.execute(query, (queue,))
+      for row in cur:
+        customer_list.append(Customer(**row))
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      if customer_list == []:
+         raise HTTPException(status_code=404, detail="queue missing")
+      return customer_list
+      #return list of customers from the specified queue, unless it's empty in which case an error is returned
+
+  def pop_customer3(self, queue: str):
+      cashe: Customer
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      DELETE FROM queue
+      WHERE ticket_id = (
+        SELECT ticket_id FROM queue
+        WHERE queue_code = '2'
+        ORDER BY ticket_id
+        LIMIT 1
+      )
+      RETURNING *
+      """
+      #set up query to make call to database
+      cur.execute(query, (queue,))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      if cashe == None:
+         raise HTTPException(status_code=404, detail="queue missing or empty")
+      return cashe
+      #return list of customers from the specified queue, unless it's empty in which case an error is returned

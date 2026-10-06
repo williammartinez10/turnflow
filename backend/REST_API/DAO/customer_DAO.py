@@ -13,7 +13,7 @@ class Customer(BaseModel):
   queue_code: Optional[str] = None
   time: Optional[datetime.datetime | str] = None
 
-class QueueDAO:
+class customerDAO:
   def __init__(self):
       self.pool = SimpleConnectionPool(
           POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
@@ -22,7 +22,7 @@ class QueueDAO:
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      INSERT INTO queue
+      INSERT INTO customer
       (phone_number, queue_code, time)
       VALUES (%s, %s, NOW())
       RETURNING ticket_id, time
@@ -38,16 +38,16 @@ class QueueDAO:
       #store and return entry just created in database
       return new_customer
 
-  def list_customers3(self, queue: str):
+  def list_customers3(self, customer: str):
       customer_list: list[Customer] = []
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      SELECT * FROM queue
+      SELECT * FROM customer
       WHERE queue_code = %s
       """
       #set up query to make call to database
-      cur.execute(query, (queue,))
+      cur.execute(query, (customer,))
       for row in cur:
         customer_list.append(Customer(**row))
       conn.commit()
@@ -58,14 +58,14 @@ class QueueDAO:
       return customer_list
       #return list of customers from the specified queue, unless it's empty in which case an error is returned
 
-  def pop_customer3(self, queue: str):
+  def pop_customer3(self, customer: str):
       cashe: Customer
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      DELETE FROM queue
+      DELETE FROM customer
       WHERE ticket_id = (
-        SELECT ticket_id FROM queue
+        SELECT ticket_id FROM customer
         WHERE queue_code = '2'
         ORDER BY ticket_id
         LIMIT 1
@@ -73,7 +73,7 @@ class QueueDAO:
       RETURNING *
       """
       #set up query to make call to database
-      cur.execute(query, (queue,))
+      cur.execute(query, (customer,))
       cashe = cur.fetchone()
       conn.commit()
       cur.close()

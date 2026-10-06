@@ -15,6 +15,7 @@ DB_CONFIG = {
 conn = psycopg2.connect(**DB_CONFIG)
 cur = conn.cursor()
 query = """
+DROP TABLE IF EXISTS customer CASCADE;
 DROP TABLE IF EXISTS queue CASCADE;
 DROP TABLE IF EXISTS user_log CASCADE;
 DROP TABLE IF EXISTS staff_privileges CASCADE;
@@ -22,9 +23,14 @@ DROP TABLE IF EXISTS staff_accounts CASCADE;
 DROP TABLE IF EXISTS admin_accounts CASCADE;
 
 CREATE TABLE queue(
+queue_id serial PRIMARY KEY,
+queue_code TEXT,
+);
+
+CREATE TABLE customer(
 ticket_id serial PRIMARY KEY,
 phone_number TEXT,
-queue_code TEXT,
+FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
 time TIMESTAMPTZ
 );
 

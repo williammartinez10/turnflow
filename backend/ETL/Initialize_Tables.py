@@ -24,12 +24,13 @@ DROP TABLE IF EXISTS admin_accounts CASCADE;
 
 CREATE TABLE queue(
 queue_id serial PRIMARY KEY,
-queue_code TEXT,
+queue_code TEXT
 );
 
 CREATE TABLE customer(
 ticket_id serial PRIMARY KEY,
 phone_number TEXT,
+queue_id integer,
 FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
 time TIMESTAMPTZ
 );

@@ -19,12 +19,12 @@ class customerHandler:
       raise HTTPException(status_code=401, detail="invalid phone number")
     return customerDAO().add_customer3(new_customer)
 
-  def list_customers2(self, customer: str):
-      return customerDAO().list_customers3(customer)
+  def list_customers2(self, queue_code: str):
+      return customerDAO().list_customers3(queue_code)
 
-  def pop_customer2(self, customer: str):
-    result = customerDAO().pop_customer3(customer)
+  def pop_customer2(self, queue_code: str):
+    result = customerDAO().pop_customer3(queue_code)
     return {
-      "message": "Customer from queue " + queue + " successfully popped from queue",
+      "message": "Customer from queue " + queue_code + " successfully popped from queue",
       "customer": result
       }

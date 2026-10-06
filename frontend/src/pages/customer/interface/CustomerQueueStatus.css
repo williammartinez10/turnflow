@@ -1,0 +1,274 @@
+
+/* ============= Page ============= */
+
+.customer-queue-status-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Main ============= */
+
+.customer-queue-status-main {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 60px;
+}
+
+.customer-queue-status-content {
+    width: 100%;
+    max-width: 600px;
+    animation: slide-up 0.4s ease-out;
+}
+
+
+/* ============= Title ============= */
+
+.customer-queue-status-title {
+    margin: 0 0 20px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+
+/* ============= Queue information ============= */
+
+.customer-queue-status-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.customer-queue-status-header h2 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.customer-queue-status-organization {
+    margin: 12px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.customer-queue-status-location {
+    margin: 2px 0 0;
+    color: #666666;
+    font-size: 13px;
+}
+
+.customer-queue-status-service {
+    margin: 12px 0 0;
+    color: #666666;
+    font-size: 14px;
+}
+
+.customer-queue-status-service span {
+    color: #303030;
+    font-weight: 700;
+}
+
+
+/* ============= Ticket ============= */
+
+.customer-queue-ticket {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 60%;
+    min-width: 260px;
+    margin: 30px auto;
+    padding: 15px 22px;
+    border: 1px solid #b8dce6;
+    border-radius: 8px;
+    background: #dff4fa;
+}
+
+.customer-queue-ticket-icon {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    color: #303030;
+}
+
+.customer-queue-ticket-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.customer-queue-ticket-label {
+    margin-bottom: 3px;
+    color: #666666;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.customer-queue-ticket-number {
+    color: #303030;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+
+/* ============= Queue statistics ============= */
+
+.customer-queue-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    overflow: hidden;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.customer-queue-status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 82px;
+    padding: 14px;
+    text-align: center;
+}
+
+.customer-queue-status-item:nth-child(1),
+.customer-queue-status-item:nth-child(3) {
+    border-right: 1px solid #cfcfcf;
+}
+
+.customer-queue-status-item:nth-child(1),
+.customer-queue-status-item:nth-child(2) {
+    border-bottom: 1px solid #cfcfcf;
+}
+
+.customer-queue-status-label {
+    margin-bottom: 5px;
+    color: #666666;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.customer-queue-status-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
+/* ============= Current status ============= */
+
+.customer-queue-current-status {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.customer-queue-current-status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255, 59, 63, 0.2);
+    border-radius: 50%;
+    background: rgba(255, 59, 63, 0.08);
+    color: var(--color-watermelon);
+}
+
+.customer-queue-current-status-text h2 {
+    margin: 0 0 3px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.customer-queue-current-status-text p {
+    margin: 0;
+    color: #666666;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+
+/* ============= Update information ============= */
+
+.customer-queue-update-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 14px;
+    color: #666666;
+}
+
+.customer-queue-update-info svg {
+    flex-shrink: 0;
+    color: #666666;
+}
+
+.customer-queue-update-info p {
+    margin: 0;
+    font-size: 12px;
+}
+
+.customer-queue-update-info span {
+    color: #303030;
+    font-weight: 600;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 600px) {
+    .customer-queue-status-main {
+        padding: 30px 18px 50px;
+    }
+
+    .customer-queue-status-title {
+        font-size: 28px;
+    }
+
+    .customer-queue-status-header h2 {
+        font-size: 20px;
+    }
+
+    .customer-queue-ticket {
+        width: 80%;
+        min-width: 0;
+    }
+
+    .customer-queue-status-item {
+        min-height: 75px;
+        padding: 12px 8px;
+    }
+
+    .customer-queue-current-status,
+    .customer-queue-update-info {
+        align-items: flex-start;
+    }
+}

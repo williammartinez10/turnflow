@@ -11,20 +11,20 @@ from backend.REST_API.DAO.queue_DAO import (
     Queue,
 )
 
-from backend.REST_API.handler.admin_handler import adminHandler
-from backend.REST_API.DAO.admin_DAO import (
-    Admin,
-)
+#from backend.REST_API.handler.admin_handler import adminHandler
+#from backend.REST_API.DAO.admin_DAO import (
+#    Admin,
+#)
 
-from backend.REST_API.handler.staff_handler import staffHandler
-from backend.REST_API.DAO.staff_DAO import (
-    Staff,
-)
+#from backend.REST_API.handler.staff_handler import staffHandler
+#from backend.REST_API.DAO.staff_DAO import (
+#    Staff,
+#)
 
-from backend.REST_API.handler.staff_privilage_handler import staffHandler
-from backend.REST_API.DAO.staff_privilage_DAO import (
-    Staff_Privilege,
-)
+#from backend.REST_API.handler.staff_privilage_handler import staffHandler
+#from backend.REST_API.DAO.staff_privilage_DAO import (
+#    Staff_Privilege,
+#)
 
 app = FastAPI()
 origins = ["*"]
@@ -60,33 +60,33 @@ async def get_queue_list1(status_code=201):
     return queueHandler().get_queue_list2()
     # get list of queues defined with their queue code
 
-@app.post("/database/admin/add_admin")
-async def add_admin1(new_admin: Admin, status_code=201):
-    return adminHandler().add_admin2(new_admin)
-    # add new admin
-@app.get("/database/admin/get_admin")
-async def get_admin1(new_admin: Admin, status_code=201):
-    return adminHandler().get_admin2(new_admin)
-    # get existing admin
-@app.get("/database/admin/delete_admin")
-async def delete_admin1(new_admin: Admin, status_code=201):
-    return adminHandler().delete_admin2(new_admin)
-    # delete admin
+#@app.post("/database/admin/add_admin")
+#async def add_admin1(new_admin: Admin, status_code=201):
+#    return adminHandler().add_admin2(new_admin)
+#    # add new admin
+#@app.get("/database/admin/get_admin")
+#async def get_admin1(new_admin: Admin, status_code=201):
+#    return adminHandler().get_admin2(new_admin)
+#    # get existing admin
+#@app.get("/database/admin/delete_admin")
+#async def delete_admin1(new_admin: Admin, status_code=201):
+#    return adminHandler().delete_admin2(new_admin)
+#    # delete admin
 
-@app.post("/database/staff/add_staff")
-async def add_staff1(new_Staff: Staff, status_code=201):
-    return adminHandler().add_staff2(new_Staff)
-    # add 
-@app.get("/database/staff/get_staff")
-async def get_staff1(new_Staff: Staff, status_code=201):
-    return adminHandler().get_staff2(new_Staff)
-    # add new queue
-@app.get("/database/staff/delete_staff")
-async def delete_staff1(new_Staff: Staff, status_code=201):
-    return adminHandler().delete_staff2(new_Staff)
-    # add new queue
+#@app.post("/database/staff/add_staff")
+#async def add_staff1(new_Staff: Staff, status_code=201):
+#    return adminHandler().add_staff2(new_Staff)
+#    # add staff member
+#@app.get("/database/staff/get_staff")
+#async def get_staff1(new_Staff: Staff, status_code=201):
+#    return adminHandler().get_staff2(new_Staff)
+#    # get existing staff member
+#@app.get("/database/staff/delete_staff")
+#async def delete_staff1(new_Staff: Staff, status_code=201):
+#    return adminHandler().delete_staff2(new_Staff)
+#    # delete staff member
 
-@app.get("/database/staff_privilege/add_staff_privilage")
-async def add_staff_privilege1(new_staff_privilage: Staff_Privilage, status_code=201):
-    return adminHandler().add_staff_privilage2(new_Staff_privilage)
-    # add new staff privilage
+#@app.get("/database/staff_privilege/add_staff_privilage")
+#async def add_staff_privilege1(new_staff_privilage: Staff_Privilage, status_code=201):
+#    return adminHandler().add_staff_privilage2(new_Staff_privilage)
+#    # add new staff privilage

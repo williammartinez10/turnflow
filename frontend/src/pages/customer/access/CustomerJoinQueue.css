@@ -1,0 +1,240 @@
+
+/* ============= Page ============= */
+
+.customer-join-queue-page {
+    min-height: 100vh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Main ============= */
+
+.customer-join-queue-main {
+    display: flex;
+    justify-content: center;
+    padding: 50px 24px 80px;
+}
+
+.customer-join-queue-content {
+    width: 100%;
+    max-width: 700px;
+    animation: slide-up 0.4s ease-out;
+}
+
+
+/* ============= Title ============= */
+
+.customer-join-queue-title {
+    margin: 0 0 32px;
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+
+/* ============= Queue form ============= */
+
+.queue-code-group {
+    display: flex;
+    width: 100%;
+}
+
+.queue-code-label {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 16px;
+    border: 1px solid var(--color-carbon);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    background: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.queue-code-input {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--color-carbon);
+    border-radius: 0 8px 8px 0;
+    background: #ffffff;
+    font: inherit;
+    text-align: center;
+}
+
+.queue-code-input:focus {
+    outline: none;
+    border-color: var(--color-watermelon);
+    box-shadow: 0 0 0 2px rgba(255, 59, 63, 0.12);
+}
+
+
+/* ============= Find Queue ============= */
+
+.find-queue-button {
+    display: block;
+    width: 60%;
+    min-width: 280px;
+    margin: 32px auto 0;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.find-queue-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+
+/* ============= QR section ============= */
+
+.qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 28px;
+    text-align: center;
+}
+
+.qr-section-label {
+    margin: 0 0 22px;
+    color: #666666;
+    font-size: 15px;
+}
+
+.qr-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    height: 100px;
+    border: 1px solid var(--color-carbon);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #303030;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.qr-button:hover {
+    border-color: var(--color-watermelon);
+    color: var(--color-watermelon);
+    transform: translateY(-2px);
+}
+
+.qr-button-label {
+    margin: 12px 0 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+/* ============= Existing ticket ============= */
+
+.existing-ticket-section {
+    margin-top: 36px;
+    padding: 20px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.existing-ticket-section h2 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.existing-ticket-section p {
+    margin: 0 0 16px;
+    color: #666666;
+    font-size: 14px;
+}
+
+.find-ticket-button {
+    display: block;
+    width: 100%;
+    padding: 13px 20px;
+    border: 1px solid var(--color-carbon);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #303030;
+    font: inherit;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.find-ticket-button:hover {
+    border-color: var(--color-watermelon);
+    color: var(--color-watermelon);
+}
+
+
+/* ============= Accessibility ============= */
+
+.find-queue-button:focus-visible,
+.qr-button:focus-visible,
+.find-ticket-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 600px) {
+    .customer-join-queue-main {
+        padding: 36px 18px 60px;
+    }
+
+    .customer-join-queue-title {
+        font-size: 30px;
+    }
+
+    .queue-code-group {
+        flex-direction: column;
+    }
+
+    .queue-code-label {
+        padding: 0 0 8px;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .queue-code-input {
+        border-radius: 8px;
+    }
+
+    .find-queue-button {
+        width: 100%;
+        min-width: 0;
+    }
+}

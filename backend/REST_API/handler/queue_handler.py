@@ -11,5 +11,5 @@ class queueHandler:
   def get_queue_list2(self):
     return queueDAO().get_queue_list3()
 
-  def get_queue2(self, queue_code: str):
-    return queueDAO().get_queue3()
+  def get_withcode_queue2(self, queue_code: str):
+    return queueDAO().get_withcode_queue3()

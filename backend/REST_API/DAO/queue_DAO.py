@@ -36,7 +36,7 @@ class queueDAO:
       #store and return entry just created in database
       return new_queue
   
-  def get_queue3(self, queue_code: str):
+  def get_withcode_queue3(self, queue_code: str):
     cashe: Queue
     conn = self.pool.getconn()
     cur = conn.cursor(cursor_factory=DictCursor)

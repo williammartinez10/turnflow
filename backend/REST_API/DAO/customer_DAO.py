@@ -20,7 +20,7 @@ class customerDAO:
           POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
       )
   def add_customer3(self, new_customer: Customer):
-      queue_id = queueDAO().get_queue3(new_customer.queue_code)
+      queue_id = queueDAO().get_withcode_queue3(new_customer.queue_code)
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
@@ -41,7 +41,7 @@ class customerDAO:
       return new_customer
 
   def list_customers3(self, queue_code: str):
-      queue_id = queueDAO().get_queue3(queue_code)
+      queue_id = queueDAO().get_withcode_queue3(queue_code)
       customer_list: list[Customer] = []
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
@@ -65,7 +65,7 @@ class customerDAO:
       #return list of customers from the specified queue, unless it's empty in which case an error is returned
 
   def pop_customer3(self, queue_code: str):
-      queue_id = queueDAO().get_queue3(queue_code)
+      queue_id = queueDAO().get_withcode_queue3(queue_code)
       cashe: Customer
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)

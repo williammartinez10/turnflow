@@ -61,8 +61,8 @@ async def get_queue_list1(status_code=201):
     # get list of queues defined with their queue code
 
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
-async def get_queue_id1(queue_code: str):
-    return customerHandler().get_queue_id2(queue_code)
+async def get_queue1(queue_code: str):
+    return customerHandler().get_queue2(queue_code)
     # return queue ID if it exists
 
 

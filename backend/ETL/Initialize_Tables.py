@@ -24,7 +24,8 @@ DROP TABLE IF EXISTS admin_accounts CASCADE;
 
 CREATE TABLE queue(
 queue_id serial PRIMARY KEY,
-queue_code TEXT
+queue_code TEXT,
+service TEXT
 );
 
 CREATE TABLE customer(

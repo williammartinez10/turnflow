@@ -6,11 +6,21 @@ import Header from "../../../components/Header/Header";
 function CustomerJoinQueue() {
   const navigate = useNavigate();
 
-  const handleFindQueue = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleFindQueue = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // TODO Later:
-
+    const queue_code_value = "1"
+    const url = new  URL("http://127.0.0.1:8000/database/queue/get_withcode_queue_"+queue_code_value);
+    const params = {queue_code : queue_code_value}
+    let queue_code = await fetch(url, {
+         method: 'GET',
+//         body: JSON.stringify({
+//            queue_code: queue_code_value,
+//         })
+      })
+    queue_code = await queue_code.json();
+    console.warn(queue_code);
     // Search for the queue using the entered Queue / Service Code.
     // If the queue exists, use its information when navigating to Service Information.
 

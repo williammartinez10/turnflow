@@ -4,11 +4,13 @@ import { Check, Ticket } from "lucide-react";
 interface QueueConfirmationModalProps {
   ticketNumber: string;
   onViewStatus: () => void;
+  isDemo?: boolean;
 }
 
 function QueueConfirmationModal({
   ticketNumber,
   onViewStatus,
+  isDemo = false,
 }: QueueConfirmationModalProps) {
   return (
     <div className="queue-confirmation-overlay">
@@ -26,11 +28,19 @@ function QueueConfirmationModal({
           className="queue-confirmation-title"
           id="queue-confirmation-title"
         >
-          You're in the queue!
+          {isDemo ? "Demo ticket" : "You're in the queue!"}
         </h2>
 
         <p className="queue-confirmation-description">
-          Your virtual ticket has been created.
+          {/* 
+              Phone number registration succeeds:
+                  - Show the real ticket
+              Registration fails (demo mode):
+                  - Show a demo ticket with a warning message
+          */}
+          {isDemo
+            ? "For demonstration only. Registration was not confirmed."
+            : "Your virtual ticket has been created."}
         </p>
 
         <div className="queue-ticket">

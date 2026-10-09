@@ -60,14 +60,26 @@ describe("CustomerServiceInfo", () => {
 
   it("navigates to join details when Join Queue is clicked", () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/service-information",
+            state: { queueCode: "ABC-123-45", queueId: 1 },
+          },
+        ]}
+      >
         <CustomerServiceInfo />
       </MemoryRouter>
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
 
-    expect(mockNavigate).toHaveBeenCalledWith("/join-details");
+    expect(mockNavigate).toHaveBeenCalledWith("/join-details", {
+      state: {
+        queueCode: "ABC-123-45",
+        queueId: 1,
+      },
+    });
   });
 
 

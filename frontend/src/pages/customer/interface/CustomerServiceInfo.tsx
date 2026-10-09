@@ -1,22 +1,31 @@
+
 import "./CustomerServiceInfo.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
 function CustomerServiceInfo() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // TODO Later: Replace this placeholder data with service and queue info returned by backend.
+  // Queue information passed from CustomerJoinQueue
+  const queueCode = location.state?.queueCode;
+  const queueId = location.state?.queueId;
+
+  // TODO Later: Replace placeholders with information from the backend.
   const serviceInfo = {
     organizationName: "<Organization Name>",
     location: "<Location>",
     serviceName: "<Service Name>",
-    queueName: "<Queue Name>",
+    queueName: queueCode || "<Queue Name>",
   };
 
   const handleJoinQueue = () => {
-    
-    // TODO Later: Pass selected service and queue info to the Customer Join Details page.
-    navigate("/join-details");
+    navigate("/join-details", {
+      state: {
+        queueCode,
+        queueId,
+      },
+    });
   };
 
   const handleCancel = () => {

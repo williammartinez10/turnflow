@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import DevPage from "./pages/dev/DevPage";
 
 import Home from "./pages/Home/Home";
 import CustomerJoinQueue from "./pages/customer/access/CustomerJoinQueue";
@@ -10,6 +11,8 @@ import Login from "./pages/login/Login";
 import AdminSignup from "./pages/signup/admin/AdminSignup";
 import StaffCode from "./pages/signup/staff/StaffCode/StaffCode";
 import StaffSignup from "./pages/signup/staff/StaffSignup/StaffSignup";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import Services_Queues from "./pages/admin/Services_Queues";
 
 function App() {
   return (
@@ -24,6 +27,13 @@ function App() {
       <Route path="/signup/admin" element={<AdminSignup />} />
       <Route path="/signup/staff/staff_code" element={<StaffCode />} />
       <Route path="/signup/staff" element={<StaffSignup />} />
+      <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
+      <Route path="/admin/Services_Queues" element={<Services_Queues />} />
+
+      {import.meta.env.DEV && (
+        <Route path="/dev" element={<DevPage />} />
+      )}
+
     </Routes>
   );
 }

@@ -1,0 +1,76 @@
+.services-queues-page {
+    min-height: 100vh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+.services-queues-main {
+    padding: 80px 24px;
+}
+
+.services-queues-title {
+    text-align: center;
+}
+
+.services-queues-content {
+    text-align: center;
+}
+
+
+/* ============= Buttons ============= */
+
+.services-button,
+.queues-button {
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+/* ============= Services ============= */
+
+.services-list {
+    margin-top: 24px;
+}
+
+.services-row {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    align-items: center;
+    border: 1px solid var(--color-carbon);
+}
+
+.services-row span,
+.services-row button {
+    padding: 12px;
+}
+
+.services-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+}
+
+
+/* ============= Queues ============= */
+
+.queues-content {
+    margin-top: 40px;
+}
+
+.queues-list {
+    margin-top: 24px;
+}
+
+.queues-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 120px;
+    align-items: center;
+    border: 1px solid var(--color-carbon);
+}
+
+.queues-row span,
+.queues-row button {
+    padding: 12px;
+}

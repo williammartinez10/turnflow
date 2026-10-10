@@ -51,6 +51,7 @@ describe("CustomerQueueStatus", () => {
             state: {
               ticketNumber: "1",
               queueCode: "ABC-123-45",
+              service: "Medicine",
             },
           },
         ]}
@@ -62,6 +63,8 @@ describe("CustomerQueueStatus", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
 
     expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
+
+    expect(screen.getByText(/Medicine/)).toBeInTheDocument();
 
     expect(screen.getByText("<###>")).toBeInTheDocument();
 

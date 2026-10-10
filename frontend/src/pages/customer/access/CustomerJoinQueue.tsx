@@ -14,8 +14,8 @@ interface Queue {
 
 // Dummy queues for testing without the backend.
 const mockQueues: Queue[] = [
-  { queue_id: 1, service: "medicine", queue_code: "ABC-123-45" },
-  { queue_id: 2, service: "lawyer", queue_code: "DEF-678-90" },
+  { queue_id: 1, service: "Medicine", queue_code: "ABC-123-45" },
+  { queue_id: 2, service: "Lawyer", queue_code: "DEF-678-90" },
 ];
 
 function CustomerJoinQueue() {

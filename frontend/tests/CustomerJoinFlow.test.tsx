@@ -15,7 +15,11 @@ describe("Customer joining flow", () => {
         .mockResolvedValueOnce({
           ok: true,
           json: async () => [
-            { queue_id: 1, queue_code: "ABC-123-45" },
+            {
+              queue_id: 1,
+              queue_code: "ABC-123-45",
+              service: "Medicine",
+            },
           ],
         })
         .mockResolvedValueOnce({
@@ -38,6 +42,7 @@ describe("Customer joining flow", () => {
 
     // Service Information
     expect(await screen.findByRole("heading", { name: "Service Information" })).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
 
 
@@ -56,6 +61,7 @@ describe("Customer joining flow", () => {
 
     // Queue Status
     expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
+    expect(screen.getByText(/Medicine/)).toBeInTheDocument();
     expect(screen.getByText("Waiting")).toBeInTheDocument();
   });
 });

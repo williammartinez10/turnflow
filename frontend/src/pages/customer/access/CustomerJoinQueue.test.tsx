@@ -25,6 +25,7 @@ describe("CustomerJoinQueue", () => {
         json: async () => [
           {
             queue_id: 1,
+            service: "Medicine",
             queue_code: "ABC-123-45",
           },
         ],
@@ -77,6 +78,7 @@ describe("CustomerJoinQueue", () => {
         {
           state: {
             queueCode: "ABC-123-45",
+            service: "Medicine",
             queueId: 1,
           },
         }
@@ -123,6 +125,7 @@ describe("CustomerJoinQueue", () => {
         {
           state: {
             queueCode: "DEF-678-90",
+            service: "Lawyer",
             queueId: 2,
           },
         }

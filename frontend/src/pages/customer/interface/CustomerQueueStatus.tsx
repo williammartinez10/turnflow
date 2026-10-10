@@ -1,4 +1,3 @@
-
 import "./CustomerQueueStatus.css";
 import { Clock3, Info, Ticket } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -10,12 +9,13 @@ function CustomerQueueStatus() {
   // Ticket and queue information passed from CustomerJoinDetails.
   const ticketNumber = location.state?.ticketNumber || "<###>";
   const queueCode = location.state?.queueCode || "<Queue Name>";
+  const service = location.state?.service;
 
   // TODO Later: Retrieve live queue status information from the backend.
   const queueStatus = {
     organizationName: "<Organization Name>",
     location: "<Location>",
-    serviceName: "<Service Name>",
+    serviceName: service || "<Service Name>",
     queueName: queueCode,
     position: "<Position>",
     nowServing: "<###>",

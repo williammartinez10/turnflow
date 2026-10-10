@@ -9,8 +9,9 @@ function CustomerJoinDetails() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Queue code passed from the previous page.
+  // Queue information passed from the previous page.
   const queueCode = location.state?.queueCode;
+  const service = location.state?.service;
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -108,6 +109,7 @@ function CustomerJoinDetails() {
       state: {
         queueCode,
         ticketNumber,
+        service,
       },
     });
   };

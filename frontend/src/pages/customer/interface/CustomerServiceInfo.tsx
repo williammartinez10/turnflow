@@ -1,4 +1,3 @@
-
 import "./CustomerServiceInfo.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header/Header";
@@ -7,15 +6,16 @@ function CustomerServiceInfo() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Queue information passed from CustomerJoinQueue
+  // Queue information passed from CustomerJoinQueue.
   const queueCode = location.state?.queueCode;
   const queueId = location.state?.queueId;
+  const service = location.state?.service;
 
-  // TODO Later: Replace placeholders with information from the backend.
+  // TODO Later: Replace remaining placeholders with information from the backend.
   const serviceInfo = {
     organizationName: "<Organization Name>",
     location: "<Location>",
-    serviceName: "<Service Name>",
+    serviceName: service || "<Service Name>",
     queueName: queueCode || "<Queue Name>",
   };
 
@@ -24,6 +24,7 @@ function CustomerServiceInfo() {
       state: {
         queueCode,
         queueId,
+        service,
       },
     });
   };

@@ -2,7 +2,7 @@ import "./Services_Queues.css";
 import Header from "../../components/Header/Header";
 import { useState } from "react";
 
-// Define expected values
+// Describes what information every Service object should contain
 type Service = {
     name: string;
     active: boolean;
@@ -12,13 +12,16 @@ type Service = {
 
 type Queue = {
     name: string;
+    prefix: string;
+    description: string;
+    services: string[];
     active: boolean;
     currentWait: number;
     peopleWaiting: number;
 };
 
 function Services_Queues() {
-    // Services variables
+    // Stores the service list and temporary values used when creating or editing a service
     const [showNewService, setShowNewService] = useState(false);
     const [newServiceName, setNewServiceName] = useState("");
     const [services, setServices] = useState<Service[]>([]);
@@ -27,21 +30,29 @@ function Services_Queues() {
     const [editActive, setEditActive] = useState(true);
     const [editDuration, setEditDuration] = useState(0);
 
-    // Queues variables
+    // Stores the queue list and temporary values used when creating or editing a queue
     const [showNewQueue, setShowNewQueue] = useState(false);
     const [newQueueName, setNewQueueName] = useState("");
+    const [newQueuePrefix, setNewQueuePrefix] = useState("");
+    const [newQueueDescription, setNewQueueDescription] = useState("");
+    const [newQueueServices, setNewQueueServices] = useState<string[]>([]);
+    const [newQueueActive, setNewQueueActive] = useState(true);
     const [queues, setQueues] = useState<Queue[]>([]);
+
     const [editingQueueIndex, setEditingQueueIndex] = useState<number | null>(null);
     const [editQueueName, setEditQueueName] = useState("");
     const [editQueueActive, setEditQueueActive] = useState(true);
+    const [editQueuePrefix, setEditQueuePrefix] = useState("");
+    const [editQueueDescription, setEditQueueDescription] = useState("");
+    const [editQueueServices, setEditQueueServices] = useState<string[]>([]);
 
-    // Cancel button
+    // Clears the New Service form and closes it without creating anything
     function cancelNewService() {
         setNewServiceName("");
         setShowNewService(false);
     }
 
-    // New service button
+    // Checks the service name, creates the new service, then resets the form
     function createService() {
         if (!newServiceName.trim()) {
             return;
@@ -60,7 +71,7 @@ function Services_Queues() {
         setShowNewService(false);
     }
 
-    // Save button after making new service
+    // Saves changes made to the selected service and exits edit mode
     function saveEdit() {
         if (editingIndex === null || !editName.trim()) {
             return;
@@ -79,13 +90,17 @@ function Services_Queues() {
         setEditName("");
     }
 
-    // Cancel button
+    // Clears the New Queue form and closes it without creating a queue
     function cancelNewQueue() {
         setNewQueueName("");
+        setNewQueuePrefix("");
+        setNewQueueDescription("");
+        setNewQueueServices([]);
+        setNewQueueActive(true);
         setShowNewQueue(false);
     }
 
-    // New queue button
+    // Creates a queue from the form values, then resets and closes the form
     function createQueue() {
         if (!newQueueName.trim()) {
             return;
@@ -95,17 +110,24 @@ function Services_Queues() {
             ...queues,
             {
                 name: newQueueName.trim(),
-                active: true,
+                prefix: newQueuePrefix.trim(),
+                description: newQueueDescription.trim(),
+                services: newQueueServices,
+                active: newQueueActive,
                 currentWait: 0,
                 peopleWaiting: 0,
-            },
+            }
         ]);
 
         setNewQueueName("");
+        setNewQueuePrefix("");
+        setNewQueueDescription("");
+        setNewQueueServices([]);
+        setNewQueueActive(true);
         setShowNewQueue(false);
     }
 
-    // Save button after making new queue
+    // Saves the edited queue values and exits queue edit mode
     function saveQueueEdit() {
         if (editingQueueIndex === null || !editQueueName.trim()) {
             return;
@@ -116,26 +138,47 @@ function Services_Queues() {
         updatedQueues[editingQueueIndex] = {
             ...updatedQueues[editingQueueIndex],
             name: editQueueName.trim(),
+            prefix: editQueuePrefix.trim(),
+            description: editQueueDescription.trim(),
+            services: editQueueServices,
             active: editQueueActive,
         };
 
         setQueues(updatedQueues);
         setEditingQueueIndex(null);
+        setEditQueuePrefix("");
+        setEditQueueDescription("");
         setEditQueueName("");
+        setEditQueueServices([]);
     }
 
+    // Discards unsaved queue changes and exits edit mode
+    function cancelQueueEdit() {
+        setEditingQueueIndex(null);
+        setEditQueueName("");
+        setEditQueuePrefix("");
+        setEditQueueDescription("");
+        setEditQueueServices([]);
+    }
+
+    // Defines what this React component displays on the page
     return (
+        // Main page container for the Services & Queues screen
         <div className="services-queues-page">
+            {/* Reuses the shared website header */}
             <Header />
 
+            {/* Contains the main content of this page */}
             <main className="services-queues-main">
+
+                {/* Groups the main Services and Queues content together */}
                 <section className="services-queues-content">
-                    {/*Title*/}
+                    {/* Main title for this page */}
                     <h1 className="services-queues-title">Services & Queues</h1>
-                    {/*Sub_Title*/}
-                    <h2>Services</h2>
-                    {/*Services section*/}
-                    {/*New service button*/}
+                    {/* Marks the beginning of the Services management area */}
+                    <h2 className="services-and-queues-title">Services</h2>
+
+                    {/* Opens the form used to create a new service */}
                     <button
                         className="services-button"
                         type="button"
@@ -144,10 +187,11 @@ function Services_Queues() {
                         + New Service
                     </button>
 
+                    {/* Shows the New Service form only when showNewService is true */}
                     {showNewService && (
                         <div className="services-new-form">
                             <label htmlFor="service-name">Service Name</label>
-                            {/*Fill in info for new service*/}
+                            {/* Stores the service name as the user types */}
                             <input
                                 id="service-name"
                                 type="text"
@@ -155,7 +199,7 @@ function Services_Queues() {
                                 onChange={(e) => setNewServiceName(e.target.value)}
                                 placeholder="Enter service name"
                             />
-                            {/*Cancel button*/}
+                            {/* Clears the form and closes it without creating a service */}
                             <button
                                 type="button"
                                 onClick={cancelNewService}
@@ -163,7 +207,7 @@ function Services_Queues() {
                                 Cancel
                             </button>
 
-                            {/*Create a new service confirmation button*/}
+                            {/* Creates the service using the current form input */}
                             <button
                                 type="button"
                                 onClick={createService}
@@ -172,14 +216,16 @@ function Services_Queues() {
                             </button>
                         </div>
                     )}
-                    {/*Services form a list*/}
+                    {/* Displays all created services */}
                     <div className="services-list">
+                        {/* Creates one row for each service stored in the services array */}
                         {services.map((service, index) => (
                             <div className="services-row" key={index}>
 
+                                {/* Shows edit controls for the selected service; otherwise shows its normal summary */}
                                 {editingIndex === index ? (
                                     <div className="services-edit-form">
-                                        {/*Edit Name of service*/}
+                                        {/* Lets the selected service name be changed while editing */}
                                         <label>
                                             Name
                                             <input
@@ -189,7 +235,7 @@ function Services_Queues() {
                                             />
                                         </label>
 
-                                        {/*Edit availability of service*/}
+                                        {/* Changes whether this service is currently active or inactive */}
                                         <label>
                                             Status
                                             <select
@@ -203,7 +249,7 @@ function Services_Queues() {
                                             </select>
                                         </label>
 
-                                        {/*Duration that impacts the current wait time*/}
+                                        {/* Sets the expected service duration used later for wait-time calculations */}
                                         <label>
                                             Estimated Duration
                                             <input
@@ -218,7 +264,7 @@ function Services_Queues() {
                                         </label>
                                     </div>
                                 ) : (
-                                    // Preview of services created
+                                    // Shows the saved service information when this row is not being edited
                                     <div className="services-summary">
                                         <span>{service.name}</span>
 
@@ -234,6 +280,7 @@ function Services_Queues() {
                                 )}
                                 {/*Save edits button*/}
                                 {editingIndex === index ? (
+                                    // Saves the temporary edit values back into the selected service
                                     <button
                                         type="button"
                                         onClick={saveEdit}
@@ -241,7 +288,7 @@ function Services_Queues() {
                                         Save
                                     </button>
                                 ) : (
-                                    // Edit button for each service
+                                    // Loads this service's current values into the edit fields
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -257,24 +304,34 @@ function Services_Queues() {
                             </div>
                         ))}
                     </div>
-                    {/*Queues Section*/}
+
+
+                    {/* ===== Queues Section ===== */}
                     <div className="queues-content">
-                        {/*Sub_Title*/}
-                        <h2>Queues</h2>
-                        {/*New queue button*/}
+                        {/* Marks the beginning of the Queue management area */}
+                        <h2 className="services-and-queues-title">Queues</h2>
+
+                        {/* Opens Create Queue mode and closes any queue currently being edited */}
                         <button
                             className="queues-button"
                             type="button"
-                            onClick={() => setShowNewQueue(true)}
+                            onClick={() => {
+                                setEditingQueueIndex(null);
+                                setShowNewQueue(true);
+                            }}
                         >
                             + New Queue
                         </button>
 
+                        {/* Shows the Create Queue form only when showNewQueue is true */}
                         {showNewQueue && (
+                            // Collects all values needed to create a new queue
                             <div className="queues-new-form">
+                                <h3>Create Queue</h3>
                                 {/*Fill in info for new service*/}
                                 <label htmlFor="queue-name">Queue Name</label>
-                                {/*Edit the name of the queue*/}
+
+                                {/* Stores the queue name as the user types */}
                                 <input
                                     id="queue-name"
                                     type="text"
@@ -282,84 +339,225 @@ function Services_Queues() {
                                     onChange={(e) => setNewQueueName(e.target.value)}
                                     placeholder="Enter queue name"
                                 />
-                                {/*Cancel button*/}
-                                <button
-                                    type="button"
-                                    onClick={cancelNewQueue}
-                                >
-                                    Cancel
-                                </button>
 
-                                {/*Create confirmation button*/}
-                                <button
-                                    type="button"
-                                    onClick={createQueue}
+                                {/* Stores the short prefix used to identify this queue */}
+                                <label htmlFor="queue-prefix">Prefix</label>
+                                <input
+                                    id="queue-prefix"
+                                    type="text"
+                                    value={newQueuePrefix}
+                                    onChange={(e) => setNewQueuePrefix(e.target.value)}
+                                    placeholder="Enter prefix"
+                                />
+
+                                {/* Stores a short description explaining the purpose of this queue */}
+                                <label htmlFor="queue-description">Description</label>
+                                <input
+                                    id="queue-description"
+                                    type="text"
+                                    value={newQueueDescription}
+                                    onChange={(e) => setNewQueueDescription(e.target.value)}
+                                    placeholder="Enter description"
+                                />
+
+                                {/* Sets whether the new queue starts as active or disabled */}
+                                <label htmlFor="queue-status">Status</label>
+                                <select
+                                    id="queue-status"
+                                    value={newQueueActive ? "active" : "disabled"}
+                                    onChange={(e) => setNewQueueActive(e.target.value === "active")}
                                 >
-                                    Create
-                                </button>
+                                    <option value="active">Active</option>
+                                    <option value="disabled">Disabled</option>
+                                </select>
+
+                                {/* Lists existing services so multiple ones can be assigned to this queue */}
+
+                                <div className="queue-services-selection">
+                                    <p>Services in Queue</p>
+
+                                    {/* Creates one checkbox for each service currently stored */}
+                                    {services.map((service, index) => (
+                                        <label key={index}>
+                                            <input
+                                                type="checkbox"
+                                                checked={newQueueServices.includes(service.name)}
+
+                                                // Adds the service when checked and removes it when unchecked
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setNewQueueServices([
+                                                            ...newQueueServices,
+                                                            service.name,
+                                                        ]);
+                                                    } else {
+                                                        setNewQueueServices(
+                                                            newQueueServices.filter(
+                                                                (name) => name !== service.name
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+
+                                            {service.name}
+                                        </label>
+                                    ))}
+                                </div>
+
+
+                                <div className="queues-form-actions">
+                                    {/* Clears the Create Queue form and closes it without saving a new queue */}
+                                    <button
+                                        type="button"
+                                        onClick={cancelNewQueue}
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    {/* Creates the queue using the current form values */}
+                                    <button
+                                        type="button"
+                                        onClick={createQueue}
+                                    >
+                                        Create
+                                    </button>
+                                </div>
                             </div>
                         )}
-                        {/*Queues form a list*/}
+
+                        {/* Shows the Edit Queue form only when a queue has been selected */}
+
+                        {editingQueueIndex !== null && (
+
+                            // Uses temporary edit values so changes are not saved until Save is pressed
+                            <div className="queues-edit-form">
+                                <h3>Edit Queue</h3>
+
+                                {/* Lets the selected queue name be changed while editing */}
+                                <label>Queue Name</label>
+                                <input
+                                    type="text"
+                                    value={editQueueName}
+                                    onChange={(e) => setEditQueueName(e.target.value)}
+                                />
+
+                                {/* Lets the queue prefix be changed while editing */}
+                                <label>Prefix</label>
+                                <input
+                                    type="text"
+                                    value={editQueuePrefix}
+                                    onChange={(e) => setEditQueuePrefix(e.target.value)}
+                                />
+
+                                {/* Lets the queue description be changed while editing */}
+                                <label>Description</label>
+                                <input
+                                    type="text"
+                                    value={editQueueDescription}
+                                    onChange={(e) => setEditQueueDescription(e.target.value)}
+                                />
+
+                                {/* Changes whether the selected queue is active or disabled */}
+                                <label>Status</label>
+                                <select
+                                    value={editQueueActive ? "active" : "disabled"}
+                                    onChange={(e) =>
+                                        setEditQueueActive(e.target.value === "active")
+                                    }
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="disabled">Disabled</option>
+                                </select>
+
+                                {/* Shows the services currently available to assign to this queue */}
+
+                                <div className="queue-services-selection">
+                                    <p>Services in Queue</p>
+
+                                    {/* Creates one checkbox for each service and keeps existing selections checked */}
+                                    {services.map((service, index) => (
+                                        <label key={index}>
+
+                                            {/* Updates the temporary service selection until Save is pressed */}
+                                            <input
+                                                type="checkbox"
+                                                checked={editQueueServices.includes(service.name)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setEditQueueServices([
+                                                            ...editQueueServices,
+                                                            service.name,
+                                                        ]);
+                                                    } else {
+                                                        setEditQueueServices(
+                                                            editQueueServices.filter(
+                                                                (name) => name !== service.name
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+
+                                            {service.name}
+                                        </label>
+                                    ))}
+                                </div>
+
+                                {/* ===== End Services assigned to queue ===== */}
+
+                                <div className="queues-form-actions">
+                                    {/* Discards the temporary edit values and closes Edit Queue mode */}
+                                    <button type="button" onClick={cancelQueueEdit}>
+                                        Cancel
+                                    </button>
+                                    {/* Saves the temporary edit values back into the selected queue */}
+                                    <button type="button" onClick={saveQueueEdit}>
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Displays all queues that have been created */}
                         <div className="queues-list">
+                            {/* Creates one row for each queue stored in the queues array */}
                             {queues.map((queue, index) => (
                                 <div className="queues-row" key={index}>
-                                    {editingQueueIndex === index ? (
-                                        <>
-                                            {/*Name of queue*/}
-                                            <input
-                                                type="text"
-                                                value={editQueueName}
-                                                onChange={(e) => setEditQueueName(e.target.value)}
-                                            />
-                                            {/*Queue availability*/}
-                                            <select
-                                                value={editQueueActive ? "active" : "disabled"}
-                                                onChange={(e) =>
-                                                    setEditQueueActive(e.target.value === "active")
-                                                }
-                                            >
-                                                <option value="active">Active</option>
-                                                <option value="disabled">Disabled</option>
-                                            </select>
+                                    {/* Shows the saved queue name */}
+                                    <span>{queue.name}</span>
 
-                                            {/*Save edits for queue*/}
-                                            <button
-                                                type="button"
-                                                onClick={saveQueueEdit}
-                                            >
-                                                Save
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {/*Preview of queue info*/}
-                                            <span>{queue.name}</span>
+                                    {/* Shows the queue's current status */}
+                                    <span>
+                                        {queue.active ? "Active" : "Disabled"}
+                                    </span>
 
-                                            <span>
-                                                {queue.active ? "Active" : "Disabled"}
-                                            </span>
-
-                                            {/*Edit button*/}
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setEditingQueueIndex(index);
-                                                    setEditQueueName(queue.name);
-                                                    setEditQueueActive(queue.active);
-                                                }}
-                                            >
-                                                Edit
-                                            </button>
-                                        </>
-                                    )}
+                                    <button
+                                        // Loads this queue's saved values into the Edit Queue form above
+                                        type="button"
+                                        onClick={() => {
+                                            setShowNewQueue(false);
+                                            setEditingQueueIndex(index);
+                                            setEditQueueName(queue.name);
+                                            setEditQueueActive(queue.active);
+                                            setEditQueuePrefix(queue.prefix);
+                                            setEditQueueDescription(queue.description);
+                                            setEditQueueServices(queue.services);
+                                        }}
+                                    >
+                                        Edit
+                                    </button>
                                 </div>
                             ))}
-                        </div>
-                    </div>
+                        </div> {/* End queues-list */}
 
-                </section>
-            </main>
-        </div>
+                    </div> {/* End queues-content */}
+
+                </section> {/* End services-queues-content */}
+
+            </main> {/* End main page content */}
+
+        </div> // End services-queues-page
     );
 }
 

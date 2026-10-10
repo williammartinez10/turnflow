@@ -29,6 +29,10 @@
 
 /* ============= Services ============= */
 
+.services-and-queues-title {
+    text-align: left;
+}
+
 .services-list {
     margin-top: 24px;
 }
@@ -63,14 +67,101 @@
     margin-top: 24px;
 }
 
+.queues-new-form {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+
+    max-width: 700px;
+    margin: 24px auto 0;
+
+    text-align: left;
+}
+
+.queues-new-form input:not([type="checkbox"]),
+.queues-new-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.queues-new-form h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.queues-new-form button {
+    padding: 10px 16px;
+}
+
+.queue-services-selection {
+    grid-column: 1 / -1;
+    text-align: left;
+}
+
+.queues-edit-form {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+
+    max-width: 700px;
+    margin: 24px auto 0;
+
+    text-align: left;
+}
+
+.queues-edit-form h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.queues-edit-form input:not([type="checkbox"]),
+.queues-edit-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.queues-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
 .queues-row {
     display: grid;
     grid-template-columns: 1fr 120px 120px;
     align-items: center;
     border: 1px solid var(--color-carbon);
+    gap: 8px;
+}
+
+.queues-edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.queues-edit-actions button {
+    flex: 1;
 }
 
 .queues-row span,
 .queues-row button {
     padding: 12px;
+}
+
+.queue-services-selection label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 18px;
+}
+
+.queue-services-selection input[type="checkbox"] {
+    width: auto;
+    margin: 0;
 }

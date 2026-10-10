@@ -1,7 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import CustomerFindTicket from "./CustomerFindTicket";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import CustomerJoinQueue from "./CustomerJoinQueue";
 
 const mockNavigate = vi.fn();
 
@@ -14,87 +14,120 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-describe("CustomerFindTicket", () => {
+describe("CustomerJoinQueue", () => {
   beforeEach(() => {
     mockNavigate.mockClear();
-  });
-  
 
-  it("renders the Find My Ticket page", () => {
-    render(
-      <MemoryRouter>
-        <CustomerFindTicket />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.getByRole("heading", { name: "Find My Ticket" })
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByLabelText("Ticket Number")
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("button", {
-        name: "View Queue Status",
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [
+          {
+            queue_id: 1,
+            queue_code: "ABC-123-45",
+          },
+        ],
       })
-    ).toBeInTheDocument();
+    );
   });
+  afterEach(() => { vi.unstubAllGlobals(); });
 
 
-  it("requires a ticket number", () => {
+  it("renders the Join a Queue page", () => {
     render(
       <MemoryRouter>
-        <CustomerFindTicket />
+        <CustomerJoinQueue />
       </MemoryRouter>
     );
 
-    const input = screen.getByLabelText("Ticket Number");
+    expect(screen.getByRole("heading", { name: "Join a Queue" })).toBeInTheDocument();
 
-    expect(input).toBeRequired();
+    expect(screen.getByRole("button", { name: "Use QR Code" })).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: "Find My Ticket" })).toHaveAttribute("href", "/find-ticket");
   });
 
 
-  it("allows the customer to enter a ticket number", () => {
+  it("requires a queue code", () => {
     render(
       <MemoryRouter>
-        <CustomerFindTicket />
+        <CustomerJoinQueue />
       </MemoryRouter>
     );
 
-    const input = screen.getByLabelText("Ticket Number");
+    expect(screen.getByLabelText("Queue / Service Code")).toBeRequired();
+  });
 
-    fireEvent.change(input, {
-      target: { value: "123456" },
+
+  it("navigates to service information when a valid queue is found", async () => {
+    render(
+      <MemoryRouter>
+        <CustomerJoinQueue />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Queue / Service Code"),{target: { value: "ABC-123-45" },});
+
+    fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/service-information",
+        {
+          state: {
+            queueCode: "ABC-123-45",
+            queueId: 1,
+          },
+        }
+      );
     });
-
-    expect(input).toHaveValue("123456");
   });
 
-  
-  it("navigates to queue status when the form is submitted", () => {
+
+  it("shows an error when the queue does not exist", async () => {
     render(
       <MemoryRouter>
-        <CustomerFindTicket />
+        <CustomerJoinQueue />
       </MemoryRouter>
     );
 
-    fireEvent.change(
-      screen.getByLabelText("Ticket Number"),
-      {
-        target: { value: "123456" },
-      }
-    );
+    fireEvent.change(screen.getByLabelText("Queue / Service Code"),{target: { value: "XYZ-999-99" },});
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "View Queue Status",
-      })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
 
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/queue-status"
-    );
+    expect(await screen.findByText("Queue not found. Please check the code and try again.")).toBeInTheDocument();
+
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
+
+
+  it("uses mock queues when the backend is unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(
+      new Error("Backend unavailable")
+    ));
+
+    render(
+      <MemoryRouter>
+        <CustomerJoinQueue />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Queue / Service Code"),{ target: { value: "DEF-678-90" } });
+
+    fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/service-information",
+        {
+          state: {
+            queueCode: "DEF-678-90",
+            queueId: 2,
+          },
+        }
+      );
+    });
+  });
+
 });

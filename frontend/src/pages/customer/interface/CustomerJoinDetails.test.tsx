@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import CustomerJoinDetails from "./CustomerJoinDetails";
 
 const mockNavigate = vi.fn();
@@ -17,8 +17,19 @@ vi.mock("react-router-dom", async () => {
 describe("CustomerJoinDetails", () => {
   beforeEach(() => {
     mockNavigate.mockClear();
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ticket_id: 1 }),
+      })
+    );
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 
   it("renders the Join Queue page", () => {
     render(
@@ -59,28 +70,68 @@ describe("CustomerJoinDetails", () => {
 
     const input = screen.getByLabelText("Phone Number");
 
-    fireEvent.change(input, {target: { value: "7871234567" },});
+    fireEvent.change(input, { target: { value: "7871234567" } });
 
     expect(input).toHaveValue("(787) 123-4567");
   });
 
 
-  it("shows the confirmation modal after submitting a valid phone number", () => {
+  it("uses a demo ticket when customer registration fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("Backend unavailable"))
+    );
+
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/join-details",
+            state: { queueCode: "ABC-123-45", queueId: 1 },
+          },
+        ]}
+      >
         <CustomerJoinDetails />
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Phone Number"),{target: { value: "7871234567" },});
+    fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Demo ticket" })).toBeInTheDocument();
+
+    expect(screen.getByText("1")).toBeInTheDocument();
+
+    expect(screen.getByText("For demonstration only. Registration was not confirmed.")).toBeInTheDocument();
+
+    expect(screen.queryByRole("heading", { name: "You're in the queue!" })).not.toBeInTheDocument();
+  });
+
+
+  it("shows the confirmation modal after submitting a valid phone number", async () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/join-details",
+            state: { queueCode: "ABC-123-45", queueId: 1 },
+          },
+        ]}
+      >
+        <CustomerJoinDetails />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
 
     expect(screen.getByRole("heading", { name: "You're in the queue!" })).toBeInTheDocument();
 
-    expect(screen.getByText("<###>")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
 
@@ -91,7 +142,7 @@ describe("CustomerJoinDetails", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Phone Number"),{target: { value: "787123" },});
+    fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "787123" },});
 
     fireEvent.submit(screen.getByLabelText("Phone Number").closest("form")!);
 
@@ -99,20 +150,32 @@ describe("CustomerJoinDetails", () => {
   });
 
 
-  it("navigates to queue status from the confirmation modal", () => {
+  it("navigates to queue status from the confirmation modal", async () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/join-details",
+            state: { queueCode: "ABC-123-45", queueId: 1 },
+          },
+        ]}
+      >
         <CustomerJoinDetails />
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Phone Number"),{target: { value: "7871234567" },});
+    fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "View Queue Status", }));
+    fireEvent.click(await screen.findByRole("button", { name: "View Queue Status" }));
 
-    expect(mockNavigate).toHaveBeenCalledWith("/queue-status");
+    expect(mockNavigate).toHaveBeenCalledWith("/queue-status", {
+      state: {
+        queueCode: "ABC-123-45",
+        ticketNumber: "1",
+      },
+    });
   });
 
 
@@ -125,6 +188,6 @@ describe("CustomerJoinDetails", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(mockNavigate).toHaveBeenCalledWith("/service-information");
+    expect(mockNavigate).toHaveBeenCalledWith("/service-information", {state: null,});
   });
 });

@@ -1,0 +1,173 @@
+
+/* ============= Overlay ============= */
+
+.queue-confirmation-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+
+/* ============= Modal ============= */
+
+.queue-confirmation-modal {
+    width: 100%;
+    max-width: 520px;
+    padding: 40px;
+    border-radius: 12px;
+    background: #ffffff;
+    text-align: center;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+    animation: modal-slide-up 0.3s ease-out;
+}
+
+
+/* ============= Confirmation ============= */
+
+.queue-confirmation-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #e8f7ed;
+    color: #2e7d4f;
+}
+
+.queue-confirmation-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.queue-confirmation-description {
+    margin: 10px 0 30px;
+    color: #666666;
+    font-size: 16px;
+}
+
+
+/* ============= Ticket ============= */
+
+.queue-ticket {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 75%;
+    min-width: 280px;
+    margin: 0 auto 32px;
+    padding: 22px 28px;
+    border: 1px solid #b8dce6;
+    border-radius: 8px;
+    background: #dff4fa;
+}
+
+.queue-ticket-icon {
+    flex-shrink: 0;
+    color: #303030;
+}
+
+.queue-ticket-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.queue-ticket-label {
+    margin-bottom: 5px;
+    color: #666666;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.queue-ticket-number {
+    color: #303030;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+
+/* ============= Button ============= */
+
+.queue-confirmation-button {
+    width: 75%;
+    min-width: 280px;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.queue-confirmation-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.queue-confirmation-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes modal-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 600px) {
+    .queue-confirmation-overlay {
+        padding: 18px;
+    }
+
+    .queue-confirmation-modal {
+        padding: 67px 20px;
+    }
+
+    .queue-confirmation-description {
+        margin-bottom: 48px;
+    }
+
+    .queue-ticket {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 48px;
+        padding: 20px;
+    }
+
+    .queue-confirmation-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .queue-ticket-number {
+        font-size: 38px;
+    }
+}

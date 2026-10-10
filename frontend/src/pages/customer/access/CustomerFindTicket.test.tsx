@@ -18,7 +18,6 @@ describe("CustomerFindTicket", () => {
   beforeEach(() => {
     mockNavigate.mockClear();
   });
-  
 
   it("renders the Find My Ticket page", () => {
     render(
@@ -27,19 +26,11 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    expect(
-      screen.getByRole("heading", { name: "Find My Ticket" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Find My Ticket" })).toBeInTheDocument();
 
-    expect(
-      screen.getByLabelText("Ticket Number")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Ticket Number")).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", {
-        name: "View Queue Status",
-      })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View Queue Status", })).toBeInTheDocument();
   });
 
 
@@ -50,9 +41,7 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByLabelText("Ticket Number");
-
-    expect(input).toBeRequired();
+    expect(screen.getByLabelText("Ticket Number")).toBeRequired();
   });
 
 
@@ -63,16 +52,11 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByLabelText("Ticket Number");
+    fireEvent.change(screen.getByLabelText("Ticket Number"),{target: { value: "123456" },});
 
-    fireEvent.change(input, {
-      target: { value: "123456" },
-    });
-
-    expect(input).toHaveValue("123456");
+    expect(screen.getByLabelText("Ticket Number")).toHaveValue("123456");
   });
 
-  
   it("navigates to queue status when the form is submitted", () => {
     render(
       <MemoryRouter>
@@ -80,21 +64,10 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(
-      screen.getByLabelText("Ticket Number"),
-      {
-        target: { value: "123456" },
-      }
-    );
+    fireEvent.change(screen.getByLabelText("Ticket Number"),{target: { value: "123456" },});
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "View Queue Status",
-      })
-    );
+    fireEvent.click(screen.getByRole("button", {name: "View Queue Status",}));
 
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/queue-status"
-    );
+    expect(mockNavigate).toHaveBeenCalledWith("/queue-status");
   });
 });

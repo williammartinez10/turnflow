@@ -1,0 +1,170 @@
+
+/* ============= Page ============= */
+
+.customer-join-details-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Main ============= */
+
+.customer-join-details-main {
+    display: flex;
+    justify-content: center;
+    padding: 80px 24px;
+}
+
+.customer-join-details-content {
+    width: 100%;
+    max-width: 420px;
+    animation: slide-up 0.4s ease-out;
+}
+
+
+/* ============= Title ============= */
+
+.customer-join-details-title {
+    margin: 0;
+    font-size: 36px;
+}
+
+.customer-join-details-description {
+    margin: 12px 0 28px;
+    color: #666666;
+}
+
+
+/* ============= Form ============= */
+
+.customer-join-details-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.customer-phone-label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.customer-phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: 1px solid var(--color-carbon);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.customer-phone-input-wrapper:focus-within {
+    border-color: var(--color-watermelon);
+    box-shadow: 0 0 0 2px rgba(255, 59, 63, 0.12);
+}
+
+.customer-phone-prefix {
+    padding-left: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.customer-phone-input {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 14px 14px 8px;
+    border: none;
+    background: transparent;
+    font: inherit;
+}
+
+.customer-phone-input:focus {
+    outline: none;
+}
+
+.customer-phone-input::placeholder {
+    color: #999999;
+}
+
+.customer-phone-help {
+    margin: -2px 0 8px;
+    color: #666666;
+    font-size: 13px;
+}
+
+
+/* ============= Actions ============= */
+
+.customer-join-details-button {
+    margin-top: 12px;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.customer-join-details-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.customer-join-details-cancel-button {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #666666;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.customer-join-details-cancel-button:hover {
+    color: var(--color-watermelon);
+}
+
+
+/* ============= Accessibility ============= */
+
+.customer-join-details-button:focus-visible,
+.customer-join-details-cancel-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 480px) {
+    .customer-join-details-main {
+        padding: 50px 20px;
+    }
+
+    .customer-join-details-title {
+        font-size: 30px;
+    }
+}

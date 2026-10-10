@@ -1,46 +1,80 @@
+
 import "./CustomerJoinQueue.css";
 import { ScanQrCode } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import type { SyntheticEvent } from "react";
 import Header from "../../../components/Header/Header";
+
+interface Queue {
+  queue_id: number;
+  queue_code: string;
+}
+
+// Dummy queues for testing without the backend.
+const mockQueues: Queue[] = [
+  { queue_id: 1, queue_code: "ABC-123-45" },
+  { queue_id: 2, queue_code: "DEF-678-90" },
+];
 
 function CustomerJoinQueue() {
   const navigate = useNavigate();
 
-  const handleFindQueue = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const [queueCode, setQueueCode] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFindQueue = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // TODO Later:
-//    const queue_code_value = "1"
-//    const url = new  URL("http://127.0.0.1:8000/database/queue/get_withcode_queue_"+queue_code_value);
-//   const params = {queue_code : queue_code_value}
-//  let queue_code = await fetch(url, {
-//         method: 'GET',
-//         body: JSON.stringify({
-//            queue_code: queue_code_value,
-//         })
-//      })
-//    queue_code = await queue_code.json();
-//    console.warn(queue_code);
-// 
-// I believe this structure should give you guys an idea on how calls to the backend are structured
-// actually there's 2 methods here, one of them is by adding a value at the end of the URL, the other is sending a URL to the REST API
-// depends on the call, let me know if you guys need help, if need be just drop the variable you want the data to be stored in,
-// put dummy values inside of it, and I'll fill them in with the expected values.
-//
-    // Search for the queue using the entered Queue / Service Code.
-    // If the queue exists, use its information when navigating to Service Information.
+    setError("");
+    setIsLoading(true);
 
-    navigate("/service-information");
+    let queues: Queue[] = mockQueues;
+
+    try {
+      // Get queues from the backend.
+      const response = await fetch(
+        "http://127.0.0.1:8000/database/queue/get_queue_list", {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Backend request failed");
+      }
+
+      queues = await response.json();
+    } catch (error) {
+      // Fall back to dummy queues so the frontend can be tested without the backend.
+      console.warn("Could not load queues. Using mock data.", error);
+    }
+
+    // Find queue entered by the customer.
+    const selectedQueue = queues.find(
+      (queue) =>
+        queue.queue_code.toUpperCase() === queueCode.trim().toUpperCase()
+    );
+
+    if (selectedQueue) {
+      navigate("/service-information", {
+        state: {
+          queueCode: selectedQueue.queue_code,
+          queueId: selectedQueue.queue_id,
+        },
+      });
+    } else {
+      setError("Queue not found. Please check the code and try again.");
+    }
+
+    setIsLoading(false);
   };
 
+  
   const handleQrCode = () => {
 
-    // TODO Later:
-
-    // Open QR scanner.
-    // A valid QR code should open the corresponding
-    // Queue / Service Information page (C3).
-
+    // TODO Later: (For future milestones)
+    // Open QR scanner and navigate to the corresponding queue.
     console.log("Open QR scanner");
   };
 
@@ -72,15 +106,26 @@ function CustomerJoinQueue() {
                 name="queue-code"
                 type="text"
                 placeholder="XXX-XXX-XX"
+                value={queueCode}
+                onChange={(e) => setQueueCode(e.target.value)}
                 required
               />
             </div>
 
+            {error && (
+              <p 
+                role="alert" 
+                style={{ color: "#ff0000", textAlign: "center" }}>
+                {error}
+              </p>
+            )}
+
             <button
               className="find-queue-button"
               type="submit"
+              disabled={isLoading}
             >
-              Find Queue
+              {isLoading ? "Finding Queue..." : "Find Queue"}
             </button>
           </form>
 

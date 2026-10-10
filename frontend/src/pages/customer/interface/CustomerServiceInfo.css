@@ -1,0 +1,161 @@
+
+/* ============= Page ============= */
+
+.customer-service-info-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Main ============= */
+
+.customer-service-info-main {
+    display: flex;
+    justify-content: center;
+    padding: 50px 24px 80px;
+}
+
+.customer-service-info-content {
+    width: 100%;
+    max-width: 700px;
+    animation: slide-up 0.4s ease-out;
+}
+
+
+/* ============= Title ============= */
+
+.customer-service-info-title {
+    margin: 0 0 32px;
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+
+/* ============= Service information ============= */
+
+.customer-service-info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 28px;
+    border: 1px solid #cfcfcf;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.customer-service-info-section h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.customer-service-info-section p {
+    margin: 0;
+}
+
+.customer-service-info-primary {
+    margin-bottom: 4px;
+    font-size: 16px;
+}
+
+.customer-service-info-secondary {
+    color: #666666;
+    font-size: 14px;
+}
+
+
+/* ============= Actions ============= */
+
+.customer-service-info-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 32px;
+}
+
+.customer-service-info-join-button {
+    width: 60%;
+    min-width: 280px;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.customer-service-info-join-button:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.customer-service-info-cancel-button {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #666666;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.customer-service-info-cancel-button:hover {
+    color: var(--color-watermelon);
+}
+
+
+/* ============= Accessibility ============= */
+
+.customer-service-info-join-button:focus-visible,
+.customer-service-info-cancel-button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 600px) {
+    .customer-service-info-main {
+        padding: 36px 18px 60px;
+    }
+
+    .customer-service-info-title {
+        font-size: 30px;
+    }
+
+    .customer-service-info-details {
+        gap: 24px;
+        padding: 20px;
+    }
+
+    .customer-service-info-join-button {
+        width: 100%;
+        min-width: 0;
+    }
+}

@@ -64,7 +64,7 @@ class customerDAO:
       return customer_list
       #return list of customers from the specified queue, unless it's empty in which case an error is returned
 
-  def pop_customer3(self, queue_code: str):
+  def pop_queue3(self, queue_code: str):
       queue_id = queueDAO().get_withcode_queue3(queue_code)
       cashe: Customer
       conn = self.pool.getconn()

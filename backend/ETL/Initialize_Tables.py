@@ -45,18 +45,17 @@ time TIMESTAMPTZ
 
 CREATE TABLE staff_privileges(
 staff_priv_id serial PRIMARY KEY,
-  staff_privileges TEXT[]
+staff_privilege TEXT,
+staff_with_priv integer[]
 );
 
-CREATE TABLE staff_accounts(
+CREATE TABLE staff(
 staff_id serial PRIMARY KEY,
 email TEXT,
-password TEXT,
-staff_priv_id integer,
-FOREIGN KEY (staff_priv_id) REFERENCES staff_privileges(staff_priv_id)
+password TEXT
 );
 
-CREATE TABLE admin_accounts(
+CREATE TABLE admin(
 admin_id serial PRIMARY KEY,
 email TEXT,
 password TEXT

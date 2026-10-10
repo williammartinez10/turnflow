@@ -10,6 +10,7 @@ from fastapi import HTTPException
 class Queue(BaseModel):
   queue_id: Optional[int] = None
   queue_code: Optional[str] = None
+  service: Optional[str] = None
 
 class queueDAO:
   def __init__(self):
@@ -22,12 +23,12 @@ class queueDAO:
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
       INSERT INTO queue
-      (queue_code)
-      VALUES (%s)
+      (queue_code, service)
+      VALUES (%s, %s)
       RETURNING queue_id
       """
       #set up query to make call to database
-      cur.execute(query, (new_queue.queue_code,))
+      cur.execute(query, (new_queue.queue_code, new_queue.service))
       cashe = cur.fetchone()
       new_queue.queue_id = cashe[0]
       conn.commit()
@@ -49,6 +50,21 @@ class queueDAO:
     cashe = cur.fetchone()
     if cashe == None:
       raise HTTPException(status_code=404, detail="queue missing")
+    return cashe[0]
+
+  def check_withcode_queue3(self, queue_code: str):
+    cashe: Queue
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT * FROM queue
+    WHERE queue_code = %s
+    """
+    #set up query to make call to database
+    cur.execute(query, (queue_code,))
+    cashe = cur.fetchone()
+    if cashe == None:
+       return cashe
     return cashe[0]
 
   def get_queue_list3(self):

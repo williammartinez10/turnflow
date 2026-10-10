@@ -8,13 +8,14 @@ import Header from "../../../components/Header/Header";
 
 interface Queue {
   queue_id: number;
+  service: string;
   queue_code: string;
 }
 
 // Dummy queues for testing without the backend.
 const mockQueues: Queue[] = [
-  { queue_id: 1, queue_code: "ABC-123-45" },
-  { queue_id: 2, queue_code: "DEF-678-90" },
+  { queue_id: 1, service: "medicine", queue_code: "ABC-123-45" },
+  { queue_id: 2, service: "lawyer", queue_code: "DEF-678-90" },
 ];
 
 function CustomerJoinQueue() {
@@ -60,6 +61,7 @@ function CustomerJoinQueue() {
       navigate("/service-information", {
         state: {
           queueCode: selectedQueue.queue_code,
+          service: selectedQueue.service,
           queueId: selectedQueue.queue_id,
         },
       });

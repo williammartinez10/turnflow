@@ -44,12 +44,26 @@ describe("CustomerQueueStatus", () => {
 
   it("displays the customer's ticket and queue status", () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/queue-status",
+            state: {
+              ticketNumber: "1",
+              queueCode: "ABC-123-45",
+            },
+          },
+        ]}
+      >
         <CustomerQueueStatus />
       </MemoryRouter>
     );
 
-    expect(screen.getAllByText("<###>")).toHaveLength(2);
+    expect(screen.getByText("1")).toBeInTheDocument();
+
+    expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
+
+    expect(screen.getByText("<###>")).toBeInTheDocument();
 
     expect(screen.getByText("<Position>")).toBeInTheDocument();
 

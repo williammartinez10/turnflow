@@ -64,7 +64,11 @@ describe("CustomerServiceInfo", () => {
         initialEntries={[
           {
             pathname: "/service-information",
-            state: { queueCode: "ABC-123-45", queueId: 1 },
+            state: {
+              queueCode: "ABC-123-45",
+              queueId: 1,
+              service: "Medicine",
+            },
           },
         ]}
       >
@@ -72,12 +76,15 @@ describe("CustomerServiceInfo", () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/join-details", {
       state: {
         queueCode: "ABC-123-45",
         queueId: 1,
+        service: "Medicine",
       },
     });
   });

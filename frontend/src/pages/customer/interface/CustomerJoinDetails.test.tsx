@@ -156,7 +156,11 @@ describe("CustomerJoinDetails", () => {
         initialEntries={[
           {
             pathname: "/join-details",
-            state: { queueCode: "ABC-123-45", queueId: 1 },
+            state: {
+              queueCode: "ABC-123-45",
+              queueId: 1,
+              service: "medicine",
+            },
           },
         ]}
       >
@@ -174,6 +178,7 @@ describe("CustomerJoinDetails", () => {
       state: {
         queueCode: "ABC-123-45",
         ticketNumber: "1",
+        service: "medicine",
       },
     });
   });

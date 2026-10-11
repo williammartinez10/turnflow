@@ -97,8 +97,8 @@ def add_admin1(new_admin: Admin):
     return adminHandler().add_admin2(new_admin)
 
 
-@app.post("/database/admin/get_admin")
-def get_admin1(
+@app.post("/database/admin/verify_admin")
+def verify_admin1(
     email: str = Body(...),
     password: str = Body(...),
 ):
@@ -122,8 +122,8 @@ def add_staff1(new_Staff: Staff):
     return staffHandler().add_staff2(new_Staff)
 
 
-@app.post("/database/staff/get_staff")
-def get_staff1(
+@app.post("/database/staff/verify_staff")
+def verify_staff1(
     email: str = Body(...),
     password: str = Body(...),
 ):
@@ -189,7 +189,7 @@ def login1(
     return account
 
 
-@app.get("/auth/me")
+@app.get("/auth/get_current_account")
 def get_current_account1(request: Request):
     account = request.session.get("account")
 

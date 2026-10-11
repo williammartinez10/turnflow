@@ -88,7 +88,9 @@ function Login() {
               required
             />
 
-            {error && <p role="alert">{error}</p>}
+            {error && <p role="alert" style={{ textAlign: "center", color: "#FF2C2C" }}>
+              {error}
+            </p>}
             {success && <p role="status" style={{ textAlign: "center", color: "#008000" }}>
               {success}
             </p>}

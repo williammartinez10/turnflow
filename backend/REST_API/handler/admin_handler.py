@@ -42,17 +42,26 @@ class adminHandler:
     hashed_password = password_hash.hash(new_admin.password)
     return dao.add_admin3(new_admin, hashed_password)
 
-
   def get_admin2(self, email: str, password: str):
     account = adminDAO().get_admin3(email.strip().lower())
 
     if account is None:
-        return None
+      return None
 
     # Verify the entered password against the stored hash.
     if not password_hash.verify(password, account["password"]):
-        return None
+      return None
 
     del account["password"]
     account["role"] = "admin"
     return account
+
+  def delete_admin2(self, admin: Admin):
+    if admin.admin_id is None:
+      raise HTTPException(status_code=400, detail="admin_id is required")
+
+    result = adminDAO().delete_admin3(admin)
+    return {
+      "message": "Admin " + result["email"] + " successfully deleted",
+      "admin": result
+    }

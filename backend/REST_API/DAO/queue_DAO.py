@@ -82,6 +82,33 @@ class queueDAO:
       cur.close()
       self.pool.putconn(conn)
       if queue_list == []:
-         raise HTTPException(status_code=404, detail="queue missing")
+         raise HTTPException(status_code=404, detail="empty queue table")
       return queue_list
-      #return list of customers from the specified queue, unless it's empty in which case an error is returned
+      #return list of queues, unless it's empty in which case an error is returned
+
+  def delete_queue3(self, queue_code: str):
+      queue_id = queueDAO().get_withcode_queue3(queue_code)
+      cashe: Queue
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      DELETE FROM queue
+      WHERE queue_id = (
+        SELECT queue_id FROM queue
+        WHERE queue_id = %s
+        ORDER BY queue_id
+        LIMIT 1
+      )
+      RETURNING *
+      """
+      #set up query to make call to database
+      cur.execute(query, (queue_id,))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      if cashe == None:
+         raise HTTPException(status_code=404, detail="queue missing or empty")
+      retired_queue = Queue(**cashe)
+      return retired_queue
+      #return deleted queue, unless it's empty in which case an error is returned

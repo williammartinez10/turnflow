@@ -16,18 +16,18 @@ from backend.REST_API.DAO.queue_DAO import (
 
 from backend.REST_API.handler.admin_handler import adminHandler
 from backend.REST_API.DAO.admin_DAO import (
-   Admin,
+    Admin,
 )
 
 from backend.REST_API.handler.staff_handler import staffHandler
 from backend.REST_API.DAO.staff_DAO import (
-   Staff,
+    Staff,
 )
 
-#from backend.REST_API.handler.staff_privilage_handler import staffHandler
-#from backend.REST_API.DAO.staff_privilage_DAO import (
-#    Staff_Privilege,
-#)
+from backend.REST_API.handler.staff_privilege_handler import staff_privilegeHandler
+from backend.REST_API.DAO.staff_privilege_DAO import (
+    Staff_Privilege,
+)
 
 app = FastAPI()
 
@@ -56,65 +56,114 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/database/customer/add_customer")  # initialize code and route for defined instruction
+
+@app.post("/database/customer/add_customer")
 async def add_customer1(new_customer: Customer, status_code=201):
     return customerHandler().add_customer2(new_customer)
-    # call customerHandler with associated instruction and return the customer we just obtained
-    # adds customer with defined properties
+
+
 @app.get("/database/customer/get_queue_{queue_code}")
 async def list_customers1(queue_code: str):
     return customerHandler().list_customers2(queue_code)
-    # return list of customers from specified queue with queue_code
+
+
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
 async def pop_customer(queue_code: str):
     return customerHandler().pop_customer2(queue_code)
-    # remove oldest customer from queue
+
 
 @app.post("/database/queue/add_queue")
 async def add_queue1(new_queue: Queue, status_code=201):
     return queueHandler().add_queue2(new_queue)
-    # add new queue
+
+
 @app.get("/database/queue/get_queue_list")
 async def get_queue_list1(status_code=201):
     return queueHandler().get_queue_list2()
-    # get list of queues defined with their queue code
+
 
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
 async def get_withcode_queue1(queue_code: str):
-    return customerHandler().get_withcode_queue2(queue_code)
-    # return queue ID if it exists
+    return queueHandler().get_withcode_queue2(queue_code)
+
+
+@app.delete("/database/queue/delete_queue_{queue_code}")
+async def delete_queue1(queue_code: str):
+    return queueHandler().delete_queue2(queue_code)
 
 
 @app.post("/database/admin/add_admin", status_code=201)
 def add_admin1(new_admin: Admin):
     return adminHandler().add_admin2(new_admin)
-    # add new admin
-#@app.get("/database/admin/get_admin")
-#async def get_admin1(new_admin: Admin, status_code=201):
-#    return adminHandler().get_admin2(new_admin)
-#    # get existing admin
-#@app.get("/database/admin/delete_admin")
-#async def delete_admin1(new_admin: Admin, status_code=201):
-#    return adminHandler().delete_admin2(new_admin)
-#    # delete admin
+
+
+@app.post("/database/admin/get_admin")
+def get_admin1(
+    email: str = Body(...),
+    password: str = Body(...),
+):
+    account = adminHandler().get_admin2(email, password)
+
+    if account is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password."
+        )
+    return account
+
+
+@app.delete("/database/admin/delete_admin")
+def delete_admin1(new_admin: Admin):
+    return adminHandler().delete_admin2(new_admin)
+
 
 @app.post("/database/staff/add_staff", status_code=201)
 def add_staff1(new_Staff: Staff):
     return staffHandler().add_staff2(new_Staff)
-    # add staff member
-#@app.get("/database/staff/get_staff")
-#async def get_staff1(new_Staff: Staff, status_code=201):
-#    return staffHandler().get_staff2(new_Staff)
-#    # get existing staff member
-#@app.get("/database/staff/delete_staff")
-#async def delete_staff1(new_Staff: Staff, status_code=201):
-#    return staffHandler().delete_staff2(new_Staff)
-#    # delete staff member
 
-#@app.get("/database/staff_privilege/add_staff_privilage")
-#async def add_staff_privilege1(new_staff_privilage: Staff_Privilage, status_code=201):
-#    return staffHandler().add_staff_privilage2(new_Staff_privilage)
-#    # add new staff privilage
+
+@app.post("/database/staff/get_staff")
+def get_staff1(
+    email: str = Body(...),
+    password: str = Body(...),
+):
+    account = staffHandler().get_staff2(email, password)
+
+    if account is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password."
+        )
+    return account
+
+
+@app.delete("/database/staff/delete_staff")
+def delete_staff1(new_Staff: Staff):
+    return staffHandler().delete_staff2(new_Staff)
+
+
+@app.post("/database/staff_privilege/add_staff_privilege", status_code=201)
+async def add_staff_privilege1(new_staff_privilege: Staff_Privilege):
+    return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege)
+
+
+@app.get("/database/staff_privilege/get_staff_privilege_list")
+async def get_staff_privilege_list1():
+    return staff_privilegeHandler().get_staff_privilege_list2()
+
+
+@app.get("/database/staff_privilege/get_with_staff_privilege_staff_list_{staff_privilege}")
+async def get_with_staff_privilege_staff_list1(staff_privilege: str):
+    return staff_privilegeHandler().get_with_staff_privilege_staff_list2(
+        staff_privilege
+    )
+
+
+@app.delete("/database/staff_privilege/delete_staff_privilege_{staff_privilege}")
+async def delete_staff_privilege_staff1(staff_privilege: str):
+    return staff_privilegeHandler().delete_staff_privilege_staff2(
+        staff_privilege
+    )
 
 
 @app.post("/auth/login")
@@ -133,6 +182,7 @@ def login1(
             status_code=401,
             detail="Invalid email or password."
         )
+
     # Remember the verified account for later requests.
     request.session.clear()
     request.session["account"] = account

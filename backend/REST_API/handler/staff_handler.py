@@ -38,7 +38,6 @@ class staffHandler:
     hashed_password = password_hash.hash(new_staff.password)
     return dao.add_staff3(new_staff, hashed_password)
 
-
   def get_staff2(self, email: str, password: str):
     account = staffDAO().get_staff3(email.strip().lower())
 
@@ -52,4 +51,13 @@ class staffHandler:
     del account["password"]
     account["role"] = "staff"
     return account
-  
+
+  def delete_staff2(self, staff: Staff):
+    if staff.staff_id is None:
+      raise HTTPException(status_code=400, detail="staff_id is required")
+
+    result = staffDAO().delete_staff3(staff)
+    return {
+      "message": "Staff " + result["email"] + " successfully deleted",
+      "staff": result
+    }

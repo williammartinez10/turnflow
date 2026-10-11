@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+import os
+from starlette.middleware.sessions import SessionMiddleware
+
+from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.REST_API.handler.customer_handler import customerHandler
@@ -11,15 +14,15 @@ from backend.REST_API.DAO.queue_DAO import (
     Queue,
 )
 
-#from backend.REST_API.handler.admin_handler import adminHandler
-#from backend.REST_API.DAO.admin_DAO import (
-#    Admin,
-#)
+from backend.REST_API.handler.admin_handler import adminHandler
+from backend.REST_API.DAO.admin_DAO import (
+   Admin,
+)
 
-#from backend.REST_API.handler.staff_handler import staffHandler
-#from backend.REST_API.DAO.staff_DAO import (
-#    Staff,
-#)
+from backend.REST_API.handler.staff_handler import staffHandler
+from backend.REST_API.DAO.staff_DAO import (
+   Staff,
+)
 
 #from backend.REST_API.handler.staff_privilage_handler import staffHandler
 #from backend.REST_API.DAO.staff_privilage_DAO import (
@@ -27,7 +30,19 @@ from backend.REST_API.DAO.queue_DAO import (
 #)
 
 app = FastAPI()
-origins = ["*"]
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.environ["SESSION_SECRET_KEY"],
+    max_age=1800,
+    same_site="lax",
+    https_only=False,  # Local HTTP development.
+)
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,10 +81,10 @@ async def get_withcode_queue1(queue_code: str):
     # return queue ID if it exists
 
 
-#@app.post("/database/admin/add_admin")
-#async def add_admin1(new_admin: Admin, status_code=201):
-#    return adminHandler().add_admin2(new_admin)
-#    # add new admin
+@app.post("/database/admin/add_admin", status_code=201)
+def add_admin1(new_admin: Admin):
+    return adminHandler().add_admin2(new_admin)
+    # add new admin
 #@app.get("/database/admin/get_admin")
 #async def get_admin1(new_admin: Admin, status_code=201):
 #    return adminHandler().get_admin2(new_admin)
@@ -79,20 +94,60 @@ async def get_withcode_queue1(queue_code: str):
 #    return adminHandler().delete_admin2(new_admin)
 #    # delete admin
 
-#@app.post("/database/staff/add_staff")
-#async def add_staff1(new_Staff: Staff, status_code=201):
-#    return adminHandler().add_staff2(new_Staff)
-#    # add staff member
+@app.post("/database/staff/add_staff", status_code=201)
+def add_staff1(new_Staff: Staff):
+    return staffHandler().add_staff2(new_Staff)
+    # add staff member
 #@app.get("/database/staff/get_staff")
 #async def get_staff1(new_Staff: Staff, status_code=201):
-#    return adminHandler().get_staff2(new_Staff)
+#    return staffHandler().get_staff2(new_Staff)
 #    # get existing staff member
 #@app.get("/database/staff/delete_staff")
 #async def delete_staff1(new_Staff: Staff, status_code=201):
-#    return adminHandler().delete_staff2(new_Staff)
+#    return staffHandler().delete_staff2(new_Staff)
 #    # delete staff member
 
 #@app.get("/database/staff_privilege/add_staff_privilage")
 #async def add_staff_privilege1(new_staff_privilage: Staff_Privilage, status_code=201):
-#    return adminHandler().add_staff_privilage2(new_Staff_privilage)
+#    return staffHandler().add_staff_privilage2(new_Staff_privilage)
 #    # add new staff privilage
+
+
+@app.post("/auth/login")
+def login1(
+    request: Request,
+    email: str = Body(...),
+    password: str = Body(...),
+):
+    account = adminHandler().get_admin2(email, password)
+
+    if account is None:
+        account = staffHandler().get_staff2(email, password)
+
+    if account is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password."
+        )
+    # Remember the verified account for later requests.
+    request.session.clear()
+    request.session["account"] = account
+    return account
+
+
+@app.get("/auth/me")
+def get_current_account1(request: Request):
+    account = request.session.get("account")
+
+    if account is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Not logged in."
+        )
+    return account
+
+
+@app.post("/auth/logout")
+def logout1(request: Request):
+    request.session.clear()
+    return {"message": "Logged out."}

@@ -31,6 +31,10 @@ from backend.REST_API.DAO.staff_DAO import (
 
 app = FastAPI()
 
+# Create backend/.env containing SESSION_SECRET_KEY=<random key>.
+# Generate a key: python3 -c "import secrets; print(secrets.token_hex(32))"
+# Start the backend with --env-file backend/.env to load it.
+# Like for example: uvicorn backend.REST_API.main:app --reload --env-file backend/.env
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.environ["SESSION_SECRET_KEY"],

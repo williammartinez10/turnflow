@@ -18,9 +18,9 @@ query = """
 DROP TABLE IF EXISTS customer CASCADE;
 DROP TABLE IF EXISTS queue CASCADE;
 DROP TABLE IF EXISTS user_log CASCADE;
-DROP TABLE IF EXISTS staff_privileges CASCADE;
-DROP TABLE IF EXISTS staff_accounts CASCADE;
-DROP TABLE IF EXISTS admin_accounts CASCADE;
+DROP TABLE IF EXISTS staff_privilege CASCADE;
+DROP TABLE IF EXISTS staff CASCADE;
+DROP TABLE IF EXISTS admin CASCADE;
 
 CREATE TABLE queue(
 queue_id serial PRIMARY KEY,
@@ -43,7 +43,7 @@ queue_code TEXT,
 time TIMESTAMPTZ
 );
 
-CREATE TABLE staff_privileges(
+CREATE TABLE staff_privilege(
 staff_priv_id serial PRIMARY KEY,
 staff_privilege TEXT,
 staff_with_priv integer[]

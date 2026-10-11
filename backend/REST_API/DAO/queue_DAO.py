@@ -82,7 +82,7 @@ class queueDAO:
       cur.close()
       self.pool.putconn(conn)
       if queue_list == []:
-         raise HTTPException(status_code=404, detail="queue missing")
+         raise HTTPException(status_code=404, detail="empty queue table")
       return queue_list
       #return list of queues, unless it's empty in which case an error is returned
 

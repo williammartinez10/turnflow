@@ -21,10 +21,10 @@ from backend.REST_API.DAO.staff_DAO import (
     Staff,
 )
 
-#from backend.REST_API.handler.staff_privilage_handler import staffHandler
-#from backend.REST_API.DAO.staff_privilage_DAO import (
-#    Staff_Privilege,
-#)
+from backend.REST_API.handler.staff_privilege_handler import staff_privilegeHandler
+from backend.REST_API.DAO.staff_privilege_DAO import (
+    Staff_Privilege,
+)
 
 app = FastAPI()
 origins = ["*"]
@@ -59,11 +59,14 @@ async def add_queue1(new_queue: Queue, status_code=201):
 async def get_queue_list1(status_code=201):
     return queueHandler().get_queue_list2()
     # get list of queues defined with their queue code
-
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
 async def get_withcode_queue1(queue_code: str):
     return customerHandler().get_withcode_queue2(queue_code)
     # return queue ID if it exists
+@app.delete("/database/queue/delete_queue_{queue_code}")
+async def pop_customer(queue_code: str):
+    return queueHandler().delete_queue2(queue_code)
+    # remove oldest customer from queue
 
 
 @app.post("/database/admin/add_admin")
@@ -92,7 +95,19 @@ async def delete_staff1(new_Staff: Staff, status_code=201):
     return staffHandler().delete_staff2(new_Staff)
     # delete staff member
 
-#@app.get("/database/staff_privilege/add_staff_privilage")
-#async def add_staff_privilege1(new_staff_privilage: Staff_Privilage, status_code=201):
-#    return adminHandler().add_staff_privilage2(new_Staff_privilage)
-#    # add new staff privilage
+@app.post("/database/staff_privilege/add_staff_privilege")
+async def add_staff_privilege1(new_staff_privilege: Staff_Privilege, status_code=201):
+    return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege)
+    # add new staff privilege
+@app.get("/database/staff_privilege/get_staff_privilege_list")
+async def get_staff_privilege_list1(status_code=201):
+    return staff_privilegeHandler().get_staff_privilege_list2()
+    # get list of queues defined with their queue code
+@app.get("/database/staff_privilege/get_with_staff_privilege_staff_list_{staff_privilege}")
+async def get_with_staff_privilege_staff_list1(staff_privilege: str):
+    return staff_privilegeHandler().delete_staff_privilege_staff2(staff_privilege)
+    # return queue ID if it exists
+@app.delete("/database/staff_privilege/delete_staff_privilege_{staff_privilege}")
+async def delete_staff_privilege_staff1(staff_privilege: str):
+    return staff_privilegeHandler().delete_staff_privilege_staff2(staff_privilege)
+    # remove oldest customer from queue

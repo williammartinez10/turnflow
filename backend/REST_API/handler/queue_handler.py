@@ -19,7 +19,7 @@ class queueHandler:
     return queueDAO().get_withcode_queue3(queue_code)
 
   def delete_queue2(self, queue_code: str):
-    result = queueDAO().pop_customer3(queue_code)
+    result = queueDAO().delete_queue2(queue_code)
     return {
       "message": "Queue" + queue_code + " successfully deleted",
       "queue": result

@@ -1,75 +1,81 @@
 from backend.REST_API.dbconfig import PG_DB_CONFIG, POOL_CONFIG
-from backend.REST_API.DAO.queue_DAO import queueDAO
-import psycopg2
 from pydantic import BaseModel
 from typing import Optional
 from psycopg2.extras import DictCursor
 from psycopg2.pool import SimpleConnectionPool
-import datetime
 from fastapi import HTTPException
+
 
 class Staff(BaseModel):
   staff_id: Optional[int] = None
-  email: Optional[str] = None
-  password: Optional[str] = None
+  full_name: str
+  email: str
+  password: str
+
 
 class staffDAO:
-  def add_customer3(self, new_staff: Staff):
-      conn = self.pool.getconn()
-      cur = conn.cursor(cursor_factory=DictCursor)
-      query = """
-      INSERT INTO staff
-      (email, password)
-      VALUES (%s, %s)
-      RETURNING staff_id, time
-      """
-      #set up query to make call to database
-      cur.execute(query, (new_staff.email, new_staff.password))
-      cashe = cur.fetchone()
-      new_staff.staff_id = cashe[0]
-      conn.commit()
-      cur.close()
-      self.pool.putconn(conn)
-      #store and return entry just created in database
-      return new_staff
+  def __init__(self):
+    self.pool = SimpleConnectionPool(
+      POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
+    )
 
-  def get_staff3(self, staff: Staff):
-    cashe: Staff
+  def add_staff3(self, new_staff: Staff, password_hash: str):
     conn = self.pool.getconn()
     cur = conn.cursor(cursor_factory=DictCursor)
     query = """
-    SELECT * FROM staff
-    WHERE email = %s
-    AND password = %s
+    INSERT INTO staff
+    (full_name, email, password)
+    VALUES (%s, %s, %s)
+    RETURNING staff_id, full_name, email
     """
-    #set up query to make call to database
-    cur.execute(query, (staff.email, staff.password))
+    # Store the password hash supplied by the signup handler.
+    cur.execute(query, (
+      new_staff.full_name,
+      new_staff.email,
+      password_hash,
+    ))
     cashe = cur.fetchone()
-    if cashe == None:
-      raise HTTPException(status_code=404, detail="staff missing")
-    return cashe[0]
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+    return dict(cashe)
+
+  def get_staff3(self, email: str):
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT staff_id, full_name, email, password
+    FROM staff
+    WHERE email = %s
+    """
+    # The handler verifies the stored hash against the entered password.
+    cur.execute(query, (email,))
+    cashe = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+    return dict(cashe) if cashe is not None else None
 
   def delete_staff3(self, staff: Staff):
-      cashe: Staff
-      conn = self.pool.getconn()
-      cur = conn.cursor(cursor_factory=DictCursor)
-      query = """
-      DELETE FROM staff
-      WHERE staff_id = (
-        SELECT staff_id FROM staff
-        WHERE staff_id = %s
-        LIMIT 1
-      )
-      RETURNING *
-      """
-      #set up query to make call to database
-      cur.execute(query, (staff.staff_id,))
-      cashe = cur.fetchone()
-      conn.commit()
-      cur.close()
-      self.pool.putconn(conn)
-      if cashe == None:
-         raise HTTPException(status_code=404, detail="staff missing")
-      retired_staff = Staff(staff_id=cashe[0], email=cashe[1], password=cashe[2])
-      return retired_staff
-      #return deleted staff, unless it's empty in which case an error is returned
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    DELETE FROM staff
+    WHERE staff_id = (
+      SELECT staff_id FROM staff
+      WHERE staff_id = %s
+      LIMIT 1
+    )
+    RETURNING staff_id, full_name, email
+    """
+    cur.execute(query, (staff.staff_id,))
+    cashe = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+
+    if cashe is None:
+      raise HTTPException(status_code=404, detail="staff missing")
+
+    # Return the deleted account without its password hash.
+    return dict(cashe)

@@ -1,75 +1,83 @@
 from backend.REST_API.dbconfig import PG_DB_CONFIG, POOL_CONFIG
-from backend.REST_API.DAO.queue_DAO import queueDAO
-import psycopg2
 from pydantic import BaseModel
 from typing import Optional
 from psycopg2.extras import DictCursor
 from psycopg2.pool import SimpleConnectionPool
-import datetime
 from fastapi import HTTPException
+
 
 class Admin(BaseModel):
   admin_id: Optional[int] = None
-  email: Optional[str] = None
-  password: Optional[str] = None
+  full_name: str
+  email: str
+  password: str
+  organization_name: str
+
 
 class adminDAO:
-  def add_customer3(self, new_admin: Admin):
-      conn = self.pool.getconn()
-      cur = conn.cursor(cursor_factory=DictCursor)
-      query = """
-      INSERT INTO admin
-      (email, password)
-      VALUES (%s, %s)
-      RETURNING staff_id, time
-      """
-      #set up query to make call to database
-      cur.execute(query, (new_admin.email, new_admin.password))
-      cashe = cur.fetchone()
-      new_admin.admin_id = cashe[0]
-      conn.commit()
-      cur.close()
-      self.pool.putconn(conn)
-      #store and return entry just created in database
-      return new_admin
+  def __init__(self):
+    self.pool = SimpleConnectionPool(
+      POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
+    )
 
-  def get_admin3(self, admin: Admin):
-    cashe: Admin
+  def add_admin3(self, new_admin: Admin, password_hash: str):
     conn = self.pool.getconn()
     cur = conn.cursor(cursor_factory=DictCursor)
     query = """
-    SELECT * FROM admin
-    WHERE email = %s
-    AND password = %s
+    INSERT INTO admin
+    (full_name, email, password, organization_name)
+    VALUES (%s, %s, %s, %s)
+    RETURNING admin_id, full_name, email, organization_name
     """
-    #set up query to make call to database
-    cur.execute(query, (admin.email, admin.password))
+    # Store the password hash supplied by the signup handler.
+    cur.execute(query, (
+      new_admin.full_name,
+      new_admin.email,
+      password_hash,
+      new_admin.organization_name,
+    ))
     cashe = cur.fetchone()
-    if cashe == None:
-      raise HTTPException(status_code=404, detail="admin missing")
-    return cashe[0]
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+    return dict(cashe)
+
+  def get_admin3(self, email: str):
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT admin_id, full_name, email, password, organization_name
+    FROM admin
+    WHERE email = %s
+    """
+    # The handler verifies the stored hash against the entered password.
+    cur.execute(query, (email,))
+    cashe = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+    return dict(cashe) if cashe is not None else None
 
   def delete_admin3(self, admin: Admin):
-      cashe: Admin
-      conn = self.pool.getconn()
-      cur = conn.cursor(cursor_factory=DictCursor)
-      query = """
-      DELETE FROM admin
-      WHERE admin_id = (
-        SELECT admin_id FROM admin
-        WHERE admin_id = %s
-        LIMIT 1
-      )
-      RETURNING *
-      """
-      #set up query to make call to database
-      cur.execute(query, (admin.admin_id,))
-      cashe = cur.fetchone()
-      conn.commit()
-      cur.close()
-      self.pool.putconn(conn)
-      if cashe == None:
-         raise HTTPException(status_code=404, detail="admin missing")
-      retired_admin = Admin(admin_id=cashe[0], email=cashe[1], password=cashe[2])
-      return retired_admin
-      #return deleted admin, unless it's empty in which case an error is returned
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    DELETE FROM admin
+    WHERE admin_id = (
+      SELECT admin_id FROM admin
+      WHERE admin_id = %s
+      LIMIT 1
+    )
+    RETURNING admin_id, full_name, email, organization_name
+    """
+    cur.execute(query, (admin.admin_id,))
+    cashe = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+
+    if cashe is None:
+      raise HTTPException(status_code=404, detail="admin missing")
+
+    # Return the deleted account without its password hash.
+    return dict(cashe)

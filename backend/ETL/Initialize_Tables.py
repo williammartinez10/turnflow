@@ -51,14 +51,17 @@ staff_with_priv integer[]
 
 CREATE TABLE staff(
 staff_id serial PRIMARY KEY,
+full_name TEXT,
 email TEXT,
 password TEXT
 );
 
 CREATE TABLE admin(
 admin_id serial PRIMARY KEY,
+full_name TEXT,
 email TEXT,
-password TEXT
+password TEXT,
+organization_name TEXT
 );
 """
 cur.execute(query)

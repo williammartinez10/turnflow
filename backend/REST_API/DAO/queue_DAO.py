@@ -109,6 +109,6 @@ class queueDAO:
       self.pool.putconn(conn)
       if cashe == None:
          raise HTTPException(status_code=404, detail="queue missing or empty")
-      retired_queue = Queue(ticket_id=cashe[0], phone_number=cashe[1], queue_code=queue_code, time=cashe[3])
+      retired_queue = Queue(**cashe)
       return retired_queue
       #return deleted queue, unless it's empty in which case an error is returned

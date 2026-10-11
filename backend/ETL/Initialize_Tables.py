@@ -50,6 +50,7 @@ staff_priv_id serial PRIMARY KEY,
 
 CREATE TABLE staff_accounts(
 staff_id serial PRIMARY KEY,
+full_name TEXT,
 email TEXT,
 password TEXT,
 staff_priv_id integer,
@@ -58,8 +59,10 @@ FOREIGN KEY (staff_priv_id) REFERENCES staff_privileges(staff_priv_id)
 
 CREATE TABLE admin_accounts(
 admin_id serial PRIMARY KEY,
+full_name TEXT,
 email TEXT,
-password TEXT
+password TEXT,
+organization_name TEXT
 );
 """
 cur.execute(query)

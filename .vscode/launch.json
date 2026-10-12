@@ -11,7 +11,8 @@
       "module": "uvicorn",
       "args": [
         "backend.REST_API.main:app",
-        "--reload"
+        "--reload",
+        "--env-file=backend/.env"
       ],
       "jinja": true
     }

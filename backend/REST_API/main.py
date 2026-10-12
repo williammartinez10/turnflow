@@ -55,20 +55,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+################################################ REST API ####################################################################
 
 @app.post("/database/customer/add_customer")
 async def add_customer1(new_customer: Customer, status_code=201):
     return customerHandler().add_customer2(new_customer)
 
-
 @app.get("/database/customer/get_queue_{queue_code}")
-async def list_customers1(queue_code: str):
+async def list_customers1(queue_code: str, status_code=201):
     return customerHandler().list_customers2(queue_code)
 
-
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
-async def pop_customer(queue_code: str):
+async def pop_customer(queue_code: str, status_code=201):
     return customerHandler().pop_customer2(queue_code)
 
 
@@ -76,31 +74,27 @@ async def pop_customer(queue_code: str):
 async def add_queue1(new_queue: Queue, status_code=201):
     return queueHandler().add_queue2(new_queue)
 
-
 @app.get("/database/queue/get_queue_list")
 async def get_queue_list1(status_code=201):
     return queueHandler().get_queue_list2()
 
-
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
-async def get_withcode_queue1(queue_code: str):
+async def get_withcode_queue1(queue_code: str, status_code=201):
     return queueHandler().get_withcode_queue2(queue_code)
 
-
 @app.delete("/database/queue/delete_queue_{queue_code}")
-async def delete_queue1(queue_code: str):
+async def delete_queue1(queue_code: str, status_code=201):
     return queueHandler().delete_queue2(queue_code)
 
 
 @app.post("/database/admin/add_admin", status_code=201)
-def add_admin1(new_admin: Admin):
+def add_admin1(new_admin: Admin, status_code=201):
     return adminHandler().add_admin2(new_admin)
 
-
-@app.post("/database/admin/verify_admin")
+@app.post("/database/admin/verify_admin", status_code=201)
 def verify_admin1(
     email: str = Body(...),
-    password: str = Body(...),
+    password: str = Body(...), status_code=201
 ):
     account = adminHandler().get_admin2(email, password)
 
@@ -111,21 +105,19 @@ def verify_admin1(
         )
     return account
 
-
 @app.delete("/database/admin/delete_admin")
-def delete_admin1(new_admin: Admin):
+def delete_admin1(new_admin: Admin, status_code=201):
     return adminHandler().delete_admin2(new_admin)
 
 
 @app.post("/database/staff/add_staff", status_code=201)
-def add_staff1(new_Staff: Staff):
+def add_staff1(new_Staff: Staff, status_code=201):
     return staffHandler().add_staff2(new_Staff)
 
-
-@app.post("/database/staff/verify_staff")
+@app.post("/database/staff/verify_staff", status_code=201)
 def verify_staff1(
     email: str = Body(...),
-    password: str = Body(...),
+    password: str = Body(...), status_code=201
 ):
     account = staffHandler().get_staff2(email, password)
 
@@ -136,9 +128,8 @@ def verify_staff1(
         )
     return account
 
-
 @app.delete("/database/staff/delete_staff")
-def delete_staff1(new_Staff: Staff):
+def delete_staff1(new_Staff: Staff, status_code=201):
     return staffHandler().delete_staff2(new_Staff)
 
 
@@ -146,25 +137,22 @@ def delete_staff1(new_Staff: Staff):
 async def add_staff_privilege1(new_staff_privilege: Staff_Privilege):
     return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege)
 
-
 @app.get("/database/staff_privilege/get_staff_privilege_list")
-async def get_staff_privilege_list1():
+async def get_staff_privilege_list1(status_code=201):
     return staff_privilegeHandler().get_staff_privilege_list2()
 
-
 @app.get("/database/staff_privilege/get_with_staff_privilege_staff_list_{staff_privilege}")
-async def get_with_staff_privilege_staff_list1(staff_privilege: str):
+async def get_with_staff_privilege_staff_list1(staff_privilege: str, status_code=201):
     return staff_privilegeHandler().get_with_staff_privilege_staff_list2(
         staff_privilege
     )
 
-
 @app.delete("/database/staff_privilege/delete_staff_privilege_{staff_privilege}")
-async def delete_staff_privilege_staff1(staff_privilege: str):
+async def delete_staff_privilege_staff1(staff_privilege: str, status_code=201):
     return staff_privilegeHandler().delete_staff_privilege_staff2(
         staff_privilege
     )
-
+################################################ LOG IN / OUT ####################################################################
 
 @app.post("/auth/login")
 def login1(

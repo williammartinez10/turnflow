@@ -2,6 +2,7 @@ import "./AdminSignup.css";
 import { useState, SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../../components/Header/Header";
+import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 
 function AdminSignup() {
   const [error, setError] = useState("");
@@ -99,11 +100,10 @@ function AdminSignup() {
               Password
             </label>
 
-            <input
+            <PasswordInput
               className="admin-signup-form-input"
               id="password"
               name="password"
-              type="password"
               placeholder="Enter your password"
               required
             />

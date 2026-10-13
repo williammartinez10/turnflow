@@ -46,6 +46,17 @@
     font-weight: 700;
 }
 
+.admin-signup-form-label:has(
+    + input:required,
+    + .password-input-wrapper > input:required
+)::after {
+    content: " REQUIRED *";
+    color: #FF2C2C;
+    font-weight: 400;
+    font-size: 12px;
+    padding-left: 6px;
+}
+
 .admin-signup-form-input {
     padding: 14px;
     border: 1px solid var(--color-carbon);

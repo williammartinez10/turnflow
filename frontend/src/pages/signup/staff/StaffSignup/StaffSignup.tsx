@@ -2,6 +2,7 @@ import "./StaffSignup.css";
 import { useState, SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
+import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
 function StaffSignup() {
   const [error, setError] = useState("");
@@ -94,15 +95,12 @@ function StaffSignup() {
               required
             />
 
-            <label className="staff-signup-form-label" htmlFor="password">
-              Password
-            </label>
+            <label className="staff-signup-form-label" htmlFor="password">Password</label>
 
-            <input
+            <PasswordInput
               className="staff-signup-form-input"
               id="password"
               name="password"
-              type="password"
               placeholder="Enter your password"
               required
             />

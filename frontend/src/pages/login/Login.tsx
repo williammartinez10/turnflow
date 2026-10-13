@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
+import PasswordInput from "../../components/PasswordInput/PasswordInput";
 
 function Login() {
   const [error, setError] = useState("");
@@ -79,11 +80,10 @@ function Login() {
 
             <label className="login-form-label" htmlFor="password">Password</label>
 
-            <input
+            <PasswordInput
               className="login-form-input"
               id="password"
               name="password"
-              type="password"
               placeholder="Enter your password"
               required
             />

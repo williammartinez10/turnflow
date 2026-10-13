@@ -53,6 +53,17 @@
     font: inherit;
 }
 
+.login-form-label:has(
+    + input:required,
+    + .password-input-wrapper > input:required
+)::after {
+    content: " REQUIRED *";
+    color: #FF2C2C;
+    font-weight: 400;
+    font-size: 12px;
+    padding-left: 6px;
+}
+
 .login-form-button {
     margin-top: 12px;
     padding: 15px;

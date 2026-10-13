@@ -64,7 +64,7 @@ describe("CustomerQueueStatus", () => {
 
     expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
 
-    expect(screen.getByText(/Medicine/)).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
 
     expect(screen.getByText("<###>")).toBeInTheDocument();
 

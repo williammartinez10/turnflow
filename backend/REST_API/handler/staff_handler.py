@@ -3,6 +3,7 @@ from backend.REST_API.DAO.admin_DAO import adminDAO
 from fastapi import HTTPException
 from pwdlib import PasswordHash
 import re
+import unicodedata
 
 
 password_hash = PasswordHash.recommended()
@@ -28,6 +29,22 @@ class staffHandler:
 
     if re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", new_staff.email) is None:
       raise HTTPException(status_code=400, detail="Enter an email address such as name@example.com.")
+
+    password = new_staff.password
+    password_categories = [unicodedata.category(character) for character in password]
+
+    if (len(password) < 8 or 
+        "Lu" not in password_categories or 
+        "Nd" not in password_categories or 
+        not any(category.startswith(("P", "S"))for category in password_categories)
+    ):
+      raise HTTPException(
+        status_code=400,
+        detail=(
+          "Password must contain at least 8 characters, "
+          "an uppercase letter, a number, and a symbol."
+        )
+      )
     
     dao = staffDAO()
 

@@ -65,6 +65,18 @@
     font: inherit;
 }
 
+.admin-signup-form-hint {
+    display: none;
+    margin: -6px 0 0;
+    color: #245a81;
+    font-size: 14px;
+}
+
+.admin-signup-form-input:invalid:not(:placeholder-shown)
+    + .admin-signup-form-hint {
+    display: block;
+}
+
 .admin-signup-form-button {
      margin-top: 12px;
     padding: 15px;
@@ -78,10 +90,17 @@
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.admin-signup-form-button:hover {
+.admin-signup-form-button:hover:not(:disabled) {
     background: #e52e32;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);}
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.admin-signup-form-button:disabled {
+    background: #ccc;
+    color: #555;
+    cursor: not-allowed;
+}
 
 .admin-signup-form-button:focus-visible {
     outline: 3px solid var(--color-watermelon);

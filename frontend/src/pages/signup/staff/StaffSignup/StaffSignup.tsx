@@ -8,6 +8,18 @@ function StaffSignup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const[isFormValid, setIsFormValid] = useState(false);
+  
+  const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
+    const requiredInputs =
+      e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
+
+    setIsFormValid(
+      Array.from(requiredInputs).every(
+        (input) => input.value.trim() !== "" && input.validity.valid
+      )
+    );
+  };
 
   const handleSignup = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,6 +80,8 @@ function StaffSignup() {
           <form
             className="staff-signup-form"
             onSubmit={handleSignup}
+            onChange={updateFormValidity}
+            onFocusCapture={updateFormValidity}
           >
             <label className="staff-signup-form-label" htmlFor="full-name">
               Full Name
@@ -79,8 +93,15 @@ function StaffSignup() {
               name="full-name"
               type="text"
               placeholder="Enter your full name"
+              pattern={String.raw`\s*\S+(?:\s+\S+)+\s*`}
+              title="Enter at least two words for your full name."
               required
+              aria-describedby="full-name-hint"
             />
+
+            <p id="full-name-hint" className="staff-signup-form-hint">
+              Enter at least two words, for example:<br/> Firstname Lastname.
+            </p>
 
             <label className="staff-signup-form-label" htmlFor="email">
               Email
@@ -92,8 +113,15 @@ function StaffSignup() {
               name="email"
               type="email"
               placeholder="Enter your email"
+              pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
+              title="Enter an email address such as name@example.com."
+              aria-describedby="email-hint"
               required
             />
+
+            <p id="email-hint" className="staff-signup-form-hint">
+              Enter an email address such as name@example.com.
+            </p>
 
             <label className="staff-signup-form-label" htmlFor="password">Password</label>
 
@@ -117,7 +145,7 @@ function StaffSignup() {
             <button
               className="staff-signup-form-button"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid}
             >
               {isLoading ? "Creating Account..." : "Create Staff Account"}
             </button>

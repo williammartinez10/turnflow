@@ -9,6 +9,18 @@ function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  
+  const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
+    const requiredInputs =
+      e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
+    
+    setIsFormValid(
+      Array.from(requiredInputs).every(
+        (input) => input.value.trim() !== "" && input.validity.valid
+      )
+    );
+  };
 
   const handleLogin = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,6 +78,8 @@ function Login() {
           <form
             className="login-form"
             onSubmit={handleLogin}
+            onChange={updateFormValidity}
+            onFocusCapture={updateFormValidity}
           >
             <label className="login-form-label" htmlFor="email">Email</label>
 
@@ -74,9 +88,16 @@ function Login() {
               id="email"
               name="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="name@example.com"
+              pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
+              title="Enter an email address such as name@example.com."
+              aria-describedby="email-hint"
               required
             />
+
+            <p id="email-hint" className="login-form-hint">
+              Enter an email address such as name@example.com.
+            </p>
 
             <label className="login-form-label" htmlFor="password">Password</label>
 
@@ -98,7 +119,7 @@ function Login() {
             <button
               className="login-form-button"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid}
             >
               {isLoading ? "Logging In..." : "Log In"}
             </button>

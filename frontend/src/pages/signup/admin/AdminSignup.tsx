@@ -8,6 +8,18 @@ function AdminSignup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
+    const requiredInputs =
+      e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
+
+    setIsFormValid(
+      Array.from(requiredInputs).every(
+        (input) => input.value.trim() !== "" && input.validity.valid
+      )
+    );
+  };
 
   const handleSignup = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,6 +81,8 @@ function AdminSignup() {
           <form
             className="admin-signup-form"
             onSubmit={handleSignup}
+            onChange={updateFormValidity}
+            onFocusCapture={updateFormValidity}
           >
             <label className="admin-signup-form-label" htmlFor="full-name">
               Full Name
@@ -80,8 +94,15 @@ function AdminSignup() {
               name="full-name"
               type="text"
               placeholder="Enter your full name"
+              pattern={String.raw`\s*\S+(?:\s+\S+)+\s*`}
+              title="Enter at least two words for your full name."
               required
+              aria-describedby="full-name-hint"
             />
+
+            <p id="full-name-hint" className="admin-signup-form-hint">
+              Enter at least two words, for example: Firstname Lastname.
+            </p>
 
             <label className="admin-signup-form-label" htmlFor="email">
               Email
@@ -93,8 +114,15 @@ function AdminSignup() {
               name="email"
               type="email"
               placeholder="Enter your email"
+              pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
+              title="Enter an email address such as name@example.com."
+              aria-describedby="email-hint"
               required
             />
+
+            <p id="email-hint" className="admin-signup-form-hint">
+              Enter an email address such as name@example.com.
+            </p>
 
             <label className="admin-signup-form-label" htmlFor="password">
               Password
@@ -135,7 +163,7 @@ function AdminSignup() {
             <button
               className="admin-signup-form-button"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid}
             >
               {isLoading ? "Creating Account..." : "Create Admin Account"}
             </button>

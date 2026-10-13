@@ -121,4 +121,77 @@ describe("AdminSignup", () => {
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+
+  it("enables submission only when required fields are valid", () => {
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    const button = screen.getByRole("button", {name: "Create Admin Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "admin.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+
+    expect(button).toBeEnabled();
+
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "" },});
+
+    expect(button).toBeDisabled();
+  });
+
+
+  it("does not submit an email without a domain suffix", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "name@example" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    const button = screen.getByRole("button", {name: "Create Admin Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+
+  it.each([
+    "first.last+tag@example.com",
+    "person@university.edu",
+  ])("accepts %s as a valid email address", (email) => {
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: email },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    expect(screen.getByRole("button", { name: "Create Admin Account" })).toBeEnabled();
+  });
+
 });

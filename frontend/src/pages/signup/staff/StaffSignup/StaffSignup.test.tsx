@@ -120,4 +120,73 @@ describe("StaffSignup", () => {
     
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+
+  it("enables submission only when required fields are valid", () => {
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    const button = screen.getByRole("button", {name: "Create Staff Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "staff.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+
+    expect(button).toBeEnabled();
+
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "" },});
+
+    expect(button).toBeDisabled();
+  });
+
+
+  it("does not submit an email without a domain suffix", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "name@example" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    const button = screen.getByRole("button", {name: "Create Staff Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+
+  it.each([
+    "first.last+tag@example.com",
+    "person@university.edu",
+  ])("accepts %s as a valid email address", (email) => {
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: email },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    expect(screen.getByRole("button", { name: "Create Staff Account" })).toBeEnabled();
+  });
 });

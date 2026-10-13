@@ -123,8 +123,73 @@ describe("Login", () => {
     fireEvent.click(screen.getByRole("button", { name: "Log In" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password.");
-    
+
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
+
+  it("enables login only after the required fields are valid", () => {
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    const button = screen.getByRole("button", { name: "Log In" });
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "staff.test@example.com" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    expect(button).toBeEnabled();
+
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "" },});
+
+    expect(button).toBeDisabled();
+  });
+
+
+  it("does not submit an email without a domain suffix", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "name@example" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    const button = screen.getByRole("button", { name: "Log In" });
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+
+  it.each([
+    "first.last+tag@example.com",
+    "person@university.edu",
+  ])("accepts %s as a valid email address", (email) => {
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: email },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    expect(screen.getByRole("button", { name: "Log In" })).toBeEnabled();
+  });
+  
 });

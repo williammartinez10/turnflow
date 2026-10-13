@@ -130,6 +130,7 @@ function StaffSignup() {
               id="password"
               name="password"
               placeholder="Enter your password"
+              showRequirements
               required
             />
 

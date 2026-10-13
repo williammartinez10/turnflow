@@ -95,13 +95,13 @@ function AdminSignup() {
               type="text"
               placeholder="Enter your full name"
               pattern={String.raw`\s*\S+(?:\s+\S+)+\s*`}
-              title="Enter at least two words for your full name."
+              title="Enter your first and last name."
               required
               aria-describedby="full-name-hint"
             />
 
             <p id="full-name-hint" className="admin-signup-form-hint">
-              Enter at least two words, for example: Firstname Lastname.
+              Enter your first and last name.
             </p>
 
             <label className="admin-signup-form-label" htmlFor="email">

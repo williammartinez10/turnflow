@@ -2,6 +2,7 @@ from backend.REST_API.DAO.staff_DAO import staffDAO, Staff
 from backend.REST_API.DAO.admin_DAO import adminDAO
 from fastapi import HTTPException
 from pwdlib import PasswordHash
+import re
 
 
 password_hash = PasswordHash.recommended()
@@ -22,6 +23,12 @@ class staffHandler:
     if not new_staff.password.strip():
       raise HTTPException(status_code=400, detail="password is required")
 
+    if len(new_staff.full_name.split()) < 2:
+      raise HTTPException(status_code=400, detail="Enter your first and last name.")
+
+    if re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", new_staff.email) is None:
+      raise HTTPException(status_code=400, detail="Enter an email address such as name@example.com.")
+    
     dao = staffDAO()
 
     # Check both account types because they share the login form.

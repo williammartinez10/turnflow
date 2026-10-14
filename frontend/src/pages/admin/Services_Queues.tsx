@@ -5,6 +5,7 @@ import { useState } from "react";
 // Describes what information every Service object should contain
 type Service = {
     name: string;
+    description: string;
     active: boolean;
     estimatedDuration: number;
     currentWait: number;
@@ -24,11 +25,13 @@ function Services_Queues() {
     // Stores the service list and temporary values used when creating or editing a service
     const [showNewService, setShowNewService] = useState(false);
     const [newServiceName, setNewServiceName] = useState("");
+    const [newServiceDescription, setNewServiceDescription] = useState("");
     const [services, setServices] = useState<Service[]>([]);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editName, setEditName] = useState("");
     const [editActive, setEditActive] = useState(true);
     const [editDuration, setEditDuration] = useState(0);
+    const [editDescription, setEditDescription] = useState("");
 
     // Stores the queue list and temporary values used when creating or editing a queue
     const [showNewQueue, setShowNewQueue] = useState(false);
@@ -49,6 +52,7 @@ function Services_Queues() {
     // Clears the New Service form and closes it without creating anything
     function cancelNewService() {
         setNewServiceName("");
+        setNewServiceDescription("");
         setShowNewService(false);
     }
 
@@ -62,12 +66,14 @@ function Services_Queues() {
             ...services,
             {
                 name: newServiceName.trim(),
+                description: newServiceDescription.trim(),
                 active: true,
                 estimatedDuration: 0,
                 currentWait: 0,
             },
         ]);
         setNewServiceName("");
+        setNewServiceDescription("");
         setShowNewService(false);
     }
 
@@ -81,6 +87,7 @@ function Services_Queues() {
         updatedServices[editingIndex] = {
             ...updatedServices[editingIndex],
             name: editName.trim(),
+            description: editDescription.trim(),
             active: editActive,
             estimatedDuration: editDuration,
         };
@@ -88,6 +95,7 @@ function Services_Queues() {
         setServices(updatedServices);
         setEditingIndex(null);
         setEditName("");
+        setEditDescription("");
     }
 
     // Clears the New Queue form and closes it without creating a queue
@@ -182,7 +190,10 @@ function Services_Queues() {
                     <button
                         className="services-button"
                         type="button"
-                        onClick={() => setShowNewService(true)}
+                        onClick={() => {
+                            setEditingIndex(null);
+                            setShowNewService(true);
+                        }}
                     >
                         + New Service
                     </button>
@@ -199,108 +210,126 @@ function Services_Queues() {
                                 onChange={(e) => setNewServiceName(e.target.value)}
                                 placeholder="Enter service name"
                             />
-                            {/* Clears the form and closes it without creating a service */}
-                            <button
-                                type="button"
-                                onClick={cancelNewService}
-                            >
-                                Cancel
-                            </button>
 
-                            {/* Creates the service using the current form input */}
-                            <button
-                                type="button"
-                                onClick={createService}
-                            >
-                                Create
-                            </button>
+                            {/* Stores a short description for the new service */}
+                            <label htmlFor="service-description">Description</label>
+
+                            <input
+                                id="service-description"
+                                type="text"
+                                value={newServiceDescription}
+                                onChange={(e) => setNewServiceDescription(e.target.value)}
+                                placeholder="Enter service description"
+                            />
+
+                            {/* Keeps the Cancel and Create buttons together below the form */}
+                            <div className="services-form-actions">
+                                <button
+                                    type="button"
+                                    onClick={cancelNewService}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={createService}
+                                >
+                                    Create
+                                </button>
+                            </div>
+
                         </div>
                     )}
+
+                    {/* ===== Edit Service Form ===== */}
+                    {/* Shows only when a service has been selected for editing */}
+
+                    {editingIndex !== null && (
+                        <div className="services-edit-form-top">
+                            <h3>Edit Service</h3>
+
+                            {/* Lets the service name be changed */}
+                            <label>Service Name</label>
+                            <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                            />
+
+                            {/* Lets the service description be changed */}
+                            <label>Description</label>
+                            <input
+                                type="text"
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                            />
+
+                            {/* Shows which queues currently use this service */}
+                            <div className="service-used-queues">
+                                <p><strong>Used in Queues</strong></p>
+
+                                {queues
+                                    .filter((queue) =>
+                                        queue.services.includes(services[editingIndex].name)
+                                    )
+                                    .map((queue, index) => (
+                                        <p key={index}>{queue.name}</p>
+                                    ))}
+                            </div>
+
+                            <div className="services-form-actions">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingIndex(null)}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={saveEdit}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ===== End Edit Service Form ===== */}
+
                     {/* Displays all created services */}
                     <div className="services-list">
                         {/* Creates one row for each service stored in the services array */}
                         {services.map((service, index) => (
                             <div className="services-row" key={index}>
+                                {/* Shows the saved service information */}
+                                <div className="services-summary">
+                                    <span>{service.name}</span>
 
-                                {/* Shows edit controls for the selected service; otherwise shows its normal summary */}
-                                {editingIndex === index ? (
-                                    <div className="services-edit-form">
-                                        {/* Lets the selected service name be changed while editing */}
-                                        <label>
-                                            Name
-                                            <input
-                                                type="text"
-                                                value={editName}
-                                                onChange={(e) => setEditName(e.target.value)}
-                                            />
-                                        </label>
+                                    <span>
+                                        {service.active ? "Active" : "Inactive"}
+                                    </span>
 
-                                        {/* Changes whether this service is currently active or inactive */}
-                                        <label>
-                                            Status
-                                            <select
-                                                value={editActive ? "active" : "inactive"}
-                                                onChange={(e) =>
-                                                    setEditActive(e.target.value === "active")
-                                                }
-                                            >
-                                                <option value="active">Active</option>
-                                                <option value="inactive">Inactive</option>
-                                            </select>
-                                        </label>
+                                    <span>
+                                        Current Wait: {service.currentWait} min
+                                    </span>
+                                </div>
 
-                                        {/* Sets the expected service duration used later for wait-time calculations */}
-                                        <label>
-                                            Estimated Duration
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                value={editDuration}
-                                                onChange={(e) =>
-                                                    setEditDuration(Number(e.target.value))
-                                                }
-                                            />
-                                            <span> minutes</span>
-                                        </label>
-                                    </div>
-                                ) : (
-                                    // Shows the saved service information when this row is not being edited
-                                    <div className="services-summary">
-                                        <span>{service.name}</span>
-
-                                        <span>
-                                            {service.active ? "Active" : "Inactive"}
-                                        </span>
-
-                                        <span>
-                                            Current Wait: {service.currentWait} min
-                                        </span>
-
-                                    </div>
-                                )}
-                                {/*Save edits button*/}
-                                {editingIndex === index ? (
-                                    // Saves the temporary edit values back into the selected service
-                                    <button
-                                        type="button"
-                                        onClick={saveEdit}
-                                    >
-                                        Save
-                                    </button>
-                                ) : (
-                                    // Loads this service's current values into the edit fields
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditingIndex(index);
-                                            setEditName(service.name);
-                                            setEditActive(service.active);
-                                            setEditDuration(service.estimatedDuration);
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                )}
+                                {/* Loads this service's values into the Edit Service form above */}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowNewService(false);
+                                        setEditingIndex(index);
+                                        setEditName(service.name);
+                                        setEditDescription(service.description);
+                                        setEditActive(service.active);
+                                        setEditDuration(service.estimatedDuration);
+                                    }}
+                                >
+                                    Edit
+                                </button>
                             </div>
                         ))}
                     </div>

@@ -56,7 +56,7 @@
 .login-form-hint {
     display: none;
     margin: -6px 0 0;
-    color: #245a81;
+    color: var(--color-carbon);
     font-size: 14px;
 }
 

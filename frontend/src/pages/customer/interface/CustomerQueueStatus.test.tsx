@@ -3,6 +3,10 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import CustomerQueueStatus from "./CustomerQueueStatus";
 
+/**
+ * Checks the existing status-page layout, placeholder content, and ticket/queue
+ * details received through router state. These are UI tests, not live-update tests.
+ */
 describe("CustomerQueueStatus", () => {
   it("renders the Queue Status page", () => {
     render(

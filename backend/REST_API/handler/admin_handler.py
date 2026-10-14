@@ -11,6 +11,13 @@ password_hash = PasswordHash.recommended()
 
 class adminHandler:
   def add_admin2(self, new_admin: Admin):
+    """
+    Validate signup data and create an admin account with a password hash.
+    
+    Normalize the name and email, check required fields and signup formats,
+    enforce password rules, and reject emails registered under either role.
+    The original password value is hashed without trimming or normalizing it.
+    """
     new_admin.full_name = new_admin.full_name.strip()
     new_admin.email = new_admin.email.strip().lower()
     new_admin.organization_name = new_admin.organization_name.strip()
@@ -28,6 +35,7 @@ class adminHandler:
     if not new_admin.organization_name:
       raise HTTPException(status_code=400, detail="organization_name is required")
 
+    # Check for at least two name parts; this validates format, not identity.
     if len(new_admin.full_name.split()) < 2:
       raise HTTPException(status_code=400, detail="Enter your first and last name.")
 
@@ -35,6 +43,8 @@ class adminHandler:
       raise HTTPException(status_code=400, detail="Enter an email address such as name@example.com.")
 
     password = new_admin.password
+    # Match the frontend Unicode categories: Lu (uppercase), Nd (digit),
+    # and P/S (punctuation or symbol). Spaces do not satisfy the symbol rule.
     password_categories = [unicodedata.category(character) for character in password]
 
     if (len(password) < 8 or 
@@ -68,6 +78,12 @@ class adminHandler:
     return dao.add_admin3(new_admin, hashed_password)
 
   def get_admin2(self, email: str, password: str):
+    """
+    Verify credentials and return a admin account without its password hash.
+    
+    Return None when the account is absent or the password does not match.
+    The added role identifies the account for the login/session response.
+    """
     account = adminDAO().get_admin3(email.strip().lower())
 
     if account is None:

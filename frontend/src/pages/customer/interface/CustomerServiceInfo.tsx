@@ -2,6 +2,11 @@ import "./CustomerServiceInfo.css";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
+/**
+ * Displays the selected queue and service received through router state.
+ * Organization and location details currently use placeholders.
+ * Lets the customer continue to phone-number entry or return to queue selection.
+ */
 function CustomerServiceInfo() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +24,7 @@ function CustomerServiceInfo() {
     queueName: queueCode || "<Queue Name>",
   };
 
+  /** Preserves the selected queue and service while opening customer registration. */
   const handleJoinQueue = () => {
     navigate("/join-details", {
       state: {
@@ -29,6 +35,7 @@ function CustomerServiceInfo() {
     });
   };
 
+  /** Returns to queue selection before registration; no ticket is deleted. */
   const handleCancel = () => {
     navigate("/join-queue");
   };

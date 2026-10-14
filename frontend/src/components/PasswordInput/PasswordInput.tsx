@@ -3,10 +3,17 @@ import { useId, useState } from "react";
 import type { InputHTMLAttributes } from "react";
 import { Circle, CircleCheck, Eye, EyeOff } from "lucide-react";
 
+/** Native input properties plus an optional signup password checklist. */
 type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+  /** Enables the checklist and signup pattern; defaults to false for login. */
   showRequirements?: boolean;
 };
 
+/**
+ * Renders a password input with an accessible show/hide button.
+ * Optionally displays a live checklist and enforces the signup password pattern.
+ * Accepts native input props and forwards change events to the parent form.
+ */
 function PasswordInput({
   id,
   showRequirements = false,
@@ -19,8 +26,11 @@ function PasswordInput({
   );
   const requirementsId = useId();
 
+  // Read the supplied value for controlled inputs; otherwise track local typing.
   const currentPassword = inputProps.value !== undefined ? String(inputProps.value) : password;
 
+  // Count Unicode code points and use the same character categories as the backend.
+  // Punctuation and symbols qualify for the symbol rule; whitespace does not.
   const requirements = [
     {
       label: "At least 8 characters",
@@ -40,6 +50,7 @@ function PasswordInput({
     },
   ];
 
+  // Preserve existing help references and add this instance's unique checklist ID.
   const describedBy = [
     inputProps["aria-describedby"],
     showRequirements ? requirementsId : undefined,
@@ -60,6 +71,7 @@ function PasswordInput({
           aria-describedby={describedBy}
           onChange={(event) => {
             setPassword(event.currentTarget.value);
+            // Keep parent form validity checks and caller callbacks working.
             onChange?.(event);
           }}
         />

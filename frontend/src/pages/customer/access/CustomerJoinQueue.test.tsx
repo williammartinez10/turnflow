@@ -14,7 +14,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+/**
+ * Checks queue-code entry, matching-queue navigation, missing-queue errors,
+ * and the existing sample-data fallback using mocked backend responses.
+ */
 describe("CustomerJoinQueue", () => {
+  // Reset navigation mocks and any shared setup before each independent case.
   beforeEach(() => {
     mockNavigate.mockClear();
 
@@ -32,6 +37,7 @@ describe("CustomerJoinQueue", () => {
       })
     );
   });
+  // Restore fetch and other stubbed globals so they do not affect later tests.
   afterEach(() => { vi.unstubAllGlobals(); });
 
 

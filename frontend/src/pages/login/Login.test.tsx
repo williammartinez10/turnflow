@@ -3,7 +3,13 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Login from "./Login";
 
+/**
+ * Checks login fields, signup links, request feedback, and submit-button validation.
+ * Mocked fetch responses verify the credential payload and cookie request option
+ * without contacting the backend.
+ */
 describe("Login", () => {
+  // Restore globals such as fetch so request mocks do not leak between tests.
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -176,6 +182,7 @@ describe("Login", () => {
   });
 
 
+  // Email validation permits plus tags, dots, and suffixes other than .com.
   it.each([
     "first.last+tag@example.com",
     "person@university.edu",

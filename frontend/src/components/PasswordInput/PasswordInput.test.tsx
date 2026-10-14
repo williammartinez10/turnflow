@@ -2,6 +2,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import PasswordInput from "./PasswordInput";
 
+/**
+ * Checks password visibility, form-submit prevention, live checklist feedback,
+ * and native signup validity. Also verifies that signup rules are optional for login.
+ */
 describe("PasswordInput", () => {
   it("shows and hides the password without changing its value", () => {
     render(
@@ -93,6 +97,7 @@ describe("PasswordInput", () => {
   });
 
 
+  // Test each missing rule separately, including whitespace as a non-symbol.
   it.each([
     ["fewer than eight characters", "Ab1!"],
     ["no uppercase letter", "abcdef1!"],

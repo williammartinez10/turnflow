@@ -4,12 +4,22 @@ import { Link } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
+/**
+ * Displays staff signup with required name, email, and password inputs.
+ * Applies browser validation and presents account-creation feedback from the backend.
+ */
 function StaffSignup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const[isFormValid, setIsFormValid] = useState(false);
   
+  /**
+   * Updates submit-button availability from all required inputs, including PasswordInput.
+   * Each value must contain non-whitespace text and satisfy native browser constraints.
+   *
+   * @param e - A change or focus event within the form.
+   */
   const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
     const requiredInputs =
       e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
@@ -21,6 +31,12 @@ function StaffSignup() {
     );
   };
 
+  /**
+   * Sends the signup fields using the backend request names and displays the result.
+   * Account creation shows a login link; it does not sign the user in automatically.
+   *
+   * @param e - The staff signup form submission event.
+   */
   const handleSignup = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -38,6 +54,7 @@ function StaffSignup() {
         headers: {
           "Content-Type": "application/json",
         },
+        // Map the form input names to the fields expected by the signup API.
         body: JSON.stringify({
           full_name: formData.get("full-name"),
           email: formData.get("email"),

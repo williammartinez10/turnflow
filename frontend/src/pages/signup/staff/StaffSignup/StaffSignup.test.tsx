@@ -3,7 +3,12 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StaffSignup from "./StaffSignup";
 
+/**
+ * Checks required staff signup fields, name/email/password validation,
+ * registration requests, and duplicate-email feedback using mocked fetch responses.
+ */
 describe("StaffSignup", () => {
+  // Restore globals such as fetch so request mocks do not leak between tests.
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -173,6 +178,7 @@ describe("StaffSignup", () => {
   });
 
 
+  // Email validation permits plus tags, dots, and suffixes other than .com.
   it.each([
     "first.last+tag@example.com",
     "person@university.edu",
@@ -191,6 +197,7 @@ describe("StaffSignup", () => {
   });
 
 
+  // An invalid password must block the request, not merely change button styling.
   it("blocks signup until password requirements are met", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

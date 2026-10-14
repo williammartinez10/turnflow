@@ -5,12 +5,22 @@ import { Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 
+/**
+ * Displays the shared Staff/Admin login form and submits credentials to the backend.
+ * Shows request feedback and enables submission when required inputs are valid.
+ */
 function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   
+  /**
+   * Updates submit-button availability from all required inputs, including PasswordInput.
+   * Each value must contain non-whitespace text and satisfy native browser constraints.
+   *
+   * @param e - A change or focus event within the form.
+   */
   const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
     const requiredInputs =
       e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
@@ -22,6 +32,12 @@ function Login() {
     );
   };
 
+  /**
+   * Requests cookie-based sign-in and displays the backend result or a connection error.
+   * Clears previous feedback and restores the loading state after every request.
+   *
+   * @param e - The login form submission event.
+   */
   const handleLogin = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -36,6 +52,7 @@ function Login() {
     try {
       const response = await fetch(`${apiBaseUrl}/auth/login`, {
         method: "POST",
+        // Allow the browser to send and accept the backend session cookie.
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +105,7 @@ function Login() {
               id="email"
               name="email"
               type="email"
-              placeholder="name@example.com"
+              placeholder="Enter your email"
               pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
               title="Enter an email address such as name@example.com."
               aria-describedby="email-hint"

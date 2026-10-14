@@ -2,9 +2,19 @@ import "./CustomerFindTicket.css";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
+/**
+ * Displays the returning-customer ticket-number form.
+ * Ticket retrieval is pending; the current submit handler opens the status page.
+ */
 function CustomerFindTicket() {
   const navigate = useNavigate();
 
+  /**
+   * Prevents a browser form reload and opens the current status-page prototype.
+   * Reading the entered number and verifying an active ticket remain to be added.
+   *
+   * @param e - The ticket-number form submission event.
+   */
   const handleFindTicket = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 

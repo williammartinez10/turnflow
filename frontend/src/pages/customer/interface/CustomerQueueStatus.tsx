@@ -1,18 +1,27 @@
 import "./CustomerQueueStatus.css";
 import { Clock3, Info, Ticket } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
+/**
+ * Displays ticket, queue, and service details received from the joining flow.
+ * Position, people ahead, now serving, and wait estimates currently use placeholders.
+ * The screen does not yet poll the backend or send notifications.
+ */
 function CustomerQueueStatus() {
+  const location = useLocation();
 
-  // TODO Later: Replace this placeholder with ticket number returned by backend after successfully joining queue.
-  const ticketNumber = "<###>";
+  // Ticket and queue information passed from CustomerJoinDetails.
+  const ticketNumber = location.state?.ticketNumber || "<###>";
+  const queueCode = location.state?.queueCode || "<Queue Name>";
+  const service = location.state?.service;
 
-  // TODO Later: Replace this placeholder data with the customer's active queue info returned by backend.
+  // TODO Later: Retrieve live queue status information from the backend.
   const queueStatus = {
     organizationName: "<Organization Name>",
     location: "<Location>",
-    serviceName: "<Service Name>",
-    queueName: "<Queue Name>",
+    serviceName: service || "<Service Name>",
+    queueName: queueCode,
     position: "<Position>",
     nowServing: "<###>",
     peopleAhead: "<Count>",

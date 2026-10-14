@@ -45,12 +45,36 @@
     font-weight: 700;
 }
 
+.staff-signup-form-label:has(
+    + input:required,
+    + .password-input-wrapper > input:required
+)::after {
+    content: " REQUIRED *";
+    color: #FF2C2C;
+    font-weight: 400;
+    font-size: 12px;
+    padding-left: 6px;
+}
+
 .staff-signup-form-input {
     padding: 14px;
     border: 1px solid var(--color-carbon);
     border-radius: 8px;
     background: white;
     font: inherit;
+}
+
+.staff-signup-form-hint {
+    display: none;
+    margin: -6px 0 0;
+    color: var(--color-carbon);
+    font-size: 14px;
+    padding-left: 15px;
+}
+
+.staff-signup-form-input:invalid:not(:placeholder-shown)
+    + .staff-signup-form-hint {
+    display: block;
 }
 
 .staff-signup-form-button {
@@ -66,10 +90,16 @@
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.staff-signup-form-button:hover {
+.staff-signup-form-button:hover:not(:disabled) {
     background: #e52e32;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.staff-signup-form-button:disabled {
+    background: #ccc;
+    color: #555;
+    cursor: not-allowed;
 }
 
 .staff-signup-form-button:focus-visible {

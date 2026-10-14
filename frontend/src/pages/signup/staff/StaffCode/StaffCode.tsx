@@ -3,6 +3,11 @@ import { ClockCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 
+/**
+ * Displays the organization invitation-code step before staff signup.
+ * The input is currently optional for demonstrating the frontend flow.
+ * Backend invitation validation and organization linking remain pending.
+ */
 function StaffCode() {
   const navigate = useNavigate();
 
@@ -21,6 +26,8 @@ function StaffCode() {
           <form
             className="staff-code-form"
             onSubmit={(e) => {
+              // Prevent a page reload and continue to the staff account form.
+              // The entered code is not yet validated or passed to the next page.
               e.preventDefault();
               navigate("/signup/staff");
             }}
@@ -34,13 +41,7 @@ function StaffCode() {
               id="invitation-code"
               type="text"
               placeholder="Enter your invitation code"
-            //  For now, the invitation code isn't required to be filled in, 
-            //  but once the backend is implemented/added, you would likely 
-            //  want to validate this input and make it required. For now, we
-            //  can leave it as optional, to be able to showcase the flow of
-            //  the website.
-            
-            //    required
+              // TODO: Require and validate the invitation code when integrated.
             />
 
             <button className="staff-code-form-button" type="submit">

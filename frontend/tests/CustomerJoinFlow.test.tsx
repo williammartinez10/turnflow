@@ -3,7 +3,13 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "../src/App";
 
+/**
+ * Exercises the frontend journey from queue-code entry to registration, ticket
+ * confirmation, and queue status through App routes. Queue lookup and registration
+ * responses are mocked, so this does not contact a live API or database.
+ */
 describe("Customer joining flow", () => {
+  // Restore fetch and other stubbed globals so they do not affect later tests.
   afterEach(() => {
     vi.unstubAllGlobals();
   });

@@ -14,7 +14,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+/**
+ * Checks phone formatting, registration, confirmation, and navigation through the
+ * joining flow. Mocked fetch responses cover confirmed and demo-ticket outcomes.
+ */
 describe("CustomerJoinDetails", () => {
+  // Reset navigation mocks and any shared setup before each independent case.
   beforeEach(() => {
     mockNavigate.mockClear();
 
@@ -27,6 +32,7 @@ describe("CustomerJoinDetails", () => {
     );
   });
 
+  // Restore fetch and other stubbed globals so they do not affect later tests.
   afterEach(() => {
     vi.unstubAllGlobals();
   });

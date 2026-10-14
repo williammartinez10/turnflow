@@ -2,6 +2,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import QueueConfirmationModal from "./QueueConfirmationModal";
 
+/**
+ * Checks the confirmation dialog, the supplied ticket number, and invocation
+ * of the parent's callback when the customer selects View Queue Status.
+ */
 describe("QueueConfirmationModal", () => {
   it("renders the confirmation modal", () => {
     const mockViewStatus = vi.fn();

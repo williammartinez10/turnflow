@@ -14,7 +14,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+/**
+ * Checks service-information content and navigation with the selected queue/service
+ * preserved in router state. Navigation mocks also verify the Cancel destination.
+ */
 describe("CustomerServiceInfo", () => {
+  // Reset navigation mocks and any shared setup before each independent case.
   beforeEach(() => {
     mockNavigate.mockClear();
   });

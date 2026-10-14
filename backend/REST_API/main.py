@@ -34,7 +34,11 @@ app = FastAPI()
 # Create backend/.env containing SESSION_SECRET_KEY=<random key>.
 # Generate a key: python3 -c "import secrets; print(secrets.token_hex(32))"
 # Start the backend with --env-file backend/.env to load it.
-# Like for example: uvicorn backend.REST_API.main:app --reload --env-file backend/.env
+# Example: uvicorn backend.REST_API.main:app --reload --env-file backend/.env
+
+# Store the verified account in a signed session cookie.
+# The browser sends this cookie with later requests to identify the account.
+# The cookie has a maximum age of 30 minutes.
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.environ["SESSION_SECRET_KEY"],
@@ -43,6 +47,7 @@ app.add_middleware(
     https_only=False,  # Local HTTP development.
 )
 
+# Permit local frontend origins to make cookie-based authentication requests.
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -55,6 +60,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 ################################################ REST API ####################################################################
 
 @app.post("/database/customer/add_customer")
@@ -89,13 +95,16 @@ async def delete_queue1(queue_code: str, status_code=201):
 
 @app.post("/database/admin/add_admin", status_code=201)
 def add_admin1(new_admin: Admin, status_code=201):
+    """ Register an admin using signup validation and password hashing in handler. """
     return adminHandler().add_admin2(new_admin)
 
+# Credential verification uses POST; get-prefixed routes retrieve data.
 @app.post("/database/admin/verify_admin", status_code=201)
 def verify_admin1(
     email: str = Body(...),
     password: str = Body(...), status_code=201
 ):
+    """ Verify admin credentials and return safe account details without creating a session. """
     account = adminHandler().get_admin2(email, password)
 
     if account is None:
@@ -112,6 +121,7 @@ def delete_admin1(new_admin: Admin, status_code=201):
 
 @app.post("/database/staff/add_staff", status_code=201)
 def add_staff1(new_Staff: Staff, status_code=201):
+    """ Register a staff account using signup validation and password hashing in handler. """
     return staffHandler().add_staff2(new_Staff)
 
 @app.post("/database/staff/verify_staff", status_code=201)
@@ -119,6 +129,7 @@ def verify_staff1(
     email: str = Body(...),
     password: str = Body(...), status_code=201
 ):
+    """ Verify staff credentials and return safe account details without creating a session. """
     account = staffHandler().get_staff2(email, password)
 
     if account is None:
@@ -152,7 +163,9 @@ async def delete_staff_privilege_staff1(staff_privilege: str, status_code=201):
     return staff_privilegeHandler().delete_staff_privilege_staff2(
         staff_privilege
     )
-################################################ LOG IN / OUT ####################################################################
+
+
+######################################### LOG IN / OUT #########################################
 
 @app.post("/auth/login")
 def login1(
@@ -160,6 +173,12 @@ def login1(
     email: str = Body(...),
     password: str = Body(...),
 ):
+    """
+    Authenticate an admin or staff member and save the account in a signed session cookie.
+
+    Replace prior session data after successful verification and return account
+    details without the password hash. Reject invalid credentials with HTTP 401.
+    """
     account = adminHandler().get_admin2(email, password)
 
     if account is None:
@@ -171,7 +190,7 @@ def login1(
             detail="Invalid email or password."
         )
 
-    # Remember the verified account for later requests.
+    # Replace previous session data with the verified account.
     request.session.clear()
     request.session["account"] = account
     return account
@@ -179,6 +198,7 @@ def login1(
 
 @app.get("/auth/get_current_account")
 def get_current_account1(request: Request):
+    """ Return the account remembered in the session, or HTTP 401 when it is absent. """
     account = request.session.get("account")
 
     if account is None:
@@ -191,5 +211,6 @@ def get_current_account1(request: Request):
 
 @app.post("/auth/logout")
 def logout1(request: Request):
+    """ Clear this browser session and confirm logout. """
     request.session.clear()
     return {"message": "Logged out."}

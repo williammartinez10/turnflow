@@ -5,6 +5,11 @@ import type { ChangeEvent, SyntheticEvent } from "react";
 import Header from "../../../components/Header/Header";
 import QueueConfirmationModal from "../../../components/QueueConfirmation/QueueConfirmationModal";
 
+/**
+ * Collects a customer phone number and registers it in the selected queue.
+ * Displays the backend-generated ticket, or a clearly marked demo ticket on failure.
+ * Passes ticket, queue, and service details to the status page after confirmation.
+ */
 function CustomerJoinDetails() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,6 +25,13 @@ function CustomerJoinDetails() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
 
+  /**
+   * Keeps at most ten digits and progressively formats the displayed phone number.
+   * This prepares the input for the separate ten-digit submission check.
+   *
+   * @param value - The current input text, including any separators.
+   * @returns The formatted display value, or an empty string when no digits remain.
+   */
   const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, "").slice(0, 10);
 
@@ -38,10 +50,18 @@ function CustomerJoinDetails() {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   };
 
+  /** Updates the controlled input with the formatted value as the customer types. */
   const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(formatPhoneNumber(e.target.value));
   };
 
+  /**
+   * Checks the phone length and queue selection, then requests customer registration.
+   * Converts the display value to the backend's XXX-XXX-XXXX phone-number format.
+   * Uses the returned ticket ID on success; failures open a demo confirmation.
+   *
+   * @param e - The customer registration form submission event.
+   */
   const handleContinue = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -104,6 +124,7 @@ function CustomerJoinDetails() {
     setIsLoading(false);
   };
 
+  /** Opens queue status with the ticket, queue code, and selected service. */
   const handleViewStatus = () => {
     navigate("/queue-status", {
       state: {
@@ -114,6 +135,7 @@ function CustomerJoinDetails() {
     });
   };
 
+  /** Returns to service information with the selection preserved in router state. */
   const handleCancel = () => {
     navigate("/service-information", {
       state: location.state,

@@ -2,12 +2,41 @@ import "./AdminSignup.css";
 import { useState, SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../../components/Header/Header";
+import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 
+/**
+ * Displays admin signup with name, email, password, and organization-name inputs.
+ * Applies browser validation and presents account-creation feedback from the backend.
+ */
 function AdminSignup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
 
+  /**
+   * Updates submit-button availability from all required inputs, including PasswordInput.
+   * Each value must contain non-whitespace text and satisfy native browser constraints.
+   *
+   * @param e - A change or focus event within the form.
+   */
+  const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
+    const requiredInputs =
+      e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
+
+    setIsFormValid(
+      Array.from(requiredInputs).every(
+        (input) => input.value.trim() !== "" && input.validity.valid
+      )
+    );
+  };
+
+  /**
+   * Sends the signup fields using the backend request names and displays the result.
+   * Account creation shows a login link; it does not sign the user in automatically.
+   *
+   * @param e - The admin signup form submission event.
+   */
   const handleSignup = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -25,6 +54,7 @@ function AdminSignup() {
         headers: {
           "Content-Type": "application/json",
         },
+        // Map the form input names to the fields expected by the signup API.
         body: JSON.stringify({
           full_name: formData.get("full-name"),
           email: formData.get("email"),
@@ -68,6 +98,8 @@ function AdminSignup() {
           <form
             className="admin-signup-form"
             onSubmit={handleSignup}
+            onChange={updateFormValidity}
+            onFocusCapture={updateFormValidity}
           >
             <label className="admin-signup-form-label" htmlFor="full-name">
               Full Name
@@ -79,8 +111,15 @@ function AdminSignup() {
               name="full-name"
               type="text"
               placeholder="Enter your full name"
+              pattern={String.raw`\s*\S+(?:\s+\S+)+\s*`}
+              title="Enter your first and last name."
               required
+              aria-describedby="full-name-hint"
             />
+
+            <p id="full-name-hint" className="admin-signup-form-hint">
+              Enter your first and last name.
+            </p>
 
             <label className="admin-signup-form-label" htmlFor="email">
               Email
@@ -92,19 +131,26 @@ function AdminSignup() {
               name="email"
               type="email"
               placeholder="Enter your email"
+              pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
+              title="Enter an email address such as name@example.com."
+              aria-describedby="email-hint"
               required
             />
+
+            <p id="email-hint" className="admin-signup-form-hint">
+              Enter an email address such as name@example.com.
+            </p>
 
             <label className="admin-signup-form-label" htmlFor="password">
               Password
             </label>
 
-            <input
+            <PasswordInput
               className="admin-signup-form-input"
               id="password"
               name="password"
-              type="password"
               placeholder="Enter your password"
+              showRequirements
               required
             />
 
@@ -135,7 +181,7 @@ function AdminSignup() {
             <button
               className="admin-signup-form-button"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid}
             >
               {isLoading ? "Creating Account..." : "Create Admin Account"}
             </button>

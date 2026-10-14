@@ -14,7 +14,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+/**
+ * Checks ticket-form rendering, its required input, typing, and current navigation.
+ * Navigation is mocked; these tests do not verify that a ticket exists in the database.
+ */
 describe("CustomerFindTicket", () => {
+  // Reset navigation mocks and any shared setup before each independent case.
   beforeEach(() => {
     mockNavigate.mockClear();
   });

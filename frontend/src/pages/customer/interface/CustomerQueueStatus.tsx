@@ -3,6 +3,11 @@ import { Clock3, Info, Ticket } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
+/**
+ * Displays ticket, queue, and service details received from the joining flow.
+ * Position, people ahead, now serving, and wait estimates currently use placeholders.
+ * The screen does not yet poll the backend or send notifications.
+ */
 function CustomerQueueStatus() {
   const location = useLocation();
 

@@ -3,7 +3,12 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StaffSignup from "./StaffSignup";
 
+/**
+ * Checks required staff signup fields, name/email/password validation,
+ * registration requests, and duplicate-email feedback using mocked fetch responses.
+ */
 describe("StaffSignup", () => {
+  // Restore globals such as fetch so request mocks do not leak between tests.
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -119,5 +124,107 @@ describe("StaffSignup", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Email is already registered.");
     
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+
+  it("enables submission only when required fields are valid", () => {
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    const button = screen.getByRole("button", {name: "Create Staff Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "staff.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+
+    expect(button).toBeEnabled();
+
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "" },});
+
+    expect(button).toBeDisabled();
+  });
+
+
+  it("does not submit an email without a domain suffix", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "name@example" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    const button = screen.getByRole("button", {name: "Create Staff Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+
+  // Email validation permits plus tags, dots, and suffixes other than .com.
+  it.each([
+    "first.last+tag@example.com",
+    "person@university.edu",
+  ])("accepts %s as a valid email address", (email) => {
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: email },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+
+    expect(screen.getByRole("button", { name: "Create Staff Account" })).toBeEnabled();
+  });
+
+
+  // An invalid password must block the request, not merely change button styling.
+  it("blocks signup until password requirements are met", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "staff.test@example.com" },});
+
+    const passwordInput = screen.getByLabelText("Password");
+    const button = screen.getByRole("button", {name: "Create Staff Account",});
+
+    // Missing an uppercase letter.
+    fireEvent.change(passwordInput, {target: { value: "abcdef1!" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    // Now all password requirements are met.
+    fireEvent.change(passwordInput, {target: { value: "abcDef1!" },});
+
+    expect(button).toBeEnabled();
   });
 });

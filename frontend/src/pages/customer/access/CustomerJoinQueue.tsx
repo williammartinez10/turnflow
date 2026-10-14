@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { SyntheticEvent } from "react";
 import Header from "../../../components/Header/Header";
 
+/** Queue fields returned by the backend and passed through the joining flow. */
 interface Queue {
   queue_id: number;
   service: string;
@@ -18,6 +19,11 @@ const mockQueues: Queue[] = [
   { queue_id: 2, service: "Lawyer", queue_code: "DEF-678-90" },
 ];
 
+/**
+ * Lets a customer find a queue by code and review its service before joining.
+ * Requests the queue list from the backend, with a sample-data fallback for demos.
+ * Also provides access to ticket lookup and the future QR-scanning shortcut.
+ */
 function CustomerJoinQueue() {
   const navigate = useNavigate();
 
@@ -25,6 +31,13 @@ function CustomerJoinQueue() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Finds the entered code in the retrieved queue list without case sensitivity.
+   * Passes the queue ID, code, and service to the next page, or shows a lookup error.
+   * Backend failures use the existing sample queue list for frontend demonstration.
+   *
+   * @param e - The queue-code form submission event.
+   */
   const handleFindQueue = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -73,6 +86,7 @@ function CustomerJoinQueue() {
   };
 
   
+  /** Placeholder for the QR shortcut; currently logs a message without scanning. */
   const handleQrCode = () => {
 
     // TODO Later: (For future milestones)

@@ -3,7 +3,12 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AdminSignup from "./AdminSignup";
 
+/**
+ * Checks required admin signup fields, name/email/password validation,
+ * registration requests, and duplicate-email feedback using mocked fetch responses.
+ */
 describe("AdminSignup", () => {
+  // Restore globals such as fetch so request mocks do not leak between tests.
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -120,5 +125,112 @@ describe("AdminSignup", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Email is already registered.");
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+
+  it("enables submission only when required fields are valid", () => {
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    const button = screen.getByRole("button", {name: "Create Admin Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "admin.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+
+    expect(button).toBeEnabled();
+
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "" },});
+
+    expect(button).toBeDisabled();
+  });
+
+
+  it("does not submit an email without a domain suffix", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "name@example" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    const button = screen.getByRole("button", {name: "Create Admin Account",});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+
+  // Email validation permits plus tags, dots, and suffixes other than .com.
+  it.each([
+    "first.last+tag@example.com",
+    "person@university.edu",
+  ])("accepts %s as a valid email address", (email) => {
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: email },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    expect(screen.getByRole("button", { name: "Create Admin Account" })).toBeEnabled();
+  });
+
+
+  // An invalid password must block the request, not merely change button styling.
+  it("blocks signup until password requirements are met", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "admin.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    const passwordInput = screen.getByLabelText("Password");
+    const button = screen.getByRole("button", {name: "Create Admin Account",
+    });
+
+    // Missing an uppercase letter.
+    fireEvent.change(passwordInput, {target: { value: "abcdef1!" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    // Now all password requirements are met.
+    fireEvent.change(passwordInput, {target: { value: "abcDef1!" },});
+
+    expect(button).toBeEnabled();
   });
 });

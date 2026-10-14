@@ -20,7 +20,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 
 install docker
-write docker run --name TurnFlow2 -e POSTGRES_PASSWORD=Medical@ffice20 -e POSTGRES_USER=dbuser -e PGDATA=/var/lib/postgresql/data --volume some-postgres:/var/lib/postgresql -p 8982:5432 -e POSTGRES_DB=TurnFlow_Database2 -d postgres:17 into terminal
+write docker run --name TurnFlow -e POSTGRES_PASSWORD=Medical@ffice20 -e POSTGRES_USER=dbuser -e PGDATA=/var/lib/postgresql/data --volume some-postgres:/var/lib/postgresql -p 8982:5432 -e POSTGRES_DB=TurnFlow_Database -d postgres:17 into terminal
 run turnflow/backend/ETL/Initialize_Tables.py in coderunne (like vscode)
 ```
 

@@ -3,6 +3,10 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Home from "./Home";
 
+/**
+ * Checks the landing page's branding, customer entry button, and login link.
+ * MemoryRouter supplies the router context required by Home's links and navigation.
+ */
 describe("Home", () => {
   it("renders the TurnFlow branding", () => {
     render(

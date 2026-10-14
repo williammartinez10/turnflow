@@ -53,6 +53,29 @@
     font: inherit;
 }
 
+.login-form-hint {
+    display: none;
+    margin: -6px 0 0;
+    color: var(--color-carbon);
+    font-size: 14px;
+}
+
+.login-form-input:invalid:not(:placeholder-shown)
+    + .login-form-hint {
+    display: block;
+}
+
+.login-form-label:has(
+    + input:required,
+    + .password-input-wrapper > input:required
+)::after {
+    content: " REQUIRED *";
+    color: #FF2C2C;
+    font-weight: 400;
+    font-size: 12px;
+    padding-left: 6px;
+}
+
 .login-form-button {
     margin-top: 12px;
     padding: 15px;
@@ -66,10 +89,16 @@
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.login-form-button:hover {
+.login-form-button:hover:not(:disabled) {
     background: #e52e32;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.login-form-button:disabled {
+    background: #ccc;
+    color: #555;
+    cursor: not-allowed;
 }
 
 .login-form-button:focus-visible {

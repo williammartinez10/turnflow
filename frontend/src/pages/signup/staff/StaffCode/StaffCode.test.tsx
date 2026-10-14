@@ -3,6 +3,10 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import StaffCode from "./StaffCode";
 
+/**
+ * Checks the invitation-code field, Continue button, and navigation to staff signup.
+ * These tests cover the current frontend flow, not backend invitation validation.
+ */
 describe("StaffCode", () => {
   it("renders the invitation code field", () => {
     render(
@@ -28,6 +32,7 @@ describe("StaffCode", () => {
     ).toBeInTheDocument();
   });
 
+  // A simple destination page verifies routing without rendering the signup form.
   it("navigates to staff signup when continue is pressed", () => {
     render(
       <MemoryRouter initialEntries={["/signup/staff/staff_code"]}>

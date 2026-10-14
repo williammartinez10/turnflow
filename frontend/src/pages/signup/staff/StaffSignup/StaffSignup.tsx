@@ -1,9 +1,87 @@
 import "./StaffSignup.css";
-import { ClockCheck } from "lucide-react";
+import { useState, SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
+import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
+/**
+ * Displays staff signup with required name, email, and password inputs.
+ * Applies browser validation and presents account-creation feedback from the backend.
+ */
 function StaffSignup() {
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const[isFormValid, setIsFormValid] = useState(false);
+  
+  /**
+   * Updates submit-button availability from all required inputs, including PasswordInput.
+   * Each value must contain non-whitespace text and satisfy native browser constraints.
+   *
+   * @param e - A change or focus event within the form.
+   */
+  const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
+    const requiredInputs =
+      e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
+
+    setIsFormValid(
+      Array.from(requiredInputs).every(
+        (input) => input.value.trim() !== "" && input.validity.valid
+      )
+    );
+  };
+
+  /**
+   * Sends the signup fields using the backend request names and displays the result.
+   * Account creation shows a login link; it does not sign the user in automatically.
+   *
+   * @param e - The staff signup form submission event.
+   */
+  const handleSignup = async (e: SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/database/staff/add_staff`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Map the form input names to the fields expected by the signup API.
+        body: JSON.stringify({
+          full_name: formData.get("full-name"),
+          email: formData.get("email"),
+          password: formData.get("password"),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(
+          typeof data.detail === "string"
+            ? data.detail
+            : "Could not create the account."
+        );
+        return;
+      }
+
+      setSuccess("Staff account created successfully.");
+    } catch {
+      setError("Could not create the account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="staff-signup-page">
       <Header />
@@ -18,7 +96,9 @@ function StaffSignup() {
 
           <form
             className="staff-signup-form"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={handleSignup}
+            onChange={updateFormValidity}
+            onFocusCapture={updateFormValidity}
           >
             <label className="staff-signup-form-label" htmlFor="full-name">
               Full Name
@@ -27,10 +107,18 @@ function StaffSignup() {
             <input
               className="staff-signup-form-input"
               id="full-name"
+              name="full-name"
               type="text"
               placeholder="Enter your full name"
+              pattern={String.raw`\s*\S+(?:\s+\S+)+\s*`}
+              title="Enter your first and last name."
               required
+              aria-describedby="full-name-hint"
             />
+
+            <p id="full-name-hint" className="staff-signup-form-hint">
+              Enter your first and last name.
+            </p>
 
             <label className="staff-signup-form-label" htmlFor="email">
               Email
@@ -39,25 +127,45 @@ function StaffSignup() {
             <input
               className="staff-signup-form-input"
               id="email"
+              name="email"
               type="email"
               placeholder="Enter your email"
+              pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
+              title="Enter an email address such as name@example.com."
+              aria-describedby="email-hint"
               required
             />
 
-            <label className="staff-signup-form-label" htmlFor="password">
-              Password
-            </label>
+            <p id="email-hint" className="staff-signup-form-hint">
+              Enter an email address such as name@example.com.
+            </p>
 
-            <input
+            <label className="staff-signup-form-label" htmlFor="password">Password</label>
+
+            <PasswordInput
               className="staff-signup-form-input"
               id="password"
-              type="password"
+              name="password"
               placeholder="Enter your password"
+              showRequirements
               required
             />
 
-            <button className="staff-signup-form-button" type="submit">
-              Create Staff Account
+            {error && <p role="alert">{error}</p>}
+            {success && (
+              <p role="status" style={{ color: "#008000", textAlign: "center" }}>
+                {success} <Link to="/login" style={{ color: "#000000" }}>
+                  Log In
+                </Link>
+              </p>
+            )}
+
+            <button
+              className="staff-signup-form-button"
+              type="submit"
+              disabled={isLoading || !isFormValid}
+            >
+              {isLoading ? "Creating Account..." : "Create Staff Account"}
             </button>
           </form>
         </div>

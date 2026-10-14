@@ -1,24 +1,41 @@
 import "./CustomerServiceInfo.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
+/**
+ * Displays the selected queue and service received through router state.
+ * Organization and location details currently use placeholders.
+ * Lets the customer continue to phone-number entry or return to queue selection.
+ */
 function CustomerServiceInfo() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // TODO Later: Replace this placeholder data with service and queue info returned by backend.
+  // Queue information passed from CustomerJoinQueue.
+  const queueCode = location.state?.queueCode;
+  const queueId = location.state?.queueId;
+  const service = location.state?.service;
+
+  // TODO Later: Replace remaining placeholders with information from the backend.
   const serviceInfo = {
     organizationName: "<Organization Name>",
     location: "<Location>",
-    serviceName: "<Service Name>",
-    queueName: "<Queue Name>",
+    serviceName: service || "<Service Name>",
+    queueName: queueCode || "<Queue Name>",
   };
 
+  /** Preserves the selected queue and service while opening customer registration. */
   const handleJoinQueue = () => {
-    
-    // TODO Later: Pass selected service and queue info to the Customer Join Details page.
-    navigate("/join-details");
+    navigate("/join-details", {
+      state: {
+        queueCode,
+        queueId,
+        service,
+      },
+    });
   };
 
+  /** Returns to queue selection before registration; no ticket is deleted. */
   const handleCancel = () => {
     navigate("/join-queue");
   };

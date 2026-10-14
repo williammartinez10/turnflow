@@ -1,9 +1,87 @@
 import "./Login.css";
-import { ClockCheck } from "lucide-react";
+import { useState } from "react";
+import type { SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
+import PasswordInput from "../../components/PasswordInput/PasswordInput";
 
+/**
+ * Displays the shared Staff/Admin login form and submits credentials to the backend.
+ * Shows request feedback and enables submission when required inputs are valid.
+ */
 function Login() {
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  
+  /**
+   * Updates submit-button availability from all required inputs, including PasswordInput.
+   * Each value must contain non-whitespace text and satisfy native browser constraints.
+   *
+   * @param e - A change or focus event within the form.
+   */
+  const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
+    const requiredInputs =
+      e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
+    
+    setIsFormValid(
+      Array.from(requiredInputs).every(
+        (input) => input.value.trim() !== "" && input.validity.valid
+      )
+    );
+  };
+
+  /**
+   * Requests cookie-based sign-in and displays the backend result or a connection error.
+   * Clears previous feedback and restores the loading state after every request.
+   *
+   * @param e - The login form submission event.
+   */
+  const handleLogin = async (e: SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/login`, {
+        method: "POST",
+        // Allow the browser to send and accept the backend session cookie.
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.get("email"),
+          password: formData.get("password"),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(
+          typeof data.detail === "string"
+            ? data.detail
+            : "Could not log in."
+        );
+        return;
+      }
+
+      setSuccess("Logged in successfully.");
+    } catch {
+      setError("Could not complete login. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="login-page">
       <Header />
@@ -16,29 +94,52 @@ function Login() {
 
           <form
             className="login-form"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={handleLogin}
+            onChange={updateFormValidity}
+            onFocusCapture={updateFormValidity}
           >
             <label className="login-form-label" htmlFor="email">Email</label>
 
             <input
               className="login-form-input"
               id="email"
+              name="email"
               type="email"
               placeholder="Enter your email"
+              pattern={String.raw`[^@\s]+@[^@\s]+\.[^@\s]+`}
+              title="Enter an email address such as name@example.com."
+              aria-describedby="email-hint"
               required
             />
 
+            <p id="email-hint" className="login-form-hint">
+              Enter an email address such as name@example.com.
+            </p>
+
             <label className="login-form-label" htmlFor="password">Password</label>
 
-            <input
+            <PasswordInput
               className="login-form-input"
               id="password"
-              type="password"
+              name="password"
               placeholder="Enter your password"
               required
             />
 
-            <button className="login-form-button" type="submit">Log In</button>
+            {error && <p role="alert" style={{ textAlign: "center", color: "#FF2C2C" }}>
+              {error}
+            </p>}
+            {success && <p role="status" style={{ textAlign: "center", color: "#008000" }}>
+              {success}
+            </p>}
+
+            <button
+              className="login-form-button"
+              type="submit"
+              disabled={isLoading || !isFormValid}
+            >
+              {isLoading ? "Logging In..." : "Log In"}
+            </button>
           </form>
 
           <p className="login-signup-label">Don't have an account?</p>

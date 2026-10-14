@@ -1,10 +1,39 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "../src/App";
 
+/**
+ * Exercises the frontend journey from queue-code entry to registration, ticket
+ * confirmation, and queue status through App routes. Queue lookup and registration
+ * responses are mocked, so this does not contact a live API or database.
+ */
 describe("Customer joining flow", () => {
-  it("allows a customer to join a queue and view their queue status", () => {
+  // Restore fetch and other stubbed globals so they do not affect later tests.
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("allows a customer to join a queue and receive a ticket, and view queue status", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => [
+            {
+              queue_id: 1,
+              queue_code: "ABC-123-45",
+              service: "Medicine",
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ ticket_id: 1 }),
+        })
+    );
+
     render(
       <MemoryRouter initialEntries={["/join-queue"]}>
         <App />
@@ -18,7 +47,8 @@ describe("Customer joining flow", () => {
 
 
     // Service Information
-    expect(screen.getByRole("heading", { name: "Service Information" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Service Information" })).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
 
 
@@ -29,13 +59,15 @@ describe("Customer joining flow", () => {
 
 
     // Confirmation
-    expect(screen.getByRole("heading", { name: "You're in the queue!", })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "View Queue Status", }));
+    expect(await screen.findByRole("heading", { name: "You're in the queue!" })).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "View Queue Status" }));
 
 
     // Queue Status
     expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
+    expect(screen.getByText(/Medicine/)).toBeInTheDocument();
     expect(screen.getByText("Waiting")).toBeInTheDocument();
-    
   });
 });

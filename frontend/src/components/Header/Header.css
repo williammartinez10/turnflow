@@ -2,6 +2,10 @@
 /* ============= Header ============= */
 
 .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--color-neutral);
     padding: 28px 6%;
     border-bottom: 1px solid #dddddd;
 }

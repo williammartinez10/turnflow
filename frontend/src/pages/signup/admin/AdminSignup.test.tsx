@@ -194,4 +194,36 @@ describe("AdminSignup", () => {
     expect(screen.getByRole("button", { name: "Create Admin Account" })).toBeEnabled();
   });
 
+
+  it("blocks signup until password requirements are met", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <AdminSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Admin" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "admin.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: "TurnFlow Test" },});
+
+    const passwordInput = screen.getByLabelText("Password");
+    const button = screen.getByRole("button", {name: "Create Admin Account",
+    });
+
+    // Missing an uppercase letter.
+    fireEvent.change(passwordInput, {target: { value: "abcdef1!" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    // Now all password requirements are met.
+    fireEvent.change(passwordInput, {target: { value: "abcDef1!" },});
+
+    expect(button).toBeEnabled();
+  });
 });

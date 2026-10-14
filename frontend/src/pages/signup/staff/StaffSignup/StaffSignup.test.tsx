@@ -189,4 +189,35 @@ describe("StaffSignup", () => {
 
     expect(screen.getByRole("button", { name: "Create Staff Account" })).toBeEnabled();
   });
+
+
+  it("blocks signup until password requirements are met", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MemoryRouter>
+        <StaffSignup />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Full Name"), {target: { value: "Test Staff" },});
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "staff.test@example.com" },});
+
+    const passwordInput = screen.getByLabelText("Password");
+    const button = screen.getByRole("button", {name: "Create Staff Account",});
+
+    // Missing an uppercase letter.
+    fireEvent.change(passwordInput, {target: { value: "abcdef1!" },});
+
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    // Now all password requirements are met.
+    fireEvent.change(passwordInput, {target: { value: "abcDef1!" },});
+
+    expect(button).toBeEnabled();
+  });
 });

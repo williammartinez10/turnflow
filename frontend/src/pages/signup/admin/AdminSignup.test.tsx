@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AdminSignup from "./AdminSignup";
 
 /**
  * Checks required admin signup fields, name/email/password validation,
- * registration requests, and duplicate-email feedback using mocked fetch responses.
+ * registration, automatic login, and duplicate-email feedback.
  */
 describe("AdminSignup", () => {
   // Restore globals such as fetch so request mocks do not leak between tests.
@@ -51,7 +51,7 @@ describe("AdminSignup", () => {
   });
 
 
-  it("submits the signup fields and shows successful registration", async () => {
+  it("submits the signup fields, signs in, and opens the dashboard", async () => {
     const signupData = {
       full_name: "William Test",
       email: "admin.test@example.com",
@@ -59,17 +59,28 @@ describe("AdminSignup", () => {
       organization_name: "TurnFlow Test",
     };
 
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 201,
-      json: async () => ({ admin_id: 1 }),
-    });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => ({ admin_id: 1 }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+      });
 
     vi.stubGlobal("fetch", fetchMock);
 
     render(
-      <MemoryRouter>
-        <AdminSignup />
+      <MemoryRouter initialEntries={["/signup/admin"]}>
+        <Routes>
+          <Route path="/signup/admin" element={<AdminSignup />} />
+          <Route
+            path="/admin/AdminDashboard"
+            element={<h1>Admin Dashboard</h1>}
+          />
+        </Routes>
       </MemoryRouter>
     );
 
@@ -79,11 +90,12 @@ describe("AdminSignup", () => {
     fireEvent.change(screen.getByLabelText("Organization Name"), {target: { value: signupData.organization_name },});
     fireEvent.click(screen.getByRole("button", { name: "Create Admin Account" }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Admin account created successfully.");
+    expect(await screen.findByRole("heading", { name: "Admin Dashboard" })).toBeInTheDocument();
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
       expect.stringMatching(/\/database\/admin\/add_admin$/),
       expect.objectContaining({
         method: "POST",
@@ -95,6 +107,19 @@ describe("AdminSignup", () => {
 
     const requestOptions = fetchMock.mock.calls[0][1];
     expect(JSON.parse(requestOptions.body)).toEqual(signupData);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/\/auth\/login$/),
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          email: signupData.email,
+          password: signupData.password,
+        }),
+      })
+    );
   });
 
 

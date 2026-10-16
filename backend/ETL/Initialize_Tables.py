@@ -33,7 +33,8 @@ ticket_id serial PRIMARY KEY,
 phone_number TEXT,
 queue_id integer,
 FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
-time TIMESTAMPTZ
+time TIMESTAMPTZ,
+status TEXT NOT NULL DEFAULT 'waiting'
 );
 
 CREATE TABLE user_log(

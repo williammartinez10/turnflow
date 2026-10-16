@@ -13,12 +13,14 @@ class Customer(BaseModel):
   phone_number: Optional[str] = None
   queue_code: Optional[str] = None
   time: Optional[datetime.datetime | str] = None
+  status: Optional[str] = None
 
 class customerDAO:
   def __init__(self):
       self.pool = SimpleConnectionPool(
           POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
       )
+  
   def add_customer3(self, new_customer: Customer):
       queue_id = queueDAO().get_withcode_queue3(new_customer.queue_code)
       conn = self.pool.getconn()
@@ -27,18 +29,43 @@ class customerDAO:
       INSERT INTO customer
       (phone_number, queue_id, time)
       VALUES (%s, %s, NOW())
-      RETURNING ticket_id, time
+      RETURNING ticket_id, time, status
       """
       #set up query to make call to database
       cur.execute(query, (new_customer.phone_number, queue_id))
       cashe = cur.fetchone()
       new_customer.ticket_id = cashe[0]
       new_customer.time = cashe[1]
+      new_customer.status = cashe[2]
       conn.commit()
       cur.close()
       self.pool.putconn(conn)
       #store and return entry just created in database
       return new_customer
+
+  def get_ticket3(self, queue_code: str, ticket_number: int):
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      SELECT customer.ticket_id AS ticket_number,
+      queue.queue_code,
+      queue.service,
+      customer.status
+      FROM customer
+      JOIN queue ON customer.queue_id = queue.queue_id
+      WHERE queue.queue_code = %s
+      AND customer.ticket_id = %s
+      """
+      #set up query to make call to database
+      cur.execute(query, (queue_code, ticket_number))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      if cashe == None:
+          raise HTTPException(status_code=404, detail="ticket missing")
+      return dict(cashe)
+      #return the matching ticket without customer contact information
 
   def list_customers3(self, queue_code: str):
       queue_id = queueDAO().get_withcode_queue3(queue_code)
@@ -87,6 +114,6 @@ class customerDAO:
       self.pool.putconn(conn)
       if cashe == None:
          raise HTTPException(status_code=404, detail="queue missing or empty")
-      retired_customer = Customer(ticket_id=cashe[0], phone_number=cashe[1], queue_code=queue_code, time=cashe[3])
+      retired_customer = Customer(ticket_id=cashe[0], phone_number=cashe[1], queue_code=queue_code, time=cashe[3], status=cashe["status"])
       return retired_customer
       #return list of customers from the specified queue, unless it's empty in which case an error is returned

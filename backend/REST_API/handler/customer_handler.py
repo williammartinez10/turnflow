@@ -19,6 +19,9 @@ class customerHandler:
       raise HTTPException(status_code=401, detail="invalid phone number")
     return customerDAO().add_customer3(new_customer)
 
+  def get_ticket2(self, queue_code: str, ticket_number: int):
+      return customerDAO().get_ticket3(queue_code, ticket_number)
+
   def list_customers2(self, queue_code: str):
       return customerDAO().list_customers3(queue_code)
 

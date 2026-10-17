@@ -29,7 +29,8 @@ service TEXT
 );
 
 CREATE TABLE customer(
-ticket_id serial PRIMARY KEY,
+customer_id serial PRIMARY KEY,
+ticket_id integer,
 phone_number TEXT,
 queue_id integer,
 FOREIGN KEY (queue_id) REFERENCES queue(queue_id),

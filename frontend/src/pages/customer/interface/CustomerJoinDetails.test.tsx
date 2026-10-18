@@ -27,7 +27,7 @@ describe("CustomerJoinDetails", () => {
       "fetch",
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ ticket_id: 1 }),
+        json: async () => ({ ticket_id: 1, status: "waiting" }),
       })
     );
   });
@@ -185,6 +185,7 @@ describe("CustomerJoinDetails", () => {
         queueCode: "ABC-123-45",
         ticketNumber: "1",
         service: "medicine",
+        status: "waiting",
       },
     });
   });

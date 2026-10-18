@@ -4,29 +4,56 @@ import { useLocation } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
 /**
- * Displays ticket, queue, and service details received from the joining flow.
+ * Displays ticket, queue, service, and status details received from registration or lookup.
  * Position, people ahead, now serving, and wait estimates currently use placeholders.
  * The screen does not yet poll the backend or send notifications.
  */
 function CustomerQueueStatus() {
   const location = useLocation();
 
-  // Ticket and queue information passed from CustomerJoinDetails.
+  // Ticket and queue information passed from registration or ticket lookup.
   const ticketNumber = location.state?.ticketNumber || "<###>";
   const queueCode = location.state?.queueCode || "<Queue Name>";
   const service = location.state?.service;
 
-  // TODO Later: Retrieve live queue status information from the backend.
+  // Display the stored status without inferring it from missing ticket data.
+  const statuses: Record<string, { title: string; description: string }> = {
+    waiting: {
+      title: "Waiting",
+      description: "You're currently waiting in the queue.",
+    },
+    called: {
+      title: "It's Your Turn",
+      description: "Please proceed to the service area.",
+    },
+    completed: {
+      title: "Completed",
+      description: "Your service has been completed.",
+    },
+    skipped: {
+      title: "Skipped",
+      description: "Your ticket was skipped. Please check with Staff.",
+    },
+    no_show: {
+      title: "No Show",
+      description: "Staff marked you as absent. Please check with Staff.",
+    },
+  };
+
+  const currentStatus = statuses[location.state?.status] || {
+    title: "Status Unavailable",
+    description: "Look up your ticket again to retrieve its current status.",
+  };
+
+  // TODO Later: Retrieve position and wait-time information from the backend.
   const queueStatus = {
     organizationName: "<Organization Name>",
-    location: "<Location>",
     serviceName: service || "<Service Name>",
     queueName: queueCode,
     position: "<Position>",
     nowServing: "<###>",
     peopleAhead: "<Count>",
     estimatedWait: "<Time>",
-    status: "waiting",
   };
 
   return (
@@ -44,10 +71,6 @@ function CustomerQueueStatus() {
 
             <p className="customer-queue-status-organization">
               {queueStatus.organizationName}
-            </p>
-
-            <p className="customer-queue-status-location">
-              {queueStatus.location}
             </p>
 
             <p className="customer-queue-status-service">
@@ -121,11 +144,9 @@ function CustomerQueueStatus() {
             </div>
 
             <div className="customer-queue-current-status-text">
-              <h2>Waiting</h2>
+              <h2>{currentStatus.title}</h2>
 
-              <p>
-                You're currently waiting in the queue. We'll let you know when your turn is approaching.
-              </p>
+              <p>{currentStatus.description}</p>
             </div>
           </div>
 
@@ -133,8 +154,8 @@ function CustomerQueueStatus() {
             <Info size={18} strokeWidth={2} />
 
             <p>
-              <span>Queue status updates automatically.</span>{" "}
-              You'll be notified when your turn is approaching.
+              Status reflects the last ticket lookup or registration.
+              {" "}Look up your ticket again for an updated status.
             </p>
           </div>
         </section>

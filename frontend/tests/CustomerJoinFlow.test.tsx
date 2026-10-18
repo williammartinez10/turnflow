@@ -30,7 +30,7 @@ describe("Customer joining flow", () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ ticket_id: 1 }),
+          json: async () => ({ ticket_id: 1, status: "waiting" }),
         })
     );
 

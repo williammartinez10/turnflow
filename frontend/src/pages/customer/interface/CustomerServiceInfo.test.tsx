@@ -33,15 +33,10 @@ describe("CustomerServiceInfo", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Service Information" })).toBeInTheDocument();
-
     expect(screen.getByRole("heading", { name: "Organization" })).toBeInTheDocument();
-
     expect(screen.getByRole("heading", { name: "Service" })).toBeInTheDocument();
-
     expect(screen.getByRole("heading", { name: "Queue" })).toBeInTheDocument();
-
     expect(screen.getByRole("button", { name: "Join Queue" })).toBeInTheDocument();
-
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
@@ -54,11 +49,7 @@ describe("CustomerServiceInfo", () => {
     );
 
     expect(screen.getByText("<Organization Name>")).toBeInTheDocument();
-
-    expect(screen.getByText("<Location>")).toBeInTheDocument();
-
     expect(screen.getByText("<Service Name>")).toBeInTheDocument();
-
     expect(screen.getByText("<Queue Name>")).toBeInTheDocument();
   });
 

@@ -4,7 +4,7 @@ import Header from "../../../components/Header/Header";
 
 /**
  * Displays the selected queue and service received through router state.
- * Organization and location details currently use placeholders.
+ * Organization details currently use a placeholder.
  * Lets the customer continue to phone-number entry or return to queue selection.
  */
 function CustomerServiceInfo() {
@@ -19,7 +19,6 @@ function CustomerServiceInfo() {
   // TODO Later: Replace remaining placeholders with information from the backend.
   const serviceInfo = {
     organizationName: "<Organization Name>",
-    location: "<Location>",
     serviceName: service || "<Service Name>",
     queueName: queueCode || "<Queue Name>",
   };
@@ -56,10 +55,6 @@ function CustomerServiceInfo() {
 
               <p className="customer-service-info-primary">
                 {serviceInfo.organizationName}
-              </p>
-
-              <p className="customer-service-info-secondary">
-                {serviceInfo.location}
               </p>
             </section>
 

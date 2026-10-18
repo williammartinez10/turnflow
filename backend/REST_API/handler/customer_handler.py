@@ -1,4 +1,5 @@
 from backend.REST_API.DAO.customer_DAO import customerDAO, Customer
+from backend.REST_API.DAO.queue_DAO import queueDAO
 from fastapi import HTTPException
 
 class customerHandler:
@@ -8,6 +9,7 @@ class customerHandler:
       raise HTTPException(status_code=401, detail="phone_number is required")
     if not new_customer.queue_code:
       raise HTTPException(status_code=401, detail="queue_code is required")
+    queueDAO().get_withcode_queue3(new_customer.queue_code)
     
     if len(new_customer.phone_number) < 12 or len(new_customer.phone_number) > 12:
       raise HTTPException(status_code=401, detail="invalid phone number")

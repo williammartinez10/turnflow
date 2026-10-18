@@ -57,9 +57,11 @@ class customerDAO:
       SELECT customer.ticket_id AS ticket_number,
       queue.queue_code,
       queue.service,
-      customer.status
+      customer.status,
+      admin.organization_name
       FROM customer
       JOIN queue ON customer.queue_id = queue.queue_id
+      LEFT JOIN admin ON queue.admin_id = admin.admin_id
       WHERE queue.queue_code = %s
       AND customer.ticket_id = %s
       """

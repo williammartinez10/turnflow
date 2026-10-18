@@ -81,8 +81,11 @@ async def pop_customer(queue_code: str, status_code=201):
 
 
 @app.post("/database/queue/add_queue")
-async def add_queue1(new_queue: Queue, status_code=201):
-    return queueHandler().add_queue2(new_queue)
+async def add_queue1(new_queue: Queue, request: Request, status_code=201):
+    return queueHandler().add_queue2(
+        new_queue,
+        request.session.get("account")
+    )
 
 @app.get("/database/queue/get_queue_list")
 async def get_queue_list1(status_code=201):

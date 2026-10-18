@@ -38,7 +38,7 @@ describe("CustomerFindTicket", () => {
     expect(screen.getByRole("heading", { name: "Find My Ticket" })).toBeInTheDocument();
     expect(screen.getByLabelText("Queue Code")).toBeInTheDocument();
     expect(screen.getByLabelText("Ticket Number")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "View Queue Status", })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View Queue Status" })).toBeInTheDocument();
   });
 
 
@@ -61,7 +61,7 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Ticket Number"),{target: { value: "123456" },});
+    fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "123456" },});
 
     expect(screen.getByLabelText("Ticket Number")).toHaveValue("123456");
   });
@@ -77,6 +77,7 @@ describe("CustomerFindTicket", () => {
           queue_code: "ABC-123-45",
           service: "Medicine",
           status: "waiting",
+          organization_name: "William's Org",
         }),
       })
     );
@@ -87,9 +88,8 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Queue Code"),{target: { value: "ABC-123-45" },});
-    fireEvent.change(screen.getByLabelText("Ticket Number"),{target: { value: "123456" },});
-
+    fireEvent.change(screen.getByLabelText("Queue Code"), {target: { value: "ABC-123-45" },});
+    fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "123456" },});
     fireEvent.click(screen.getByRole("button", {name: "View Queue Status",}));
 
     await screen.findByRole("button", { name: "View Queue Status" });
@@ -100,6 +100,7 @@ describe("CustomerFindTicket", () => {
         queueCode: "ABC-123-45",
         service: "Medicine",
         status: "waiting",
+        organizationName: "William's Org",
       },
     });
   });
@@ -120,14 +121,11 @@ describe("CustomerFindTicket", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Queue Code"),{target: { value: "ABC-123-45" },});
-    fireEvent.change(screen.getByLabelText("Ticket Number"),{target: { value: "123456" },});
-
+    fireEvent.change(screen.getByLabelText("Queue Code"), {target: { value: "ABC-123-45" },});
+    fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "123456" },});
     fireEvent.click(screen.getByRole("button", {name: "View Queue Status",}));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Ticket not found. Check your queue code and ticket number."
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Ticket not found. Check your queue code and ticket number.");
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });

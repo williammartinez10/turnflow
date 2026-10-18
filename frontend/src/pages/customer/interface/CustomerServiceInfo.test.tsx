@@ -15,8 +15,9 @@ vi.mock("react-router-dom", async () => {
 });
 
 /**
- * Checks service-information content and navigation with the selected queue/service
- * preserved in router state. Navigation mocks also verify the Cancel destination.
+ * Checks service-information content and navigation with the selected queue,
+ * service, and organization preserved in router state.
+ * Navigation mocks also verify the Cancel destination.
  */
 describe("CustomerServiceInfo", () => {
   // Reset navigation mocks and any shared setup before each independent case.
@@ -41,7 +42,7 @@ describe("CustomerServiceInfo", () => {
   });
 
 
-  it("displays the service and queue information", () => {
+  it("displays placeholders when service and queue information is missing", () => {
     render(
       <MemoryRouter>
         <CustomerServiceInfo />
@@ -64,6 +65,7 @@ describe("CustomerServiceInfo", () => {
               queueCode: "ABC-123-45",
               queueId: 1,
               service: "Medicine",
+              organizationName: "William's Org",
             },
           },
         ]}
@@ -73,6 +75,8 @@ describe("CustomerServiceInfo", () => {
     );
 
     expect(screen.getByText("Medicine")).toBeInTheDocument();
+    expect(screen.getByText("ABC-123-45")).toBeInTheDocument();
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
 
@@ -81,6 +85,7 @@ describe("CustomerServiceInfo", () => {
         queueCode: "ABC-123-45",
         queueId: 1,
         service: "Medicine",
+        organizationName: "William's Org",
       },
     });
   });

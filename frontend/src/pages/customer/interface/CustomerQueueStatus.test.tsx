@@ -4,8 +4,9 @@ import { describe, expect, it } from "vitest";
 import CustomerQueueStatus from "./CustomerQueueStatus";
 
 /**
- * Checks the existing status-page layout, placeholder content, and ticket/queue
- * details received through router state. These are UI tests, not live-update tests.
+ * Checks the existing status-page layout, placeholder content, and ticket, queue,
+ * and organization details received through router state.
+ * These are UI tests, not live-update tests.
  */
 describe("CustomerQueueStatus", () => {
   it("renders the Queue Status page", () => {
@@ -24,7 +25,7 @@ describe("CustomerQueueStatus", () => {
   });
 
 
-  it("displays the queue information", () => {
+  it("displays placeholders when queue information is missing", () => {
     render(
       <MemoryRouter>
         <CustomerQueueStatus />
@@ -48,6 +49,7 @@ describe("CustomerQueueStatus", () => {
               queueCode: "ABC-123-45",
               service: "Medicine",
               status: "waiting",
+              organizationName: "William's Org",
             },
           },
         ]}
@@ -59,6 +61,7 @@ describe("CustomerQueueStatus", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
     expect(screen.getByText("Medicine")).toBeInTheDocument();
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
     expect(screen.getByText("<###>")).toBeInTheDocument();
     expect(screen.getByText("<Position>")).toBeInTheDocument();
     expect(screen.getByText("<Count>")).toBeInTheDocument();

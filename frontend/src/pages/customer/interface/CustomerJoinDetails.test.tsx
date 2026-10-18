@@ -45,11 +45,8 @@ describe("CustomerJoinDetails", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Join Queue" })).toBeInTheDocument();
-
     expect(screen.getByLabelText("Phone Number")).toBeInTheDocument();
-
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
-
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
@@ -102,15 +99,12 @@ describe("CustomerJoinDetails", () => {
     );
 
     fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
-
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(await screen.findByRole("dialog", { name: "Demo ticket" })).toBeInTheDocument();
 
     expect(screen.getByText("1")).toBeInTheDocument();
-
     expect(screen.getByText("For demonstration only. Registration was not confirmed.")).toBeInTheDocument();
-
     expect(screen.queryByRole("heading", { name: "You're in the queue!" })).not.toBeInTheDocument();
   });
 
@@ -130,13 +124,11 @@ describe("CustomerJoinDetails", () => {
     );
 
     fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
-
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
 
     expect(screen.getByRole("heading", { name: "You're in the queue!" })).toBeInTheDocument();
-
     expect(screen.getByText("1")).toBeInTheDocument();
   });
 
@@ -149,7 +141,6 @@ describe("CustomerJoinDetails", () => {
     );
 
     fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "787123" },});
-
     fireEvent.submit(screen.getByLabelText("Phone Number").closest("form")!);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -166,6 +157,7 @@ describe("CustomerJoinDetails", () => {
               queueCode: "ABC-123-45",
               queueId: 1,
               service: "medicine",
+              organizationName: "William's Org",
             },
           },
         ]}
@@ -186,6 +178,7 @@ describe("CustomerJoinDetails", () => {
         ticketNumber: "1",
         service: "medicine",
         status: "waiting",
+        organizationName: "William's Org",
       },
     });
   });

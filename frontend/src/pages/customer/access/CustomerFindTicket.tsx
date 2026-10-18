@@ -67,6 +67,7 @@ function CustomerFindTicket() {
           queueCode: ticket.queue_code,
           service: ticket.service,
           status: ticket.status,
+          organizationName: ticket.organization_name,
         },
       });
     } catch {

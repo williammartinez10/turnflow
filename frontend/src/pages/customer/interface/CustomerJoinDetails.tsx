@@ -8,7 +8,7 @@ import QueueConfirmationModal from "../../../components/QueueConfirmation/QueueC
 /**
  * Collects a customer phone number and registers it in the selected queue.
  * Displays the backend-generated ticket, or a clearly marked demo ticket on failure.
- * Passes ticket, queue, service, and status details to the status page after confirmation.
+ * Passes ticket, queue, service, organization, and status details to the status page.
  */
 function CustomerJoinDetails() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function CustomerJoinDetails() {
   // Queue information passed from the previous page.
   const queueCode = location.state?.queueCode;
   const service = location.state?.service;
+  const organizationName = location.state?.organizationName;
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -127,7 +128,7 @@ function CustomerJoinDetails() {
     setIsLoading(false);
   };
 
-  /** Opens queue status with the ticket, queue code, service, and stored status. */
+  /** Opens queue status with the ticket, queue, service, organization, and status. */
   const handleViewStatus = () => {
     navigate("/queue-status", {
       state: {
@@ -135,6 +136,7 @@ function CustomerJoinDetails() {
         ticketNumber,
         service,
         status: ticketStatus,
+        organizationName,
       },
     });
   };

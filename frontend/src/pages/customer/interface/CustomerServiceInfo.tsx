@@ -4,7 +4,7 @@ import Header from "../../../components/Header/Header";
 
 /**
  * Displays the selected queue and service received through router state.
- * Organization details currently use a placeholder.
+ * Displays the organization name when provided by the backend.
  * Lets the customer continue to phone-number entry or return to queue selection.
  */
 function CustomerServiceInfo() {
@@ -15,21 +15,23 @@ function CustomerServiceInfo() {
   const queueCode = location.state?.queueCode;
   const queueId = location.state?.queueId;
   const service = location.state?.service;
+  const organizationName = location.state?.organizationName;
 
-  // TODO Later: Replace remaining placeholders with information from the backend.
+  // Use backend information when available, with placeholders for missing details.
   const serviceInfo = {
-    organizationName: "<Organization Name>",
+    organizationName: organizationName || "<Organization Name>",
     serviceName: service || "<Service Name>",
     queueName: queueCode || "<Queue Name>",
   };
 
-  /** Preserves the selected queue and service while opening customer registration. */
+  /** Preserves the queue, service, and organization while opening registration. */
   const handleJoinQueue = () => {
     navigate("/join-details", {
       state: {
         queueCode,
         queueId,
         service,
+        organizationName,
       },
     });
   };

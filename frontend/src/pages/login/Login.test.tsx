@@ -3,6 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Login from "./Login";
 
+// Header behavior is covered separately in Header.test.tsx.
+vi.mock("../../components/Header/Header", () => ({
+  default: () => null,
+}));
+
+
 /**
  * Checks login fields, signup links, request feedback, and submit-button validation.
  * Mocked fetch responses verify credentials, cookie requests, and Admin navigation.

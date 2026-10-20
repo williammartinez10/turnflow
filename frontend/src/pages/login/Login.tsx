@@ -74,7 +74,9 @@ function Login() {
         );
         return;
       }
-      
+
+      window.dispatchEvent(new Event("session-changed"));
+
       if (data.role === "admin") {
         navigate("/admin/AdminDashboard", { replace: true });
         return;

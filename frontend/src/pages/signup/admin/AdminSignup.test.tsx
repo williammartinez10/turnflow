@@ -3,6 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AdminSignup from "./AdminSignup";
 
+// Header behavior is covered separately in Header.test.tsx.
+vi.mock("../../../components/Header/Header", () => ({
+  default: () => null,
+}));
+
+
 /**
  * Checks required admin signup fields, name/email/password validation,
  * registration, automatic login, and duplicate-email feedback.

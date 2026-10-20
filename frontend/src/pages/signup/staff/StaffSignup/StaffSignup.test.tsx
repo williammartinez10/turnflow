@@ -3,6 +3,12 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StaffSignup from "./StaffSignup";
 
+// Header behavior is covered separately in Header.test.tsx.
+vi.mock("../../../../components/Header/Header", () => ({
+  default: () => null,
+}));
+
+
 /**
  * Checks required staff signup fields, name/email/password validation,
  * registration requests, and duplicate-email feedback using mocked fetch responses.

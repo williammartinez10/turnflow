@@ -39,6 +39,11 @@ time TIMESTAMPTZ,
 status TEXT NOT NULL DEFAULT 'waiting'
 );
 
+-- Allow only one active ticket per phone number in each queue.
+CREATE UNIQUE INDEX customer_unique_active_phone_per_queue
+ON customer (queue_id, phone_number)
+WHERE status IN ('waiting', 'called', 'skipped');
+
 CREATE TABLE user_log(
 log_id serial PRIMARY KEY,
 phone_number TEXT,

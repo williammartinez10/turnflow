@@ -94,6 +94,12 @@
     font-size: 13px;
 }
 
+/* Keep the error message and its following link close together. */
+.customer-join-details-form > p[role="alert"],
+.customer-join-details-form > p[role="alert"] + p {
+    margin: 0;
+}
+
 
 /* ============= Actions ============= */
 

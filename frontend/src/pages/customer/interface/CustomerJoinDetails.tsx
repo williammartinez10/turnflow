@@ -1,6 +1,6 @@
 import "./CustomerJoinDetails.css";
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import Header from "../../../components/Header/Header";
 import QueueConfirmationModal from "../../../components/QueueConfirmation/QueueConfirmationModal";
@@ -8,6 +8,7 @@ import QueueConfirmationModal from "../../../components/QueueConfirmation/QueueC
 /**
  * Collects a customer phone number and registers it in the selected queue.
  * Displays the backend-generated ticket, or a clearly marked demo ticket on failure.
+ * Duplicate active tickets show a message and a link to Find My Ticket.
  * Passes ticket, queue, service, organization, and status details to the status page.
  */
 function CustomerJoinDetails() {
@@ -24,6 +25,7 @@ function CustomerJoinDetails() {
   const [ticketNumber, setTicketNumber] = useState("");
   const [ticketStatus, setTicketStatus] = useState<string | undefined>();
   const [error, setError] = useState("");
+  const [hasActiveTicket, setHasActiveTicket] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
 
@@ -60,7 +62,8 @@ function CustomerJoinDetails() {
   /**
    * Checks the phone length and queue selection, then requests customer registration.
    * Converts the display value to the backend's XXX-XXX-XXXX phone-number format.
-   * Uses the returned ticket ID on success; failures open a demo confirmation.
+   * Uses the returned ticket ID on success and shows feedback for duplicate tickets.
+   * Other failures open a demo confirmation.
    *
    * @param e - The customer registration form submission event.
    */
@@ -79,6 +82,7 @@ function CustomerJoinDetails() {
     }
 
     setError("");
+    setHasActiveTicket(false);
     setIsLoading(true);
     setIsDemo(false);
 
@@ -101,6 +105,14 @@ function CustomerJoinDetails() {
           }),
         }
       );
+
+      // An existing active ticket must not open a demo confirmation.
+      if (response.status === 409) {
+        setError("You already have an active ticket in this queue. Use Find My Ticket to view it.");
+        setHasActiveTicket(true);
+        setIsLoading(false);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Backend request failed");
@@ -197,8 +209,16 @@ function CustomerJoinDetails() {
             </p>
 
             {error && (
-              <p role="alert" style={{ color: "#ff0000", textAlign: "center" }}>
+              <p role="alert" style={{ color: "#ff0000", textAlign: "left" }}>
                 {error}
+              </p>
+            )}
+
+            {hasActiveTicket && (
+              <p style={{ textAlign: "center" }}>
+                <Link to="/find-ticket" style={{ color: "#303030", fontWeight: 500 }}>
+                  Find My Ticket
+                </Link>
               </p>
             )}
 

@@ -17,9 +17,19 @@ class customerHandler:
     if new_customer.phone_number[3] != "-" or new_customer.phone_number[7] != "-":
       raise HTTPException(status_code=401, detail="invalid phone number")
     
-    if not new_customer.phone_number[0:3].isdigit() or not new_customer.phone_number[4:7].isdigit()  or not new_customer.phone_number[8:12].isdigit():
+    if not new_customer.phone_number[0:3].isdigit() or not new_customer.phone_number[4:7].isdigit() or not new_customer.phone_number[8:12].isdigit():
       raise HTTPException(status_code=401, detail="invalid phone number")
-    return customerDAO().add_customer3(new_customer)
+
+    dao = customerDAO()
+
+    # Prevent another active ticket for the same phone number in this queue.
+    if dao.has_active_ticket3(new_customer.queue_code, new_customer.phone_number):
+      raise HTTPException(
+        status_code=409,
+        detail="You already have an active ticket in this queue. Please use Find My Ticket to view it."
+      )
+
+    return dao.add_customer3(new_customer)
 
   def get_ticket2(self, queue_code: str, ticket_number: int):
       return customerDAO().get_ticket3(queue_code, ticket_number)

@@ -21,7 +21,27 @@ class customerDAO:
       self.pool = SimpleConnectionPool(
           POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
       )
-  
+
+  def has_active_ticket3(self, queue_code: str, phone_number: str):
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      SELECT customer.customer_id
+      FROM customer
+      JOIN queue ON customer.queue_id = queue.queue_id
+      WHERE queue.queue_code = %s
+      AND customer.phone_number = %s
+      AND customer.status IN ('waiting', 'called', 'skipped')
+      LIMIT 1
+      """
+      # Check for an active ticket with this phone number in the same queue.
+      cur.execute(query, (queue_code, phone_number))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      return cashe is not None
+
   def add_customer3(self, new_customer: Customer):
       ticket_id = customerDAO().list_customers3(new_customer.queue_code)
       if ticket_id == []:
@@ -35,18 +55,29 @@ class customerDAO:
       INSERT INTO customer
       (ticket_id, phone_number, queue_id, time)
       VALUES (%s, %s, %s, NOW())
+      ON CONFLICT (queue_id, phone_number)
+      WHERE status IN ('waiting', 'called', 'skipped')
+      DO NOTHING
       RETURNING customer_id, time, status
       """
       #set up query to make call to database
       cur.execute(query, (ticket_id, new_customer.phone_number, queue_id))
       cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+
+      # Handle a duplicate blocked by the database during simultaneous requests.
+      if cashe is None:
+          raise HTTPException(
+              status_code=409,
+              detail="You already have an active ticket in this queue. Use Find My Ticket to view it."
+          )
+
       new_customer.ticket_id = ticket_id
       new_customer.customer_id = cashe[0]
       new_customer.time = cashe[1]
       new_customer.status = cashe[2]
-      conn.commit()
-      cur.close()
-      self.pool.putconn(conn)
       #store and return entry just created in database
       return new_customer
 

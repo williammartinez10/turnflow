@@ -148,29 +148,6 @@ describe("CustomerJoinDetails", () => {
   });
 
 
-  it("shows the confirmation modal after submitting a valid phone number", async () => {
-    render(
-      <MemoryRouter
-        initialEntries={[
-          {
-            pathname: "/join-details",
-            state: { queueCode: "ABC-123-45", queueId: 1 },
-          },
-        ]}
-      >
-        <CustomerJoinDetails />
-      </MemoryRouter>
-    );
-
-    fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "You're in the queue!" })).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
-  });
-
-
   it("does not show the confirmation modal with an incomplete phone number", () => {
     render(
       <MemoryRouter>
@@ -185,7 +162,7 @@ describe("CustomerJoinDetails", () => {
   });
 
 
-  it("navigates to queue status from the confirmation modal", async () => {
+  it("shows the confirmation modal and navigates to queue status", async () => {
     render(
       <MemoryRouter
         initialEntries={[
@@ -206,6 +183,10 @@ describe("CustomerJoinDetails", () => {
 
     fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "You're in the queue!" })).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+
     fireEvent.click(await screen.findByRole("button", { name: "View Queue Status" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/queue-status", {

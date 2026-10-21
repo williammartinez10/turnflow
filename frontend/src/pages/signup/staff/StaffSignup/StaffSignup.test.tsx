@@ -20,20 +20,7 @@ describe("StaffSignup", () => {
   });
 
 
-  it("renders the staff signup fields", () => {
-    render(
-      <MemoryRouter>
-        <StaffSignup />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByLabelText("Full Name")).toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByLabelText("Password")).toBeInTheDocument();
-  });
-
-
-  it("requires all signup fields", () => {
+  it("renders the staff signup form with required fields", () => {
     render(
       <MemoryRouter>
         <StaffSignup />
@@ -43,19 +30,7 @@ describe("StaffSignup", () => {
     expect(screen.getByLabelText("Full Name")).toBeRequired();
     expect(screen.getByLabelText("Email")).toBeRequired();
     expect(screen.getByLabelText("Password")).toBeRequired();
-  });
-
-
-  it("renders the create staff account button", () => {
-    render(
-      <MemoryRouter>
-        <StaffSignup />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.getByRole("button", { name: "Create Staff Account" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create Staff Account" })).toBeInTheDocument();
   });
 
 

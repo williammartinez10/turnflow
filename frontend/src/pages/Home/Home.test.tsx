@@ -13,7 +13,7 @@ describe("Home", () => {
   });
 
 
-  it("renders the TurnFlow branding", () => {
+  it("renders the branding, customer button, and login link", () => {
     render(
       <MemoryRouter>
         <Home />
@@ -21,26 +21,7 @@ describe("Home", () => {
     );
 
     expect(screen.getByText("TurnFlow")).toBeInTheDocument();
-  });
-
-
-  it("renders the customer button", () => {
-    render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
-    );
-
     expect(screen.getByRole("button", { name: /continue as customer/i })).toBeInTheDocument();
-  });
-
-
-  it("provides a link to login", () => {
-    render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
-    );
 
     const loginLink = screen.getByRole("link", { name: "Here" });
 
@@ -100,7 +81,7 @@ describe("Home", () => {
     fireEvent.click(screen.getByRole("link", { name: "Here" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not check your session. Please try again.");
-    
+  
     expect(screen.getByRole("link", { name: "Here" })).toBeInTheDocument();
   });
 });

@@ -54,19 +54,6 @@ describe("CustomerFindTicket", () => {
   });
 
 
-  it("allows the customer to enter a ticket number", () => {
-    render(
-      <MemoryRouter>
-        <CustomerFindTicket />
-      </MemoryRouter>
-    );
-
-    fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "123456" },});
-
-    expect(screen.getByLabelText("Ticket Number")).toHaveValue("123456");
-  });
-
-
   it("navigates to queue status when the ticket is found", async () => {
     vi.stubGlobal(
       "fetch",

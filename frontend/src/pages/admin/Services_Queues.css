@@ -1,0 +1,305 @@
+/* =========================================================
+   PAGE LAYOUT
+   Controls the overall Services & Queues page appearance
+   ========================================================= */
+
+.services-queues-page {
+    min-height: 100vh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+/* Adds space between the header and the page content */
+.services-queues-main {
+    padding: 80px 24px;
+}
+
+/* Main page title */
+.services-queues-title {
+    text-align: center;
+}
+
+/* Centers the general content unless a section overrides it */
+.services-queues-content {
+    text-align: center;
+}
+
+/* Section titles such as Services and Queues */
+.services-and-queues-title {
+    text-align: left;
+}
+
+
+/* =========================================================
+   MAIN ACTION BUTTONS
+   Shared appearance for New Service and New Queue
+   ========================================================= */
+
+.services-button,
+.queues-button {
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   SERVICES SECTION
+   Controls the list and normal display of created services
+   ========================================================= */
+
+/* Adds space before the created services list */
+.services-list {
+    margin-top: 24px;
+}
+
+/* Each service is displayed as a row */
+.services-row {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    align-items: center;
+    border: 1px solid var(--color-carbon);
+}
+
+/* Gives the service information and buttons spacing */
+.services-row span,
+.services-row button {
+    padding: 12px;
+}
+
+/* Spreads the service name, status, and wait time across the row */
+.services-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+}
+
+/* =========================================================
+   CREATE SERVICE FORM
+   Uses a two-column layout: label on left, input on right
+   ========================================================= */
+
+.services-new-form {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+
+    max-width: 700px;
+    margin: 24px auto 0;
+
+    text-align: left;
+}
+
+/* Makes the Service Name and Description fields fill their column */
+.services-new-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.services-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* Shared styling for Service and Queue form action buttons */
+.services-form-actions button,
+.queues-form-actions button {
+    padding: 10px 16px;
+}
+
+/* =========================================================
+   EDIT SERVICE FORM
+   ========================================================= */
+
+.services-edit-form-top {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+
+    max-width: 700px;
+    margin: 24px auto 0;
+
+    text-align: left;
+}
+
+/* Makes the Edit Service title span both columns */
+.services-edit-form-top h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+/* Makes the text fields fill the available form space */
+.services-edit-form-top input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+/* Used in Queues takes a full row because it may contain multiple queues */
+.service-used-queues {
+    grid-column: 1 / -1;
+    text-align: left;
+}
+
+/* Keeps Cancel and Save together below the form */
+.services-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   QUEUES SECTION
+   Controls spacing for the queue management area
+   ========================================================= */
+
+.queues-content {
+    margin-top: 40px;
+}
+
+/* Adds space before the created queues list */
+.queues-list {
+    margin-top: 24px;
+}
+
+
+/* =========================================================
+   CREATE QUEUE FORM
+   Uses a two-column layout: label on left, input on right
+   ========================================================= */
+
+.queues-new-form {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+
+    max-width: 700px;
+    margin: 24px auto 0;
+
+    text-align: left;
+}
+
+/* Makes regular text fields and dropdowns fill their grid column.
+   Checkboxes are excluded so they stay small. */
+.queues-new-form input:not([type="checkbox"]),
+.queues-new-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+/* Makes Create Queue span across both form columns */
+.queues-new-form h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+/* Gives buttons inside the Create Queue form more space */
+.queues-new-form button {
+    padding: 10px 16px;
+}
+
+
+/* =========================================================
+   EDIT QUEUE FORM
+   Uses the same two-column structure as Create Queue
+   ========================================================= */
+
+.queues-edit-form {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+
+    max-width: 700px;
+    margin: 24px auto 0;
+
+    text-align: left;
+}
+
+/* Makes Edit Queue span across both form columns */
+.queues-edit-form h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+/* Makes regular edit fields fill their column while
+   leaving checkboxes at their normal size */
+.queues-edit-form input:not([type="checkbox"]),
+.queues-edit-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+
+/* =========================================================
+   QUEUE FORM ACTIONS
+   Keeps Create/Cancel or Save/Cancel together
+   ========================================================= */
+
+.queues-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   SERVICES ASSIGNED TO A QUEUE
+   Controls the service checkbox area inside queue forms
+   ========================================================= */
+
+/* Makes the entire Services in Queue area span both columns */
+.queue-services-selection {
+    grid-column: 1 / -1;
+    text-align: left;
+}
+
+/* Keeps each checkbox next to its service name */
+.queue-services-selection label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 18px;
+}
+
+/* Prevents checkboxes from stretching like normal text inputs */
+.queue-services-selection input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+
+/* =========================================================
+   QUEUE LIST
+   Controls how saved queues appear below the forms
+   ========================================================= */
+
+/* Displays Queue Name | Status | Edit in three columns */
+.queues-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 120px;
+    align-items: center;
+    border: 1px solid var(--color-carbon);
+    gap: 8px;
+}
+
+/* Adds spacing inside each queue row */
+.queues-row span,
+.queues-row button {
+    padding: 12px;
+}

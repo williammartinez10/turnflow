@@ -3,6 +3,12 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StaffSignup from "./StaffSignup";
 
+// Header behavior is covered separately in Header.test.tsx.
+vi.mock("../../../../components/Header/Header", () => ({
+  default: () => null,
+}));
+
+
 /**
  * Checks required staff signup fields, name/email/password validation,
  * registration requests, and duplicate-email feedback using mocked fetch responses.
@@ -14,20 +20,7 @@ describe("StaffSignup", () => {
   });
 
 
-  it("renders the staff signup fields", () => {
-    render(
-      <MemoryRouter>
-        <StaffSignup />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByLabelText("Full Name")).toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByLabelText("Password")).toBeInTheDocument();
-  });
-
-
-  it("requires all signup fields", () => {
+  it("renders the staff signup form with required fields", () => {
     render(
       <MemoryRouter>
         <StaffSignup />
@@ -37,19 +30,7 @@ describe("StaffSignup", () => {
     expect(screen.getByLabelText("Full Name")).toBeRequired();
     expect(screen.getByLabelText("Email")).toBeRequired();
     expect(screen.getByLabelText("Password")).toBeRequired();
-  });
-
-
-  it("renders the create staff account button", () => {
-    render(
-      <MemoryRouter>
-        <StaffSignup />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.getByRole("button", { name: "Create Staff Account" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create Staff Account" })).toBeInTheDocument();
   });
 
 

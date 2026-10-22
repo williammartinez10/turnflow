@@ -8,28 +8,15 @@ import StaffCode from "./StaffCode";
  * These tests cover the current frontend flow, not backend invitation validation.
  */
 describe("StaffCode", () => {
-  it("renders the invitation code field", () => {
+  it("renders the invitation code field and continue button", () => {
     render(
       <MemoryRouter>
         <StaffCode />
       </MemoryRouter>
     );
 
-    expect(
-      screen.getByLabelText("Organization / Invitation Code")
-    ).toBeInTheDocument();
-  });
-
-  it("renders the continue button", () => {
-    render(
-      <MemoryRouter>
-        <StaffCode />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.getByRole("button", { name: "Continue" })
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Organization / Invitation Code")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
   });
 
   // A simple destination page verifies routing without rendering the signup form.
@@ -49,12 +36,8 @@ describe("StaffCode", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Continue" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(
-      screen.getByText("Staff Signup Page")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Staff Signup Page")).toBeInTheDocument();
   });
 });

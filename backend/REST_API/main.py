@@ -67,6 +67,10 @@ app.add_middleware(
 async def add_customer1(new_customer: Customer, status_code=201):
     return customerHandler().add_customer2(new_customer)
 
+@app.get("/database/customer/get_ticket")
+async def get_ticket1(queue_code: str, ticket_number: int):
+    return customerHandler().get_ticket2(queue_code, ticket_number)
+
 @app.get("/database/customer/get_queue_{queue_code}")
 async def list_customers1(queue_code: str, status_code=201):
     return customerHandler().list_customers2(queue_code)
@@ -77,8 +81,11 @@ async def pop_customer(queue_code: str, status_code=201):
 
 
 @app.post("/database/queue/add_queue")
-async def add_queue1(new_queue: Queue, status_code=201):
-    return queueHandler().add_queue2(new_queue)
+async def add_queue1(new_queue: Queue, request: Request, status_code=201):
+    return queueHandler().add_queue2(
+        new_queue,
+        request.session.get("account")
+    )
 
 @app.get("/database/queue/get_queue_list")
 async def get_queue_list1(status_code=201):

@@ -1,20 +1,21 @@
 import "./Login.css";
 import { useState } from "react";
 import type { SyntheticEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 
 /**
  * Displays the shared Staff/Admin login form and submits credentials to the backend.
- * Shows request feedback and enables submission when required inputs are valid.
+ * Redirects Admins to their dashboard; Staff receive a success message.
  */
 function Login() {
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  
+
   /**
    * Updates submit-button availability from all required inputs, including PasswordInput.
    * Each value must contain non-whitespace text and satisfy native browser constraints.
@@ -24,7 +25,7 @@ function Login() {
   const updateFormValidity = (e: SyntheticEvent<HTMLFormElement>) => {
     const requiredInputs =
       e.currentTarget.querySelectorAll<HTMLInputElement>("input[required]");
-    
+
     setIsFormValid(
       Array.from(requiredInputs).every(
         (input) => input.value.trim() !== "" && input.validity.valid
@@ -33,7 +34,7 @@ function Login() {
   };
 
   /**
-   * Requests cookie-based sign-in and displays the backend result or a connection error.
+   * Requests cookie-based sign-in and redirects Admins after successful login.
    * Clears previous feedback and restores the loading state after every request.
    *
    * @param e - The login form submission event.
@@ -71,6 +72,13 @@ function Login() {
             ? data.detail
             : "Could not log in."
         );
+        return;
+      }
+
+      window.dispatchEvent(new Event("session-changed"));
+
+      if (data.role === "admin") {
+        navigate("/admin/AdminDashboard", { replace: true });
         return;
       }
 

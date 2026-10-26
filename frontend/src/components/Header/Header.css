@@ -5,6 +5,11 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
     background: var(--color-neutral);
     padding: 28px 6%;
     border-bottom: 1px solid #dddddd;
@@ -29,4 +34,92 @@
     height: 42px;
     border-radius: 12px;
     background: var(--color-sky);
+}
+
+
+/* ============= Role ============= */
+
+.header-account {
+    position: relative;
+    margin-left: auto;
+    color: #303030;
+    font-size: 14px;
+}
+
+.header-role,
+.header-role-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.header-role-button {
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.header-role-button:hover {
+    background: #e2e2e2;
+}
+
+
+/* ============= Logout dropdown ============= */
+
+.header-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 200px;
+    padding: 6px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.header-logout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #303030;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.header-logout:hover:not(:disabled) {
+    background: rgba(255, 59, 63, 0.08);
+    color: #e52e32;
+}
+
+.header-logout:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.header-role-button:focus-visible,
+.header-logout:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 2px;
+}
+
+.header-dropdown [role="alert"] {
+    margin: 8px 6px;
+    color: #FF2C2C;
+    font-size: 13px;
 }

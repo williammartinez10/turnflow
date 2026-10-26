@@ -1,12 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Login from "./Login";
 
+// Header behavior is covered separately in Header.test.tsx.
+vi.mock("../../components/Header/Header", () => ({
+  default: () => null,
+}));
+
+
 /**
  * Checks login fields, signup links, request feedback, and submit-button validation.
- * Mocked fetch responses verify the credential payload and cookie request option
- * without contacting the backend.
+ * Mocked fetch responses verify credentials, cookie requests, and Admin navigation.
  */
 describe("Login", () => {
   // Restore globals such as fetch so request mocks do not leak between tests.
@@ -15,19 +20,7 @@ describe("Login", () => {
   });
 
 
-  it("renders the email and password fields", () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByLabelText("Password")).toBeInTheDocument();
-  });
-
-
-  it("requires email and password", () => {
+  it("renders the login form with required fields", () => {
     render(
       <MemoryRouter>
         <Login />
@@ -36,19 +29,8 @@ describe("Login", () => {
 
     expect(screen.getByLabelText("Email")).toBeRequired();
     expect(screen.getByLabelText("Password")).toBeRequired();
-  });
 
-
-  it("renders the login button", () => {
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    expect(
-      screen.getByRole("button", { name: "Log In" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Log In" })).toBeInTheDocument();
   });
 
 
@@ -59,13 +41,8 @@ describe("Login", () => {
       </MemoryRouter>
     );
 
-    expect(
-      screen.getByRole("link", { name: "Sign Up as Staff" })
-    ).toHaveAttribute("href", "/signup/staff/staff_code");
-
-    expect(
-      screen.getByRole("link", { name: "Sign Up as Admin" })
-    ).toHaveAttribute("href", "/signup/admin");
+    expect(screen.getByRole("link", { name: "Sign Up as Staff" })).toHaveAttribute("href", "/signup/staff/staff_code");
+    expect(screen.getByRole("link", { name: "Sign Up as Admin" })).toHaveAttribute("href", "/signup/admin");
   });
 
 
@@ -103,6 +80,35 @@ describe("Login", () => {
         body: JSON.stringify({ email, password }),
       })
     );
+  });
+
+
+  it("opens the Admin dashboard after successful Admin login", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ role: "admin" }),
+      })
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/admin/AdminDashboard"
+            element={<h1>Admin Dashboard</h1>}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText("Email"), {target: { value: "admin.test@example.com" },});
+    fireEvent.change(screen.getByLabelText("Password"), {target: { value: "LocalTestPass123!" },});
+    fireEvent.click(screen.getByRole("button", { name: "Log In" }));
+
+    expect(await screen.findByRole("heading", { name: "Admin Dashboard" })).toBeInTheDocument();
   });
 
 

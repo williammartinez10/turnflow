@@ -32,11 +32,13 @@ describe("CustomerJoinQueue", () => {
             queue_id: 1,
             service: "Medicine",
             queue_code: "ABC-123-45",
+            organization_name: "William's Org",
           },
         ],
       })
     );
   });
+
   // Restore fetch and other stubbed globals so they do not affect later tests.
   afterEach(() => { vi.unstubAllGlobals(); });
 
@@ -49,9 +51,7 @@ describe("CustomerJoinQueue", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Join a Queue" })).toBeInTheDocument();
-
     expect(screen.getByRole("button", { name: "Use QR Code" })).toBeInTheDocument();
-
     expect(screen.getByRole("link", { name: "Find My Ticket" })).toHaveAttribute("href", "/find-ticket");
   });
 
@@ -74,7 +74,7 @@ describe("CustomerJoinQueue", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Queue / Service Code"),{target: { value: "ABC-123-45" },});
+    fireEvent.change(screen.getByLabelText("Queue / Service Code"), {target: { value: "ABC-123-45" },});
 
     fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
 
@@ -86,6 +86,7 @@ describe("CustomerJoinQueue", () => {
             queueCode: "ABC-123-45",
             service: "Medicine",
             queueId: 1,
+            organizationName: "William's Org",
           },
         }
       );
@@ -100,8 +101,7 @@ describe("CustomerJoinQueue", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Queue / Service Code"),{target: { value: "XYZ-999-99" },});
-
+    fireEvent.change(screen.getByLabelText("Queue / Service Code"), {target: { value: "XYZ-999-99" },});
     fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
 
     expect(await screen.findByText("Queue not found. Please check the code and try again.")).toBeInTheDocument();
@@ -121,8 +121,7 @@ describe("CustomerJoinQueue", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByLabelText("Queue / Service Code"),{ target: { value: "DEF-678-90" } });
-
+    fireEvent.change(screen.getByLabelText("Queue / Service Code"), {target: { value: "DEF-678-90" },});
     fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
 
     await waitFor(() => {
@@ -133,6 +132,7 @@ describe("CustomerJoinQueue", () => {
             queueCode: "DEF-678-90",
             service: "Lawyer",
             queueId: 2,
+            organizationName: undefined,
           },
         }
       );

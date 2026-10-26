@@ -11,6 +11,7 @@ interface Queue {
   queue_id: number;
   service: string;
   queue_code: string;
+  organization_name?: string | null;
 }
 
 // Dummy queues for testing without the backend.
@@ -76,6 +77,7 @@ function CustomerJoinQueue() {
           queueCode: selectedQueue.queue_code,
           service: selectedQueue.service,
           queueId: selectedQueue.queue_id,
+          organizationName: selectedQueue.organization_name,
         },
       });
     } else {

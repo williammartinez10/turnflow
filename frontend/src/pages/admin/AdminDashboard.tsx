@@ -7,10 +7,36 @@ import Header from "../../components/Header/Header";
 // Link allows navigation to other pages without reloading the website
 import { Link } from "react-router-dom";
 
+
+import { useEffect, useState } from "react";
+
 function AdminDashboard() {
 
     // Placeholder values that will later come from the database
-    const organizationName = "<Organization Name>";
+    const [organizationName, setOrganizationName] = useState("Loading...");
+    useEffect(() => {
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        async function loadCurrentAdmin() {
+            const response = await fetch(
+                `${apiBaseUrl}/auth/get_current_account`,
+                {
+                    credentials: "include",
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const account = await response.json();
+            setOrganizationName(account.organization_name);
+        }
+
+        void loadCurrentAdmin();
+    }, []);
+
     const locationName = "<Location>";
 
     // Defines what the Admin Dashboard displays

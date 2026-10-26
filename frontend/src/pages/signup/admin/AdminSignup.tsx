@@ -1,6 +1,6 @@
 import "./AdminSignup.css";
 import { useState, SyntheticEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 
@@ -9,6 +9,8 @@ import PasswordInput from "../../../components/PasswordInput/PasswordInput";
  * Applies browser validation and presents account-creation feedback from the backend.
  */
 function AdminSignup() {
+  const navigate = useNavigate();
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +76,30 @@ function AdminSignup() {
         return;
       }
 
-      setSuccess("Admin account created successfully.");
+      // setSuccess("Admin account created successfully.");
+      // Log in the newly created admin so the backend creates their session
+      const loginResponse = await fetch(`${apiBaseUrl}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: formData.get("email"),
+          password: formData.get("password"),
+        }),
+      });
+
+      if (!loginResponse.ok) {
+        setError("Account created, but automatic login failed.");
+        return;
+      }
+
+      // The admin is now logged in, so send them to the dashboard
+      navigate("/admin/AdminDashboard");
+
+
+
     } catch {
       setError("Could not create the account. Please try again.");
     } finally {

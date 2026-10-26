@@ -11,6 +11,8 @@ class Queue(BaseModel):
   queue_id: Optional[int] = None
   queue_code: Optional[str] = None
   service: Optional[str] = None
+  admin_id: Optional[int] = None
+  organization_name: Optional[str] = None
 
 class queueDAO:
   def __init__(self):
@@ -23,12 +25,16 @@ class queueDAO:
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
       INSERT INTO queue
-      (queue_code, service)
-      VALUES (%s, %s)
+      (queue_code, service, admin_id)
+      VALUES (%s, %s, %s)
       RETURNING queue_id
       """
       #set up query to make call to database
-      cur.execute(query, (new_queue.queue_code, new_queue.service))
+      cur.execute(query, (
+          new_queue.queue_code,
+          new_queue.service,
+          new_queue.admin_id
+      ))
       cashe = cur.fetchone()
       new_queue.queue_id = cashe[0]
       conn.commit()
@@ -72,7 +78,12 @@ class queueDAO:
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      SELECT * FROM queue
+      SELECT queue.queue_id,
+      queue.queue_code,
+      queue.service,
+      admin.organization_name
+      FROM queue
+      LEFT JOIN admin ON queue.admin_id = admin.admin_id
       """
       #set up query to make call to database
       cur.execute(query)

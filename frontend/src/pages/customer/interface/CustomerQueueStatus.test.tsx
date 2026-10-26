@@ -4,8 +4,9 @@ import { describe, expect, it } from "vitest";
 import CustomerQueueStatus from "./CustomerQueueStatus";
 
 /**
- * Checks the existing status-page layout, placeholder content, and ticket/queue
- * details received through router state. These are UI tests, not live-update tests.
+ * Checks the existing status-page layout, placeholder content, and ticket, queue,
+ * and organization details received through router state.
+ * These are UI tests, not live-update tests.
  */
 describe("CustomerQueueStatus", () => {
   it("renders the Queue Status page", () => {
@@ -16,20 +17,15 @@ describe("CustomerQueueStatus", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
-
     expect(screen.getByText("YOUR TICKET")).toBeInTheDocument();
-
     expect(screen.getByText("Your Position")).toBeInTheDocument();
-
     expect(screen.getByText("Now Serving")).toBeInTheDocument();
-
     expect(screen.getByText("People Ahead")).toBeInTheDocument();
-
     expect(screen.getByText("Estimated Wait")).toBeInTheDocument();
   });
 
 
-  it("displays the queue information", () => {
+  it("displays placeholders when queue information is missing", () => {
     render(
       <MemoryRouter>
         <CustomerQueueStatus />
@@ -37,11 +33,7 @@ describe("CustomerQueueStatus", () => {
     );
 
     expect(screen.getByText("<Organization Name>")).toBeInTheDocument();
-
-    expect(screen.getByText("<Location>")).toBeInTheDocument();
-
     expect(screen.getByText("<Service Name>")).toBeInTheDocument();
-
     expect(screen.getByText("<Queue Name>")).toBeInTheDocument();
   });
 
@@ -56,6 +48,8 @@ describe("CustomerQueueStatus", () => {
               ticketNumber: "1",
               queueCode: "ABC-123-45",
               service: "Medicine",
+              status: "waiting",
+              organizationName: "William's Org",
             },
           },
         ]}
@@ -65,32 +59,49 @@ describe("CustomerQueueStatus", () => {
     );
 
     expect(screen.getByText("1")).toBeInTheDocument();
-
     expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
-
     expect(screen.getByText("Medicine")).toBeInTheDocument();
-
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
     expect(screen.getByText("<###>")).toBeInTheDocument();
-
     expect(screen.getByText("<Position>")).toBeInTheDocument();
-
     expect(screen.getByText("<Count>")).toBeInTheDocument();
-
     expect(screen.getByText("<Time>")).toBeInTheDocument();
-
     expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();
   });
 
 
-  it("displays the automatic queue update information", () => {
+  it("explains how to retrieve an updated status", () => {
     render(
       <MemoryRouter>
         <CustomerQueueStatus />
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Queue status updates automatically/)).toBeInTheDocument();
+    expect(screen.getByText(/Look up your ticket again for an updated status/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Status Unavailable" })).toBeInTheDocument();
+  });
 
-    expect(screen.getByText(/You'll be notified when your turn is approaching/)).toBeInTheDocument();
+
+  it.each([
+    ["called", "It's Your Turn"],
+    ["completed", "Completed"],
+    ["skipped", "Skipped"],
+    ["no_show", "No Show"],
+    ["unknown", "Status Unavailable"],
+  ])("displays the %s ticket status", (status, title) => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/queue-status",
+            state: { status },
+          },
+        ]}
+      >
+        <CustomerQueueStatus />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
   });
 });

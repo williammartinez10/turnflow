@@ -13,6 +13,7 @@ import StaffCode from "./pages/signup/staff/StaffCode/StaffCode";
 import StaffSignup from "./pages/signup/staff/StaffSignup/StaffSignup";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Services_Queues from "./pages/admin/Services_Queues";
+import RequireAdmin from "./components/RequireAdmin/RequireAdmin";
 
 function App() {
   return (
@@ -27,8 +28,12 @@ function App() {
       <Route path="/signup/admin" element={<AdminSignup />} />
       <Route path="/signup/staff/staff_code" element={<StaffCode />} />
       <Route path="/signup/staff" element={<StaffSignup />} />
-      <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
-      <Route path="/admin/Services_Queues" element={<Services_Queues />} />
+
+      {/* Check the Admin session before displaying these pages. */}
+      <Route element={<RequireAdmin />}>
+        <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/admin/Services_Queues" element={<Services_Queues />} />
+      </Route>
 
       {import.meta.env.DEV && (
         <Route path="/dev" element={<DevPage />} />

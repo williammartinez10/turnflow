@@ -64,7 +64,7 @@
 
 .ticket-number-help {
     margin: -2px 0 8px;
-    color: #666666;
+    color: var(--color-carbon);
     font-size: 13px;
 }
 

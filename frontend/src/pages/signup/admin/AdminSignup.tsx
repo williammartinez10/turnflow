@@ -6,11 +6,10 @@ import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 
 /**
  * Displays admin signup with name, email, password, and organization-name inputs.
- * Applies browser validation and presents account-creation feedback from the backend.
+ * Applies browser validation, signs in after signup, and opens the dashboard.
  */
 function AdminSignup() {
   const navigate = useNavigate();
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,8 +33,8 @@ function AdminSignup() {
   };
 
   /**
-   * Sends the signup fields using the backend request names and displays the result.
-   * Account creation shows a login link; it does not sign the user in automatically.
+   * Creates the account, then signs in using a session cookie and opens the dashboard.
+   * Shows a login link if the account is created but automatic sign-in fails.
    *
    * @param e - The admin signup form submission event.
    */
@@ -45,6 +44,7 @@ function AdminSignup() {
     const formData = new FormData(e.currentTarget);
     const apiBaseUrl =
       import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    let accountCreated = false;
 
     setError("");
     setSuccess("");
@@ -65,9 +65,9 @@ function AdminSignup() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
+
         setError(
           typeof data.detail === "string"
             ? data.detail
@@ -76,32 +76,33 @@ function AdminSignup() {
         return;
       }
 
-      // setSuccess("Admin account created successfully.");
-      // Log in the newly created admin so the backend creates their session
+      accountCreated = true;
+
+      // Sign in and let the browser store the session cookie.
       const loginResponse = await fetch(`${apiBaseUrl}/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
-          email: formData.get("email"),
+          email: String(formData.get("email") ?? "").trim().toLowerCase(),
           password: formData.get("password"),
         }),
       });
 
       if (!loginResponse.ok) {
-        setError("Account created, but automatic login failed.");
+        setSuccess("Account created. Please log in to continue.");
         return;
       }
 
-      // The admin is now logged in, so send them to the dashboard
-      navigate("/admin/AdminDashboard");
-
-
-
+      navigate("/admin/AdminDashboard", { replace: true });
     } catch {
-      setError("Could not create the account. Please try again.");
+      if (accountCreated) {
+        setSuccess("Account created. Please log in to continue.");
+      } else {
+        setError("Could not create the account. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

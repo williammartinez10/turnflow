@@ -75,6 +75,14 @@ async def get_ticket1(queue_code: str, ticket_number: int):
 async def list_customers1(queue_code: str, status_code=201):
     return customerHandler().list_customers2(queue_code)
 
+# ===== Dashboard Statistics =====
+
+@app.get("/database/customer/count_waiting_{admin_id}")
+async def count_waiting_customers1(admin_id: int):
+    return customerHandler().count_waiting_customers2(admin_id)
+
+# ===== End Dashboard Statistics =====
+
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
 async def pop_customer(queue_code: str, status_code=201):
     return customerHandler().pop_customer2(queue_code)

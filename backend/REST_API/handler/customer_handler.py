@@ -37,6 +37,14 @@ class customerHandler:
   def list_customers2(self, queue_code: str):
       return customerDAO().list_customers3(queue_code)
 
+  # ===== Dashboard Statistics =====
+
+  # Returns the number of active customers waiting in this admin's queues.
+  def count_waiting_customers2(self, admin_id: int):
+    return customerDAO().count_waiting_customers3(admin_id)
+
+  # ===== End Dashboard Statistics =====
+
   def pop_customer2(self, queue_code: str):
     result = customerDAO().pop_customer3(queue_code)
     return {

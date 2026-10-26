@@ -12,8 +12,10 @@ import { useEffect, useState } from "react";
 
 function AdminDashboard() {
 
-    // Placeholder values that will later come from the database
+    // Stores the logged-in admin's organization name
     const [organizationName, setOrganizationName] = useState("Loading...");
+    // Stores the number of customers currently waiting in this admin's queues
+    const [peopleWaiting, setPeopleWaiting] = useState(0);
     useEffect(() => {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -32,12 +34,25 @@ function AdminDashboard() {
 
             const account = await response.json();
             setOrganizationName(account.organization_name);
+
+            // Gets the number of customers waiting in queues owned by this admin
+            const waitingResponse = await fetch(
+                `${apiBaseUrl}/database/customer/count_waiting_${account.admin_id}`,
+                {
+                    credentials: "include",
+                }
+            );
+
+            if (waitingResponse.ok) {
+                const waitingCount = await waitingResponse.json();
+                setPeopleWaiting(waitingCount);
+            }
         }
 
         void loadCurrentAdmin();
     }, []);
 
-    const locationName = "<Location>";
+
 
     // Defines what the Admin Dashboard displays
     return (
@@ -57,12 +72,9 @@ function AdminDashboard() {
                         Admin Dashboard
                     </h1>
 
-                    {/* Displays the organization and location information */}
+                    {/* Displays the organization information */}
                     <p><strong>Organization</strong></p>
                     <p>{organizationName}</p>
-
-                    <p><strong>Location</strong></p>
-                    <p>{locationName}</p>
 
                 </section> {/* End organization information */}
 
@@ -78,7 +90,7 @@ function AdminDashboard() {
 
                         <div className="admin-dashboard-item">
                             <strong>People Waiting</strong>
-                            <p>&lt;Count&gt;</p>
+                            <p>{peopleWaiting}</p>
                         </div>
 
                         <div className="admin-dashboard-item">

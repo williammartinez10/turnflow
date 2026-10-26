@@ -130,6 +130,32 @@ class customerDAO:
       return customer_list
       #return customers from the specified queue, or an empty list
 
+  # ===== Dashboard Statistics =====
+
+  # Counts all customers with an active ticket in queues owned by the admin.
+  def count_waiting_customers3(self, admin_id: int):
+      conn = self.pool.getconn()
+      cur = conn.cursor()
+
+      query = """
+              SELECT COUNT(*)
+              FROM customer
+                       JOIN queue ON customer.queue_id = queue.queue_id
+              WHERE queue.admin_id = %s
+                AND customer.status IN ('waiting', 'called', 'skipped') \
+              """
+
+      cur.execute(query, (admin_id,))
+      count = cur.fetchone()[0]
+
+      cur.close()
+      self.pool.putconn(conn)
+
+      return count
+
+  # ===== End Dashboard Statistics =====
+
+
   def pop_customer3(self, queue_code: str):
       queue_id = queueDAO().get_withcode_queue3(queue_code)
       cashe: Customer

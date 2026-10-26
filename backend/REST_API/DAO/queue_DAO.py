@@ -13,6 +13,7 @@ class Queue(BaseModel):
   service: Optional[str] = None
   admin_id: Optional[int] = None
   organization_name: Optional[str] = None
+  time_list = Optional[list[datetime.datetime] | int] = None
 
 class queueDAO:
   def __init__(self):
@@ -25,15 +26,16 @@ class queueDAO:
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
       INSERT INTO queue
-      (queue_code, service, admin_id)
-      VALUES (%s, %s, %s)
+      (queue_code, service, admin_id, time_list)
+      VALUES (%s, %s, %s, %s)
       RETURNING queue_id
       """
       #set up query to make call to database
       cur.execute(query, (
           new_queue.queue_code,
           new_queue.service,
-          new_queue.admin_id
+          new_queue.admin_id,
+          new_queue.date_time
       ))
       cashe = cur.fetchone()
       new_queue.queue_id = cashe[0]
@@ -123,3 +125,24 @@ class queueDAO:
       retired_queue = Queue(**cashe)
       return retired_queue
       #return deleted queue, unless it's empty in which case an error is returned
+
+  def update_wait_time(self, new_wait_time: datetime.datetime, queue_code: str):
+      
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      UPDATE queue SET
+        time_list = %s
+        WHERE queue_code = %s
+      RETURNING time_list
+      """
+      #set up query to make call to database
+      cur.execute(query, (
+          new_wait_time,
+          queue_code,
+      ))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      #store and return entry just created in database

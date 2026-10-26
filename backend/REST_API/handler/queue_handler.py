@@ -21,6 +21,8 @@ class queueHandler:
       raise HTTPException(status_code=401, detail="queue_code in use")
     if not new_queue.service:
       raise HTTPException(status_code=401, detail="service is required")
+    if not new_queue.time_list:
+      raise HTTPException(status_code=401, detail="initial time_list is required")
     return queueDAO().add_queue3(new_queue)
 
   def get_queue_list2(self):

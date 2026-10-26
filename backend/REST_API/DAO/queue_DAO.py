@@ -56,6 +56,9 @@ class queueDAO:
     #set up query to make call to database
     cur.execute(query, (queue_code,))
     cashe = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
     if cashe == None:
       raise HTTPException(status_code=404, detail="queue missing")
     return cashe[0]
@@ -71,6 +74,9 @@ class queueDAO:
     #set up query to make call to database
     cur.execute(query, (queue_code,))
     cashe = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
     if cashe == None:
        return cashe
     return cashe[0]

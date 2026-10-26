@@ -79,6 +79,11 @@ async def list_customers1(queue_code: str, status_code=201):
 async def pop_customer(queue_code: str, status_code=201):
     return customerHandler().pop_customer2(queue_code)
 
+@app.get("/database/customer/get_time_remaning")
+async def get_time_remaning(
+    phone_number: str,
+    queue_code: str):
+      return customerHandler().get_time_remaning2(phone_number, queue_code)
 
 @app.post("/database/queue/add_queue")
 async def add_queue1(new_queue: Queue, request: Request, status_code=201):

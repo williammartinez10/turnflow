@@ -1,5 +1,5 @@
 from backend.REST_API.dbconfig import PG_DB_CONFIG, POOL_CONFIG
-from backend.REST_API.DAO.queue_DAO import queueDAO
+from backend.REST_API.DAO.queue_DAO import queueDAO, Queue
 import psycopg2
 from pydantic import BaseModel
 from typing import Optional
@@ -224,3 +224,48 @@ class customerDAO:
       )
       #store and return entry just created in database
       return next_customer
+
+  def get_time_remaning3(self, phone_number: str, queue_code: str):
+    item_list_integer: list[int]
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT item_list_integer FROM queue
+    WHERE queue_code = %s
+    """
+    #set up query to make call to database
+    cur.execute(query, (queue_code,))
+    item_list_integer = cur.fetchone().item_list_integer
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+    if item_list_integer == None:
+      raise HTTPException(status_code=404, detail="queue missing")
+
+    customer_list: list[Customer]
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT * FROM customer
+    WHERE queue_code = %s
+    """
+    #set up query to make call to database
+    cur.execute(query, (queue_code,))
+    customer_list = cur.fetchone().item_list_integer
+    conn.commit()
+    cur.close()
+    if customer_list == None:
+      raise HTTPException(status_code=404, detail="queue empty")
+
+    average_count = 0
+    item_list_sum = 0
+    for time_waited in item_list_integer:
+       average_count += 1
+       item_list_sum += time_waited
+    average_wait_time = time_waited / average_count
+       
+    customer_count = 0
+
+    while(customer_list[customer_count].phone_number != phone_number):
+       customer_count+=1
+    return customer_count * average_wait_timea

@@ -43,3 +43,19 @@ class customerHandler:
       "message": "Customer from queue " + queue_code + " successfully popped from queue",
       "customer": result
       }
+  def get_time_remaning2(phone_number: str, queue_code: str):
+    if not phone_number:
+      raise HTTPException(status_code=401, detail="phone_number is required")
+    if not queue_code:
+      raise HTTPException(status_code=401, detail="queue_code is required")
+
+    if len(phone_number) < 12 or len(phone_number) > 12:
+      raise HTTPException(status_code=401, detail="invalid phone number")
+    
+    if phone_number[3] != "-" or phone_number[7] != "-":
+      raise HTTPException(status_code=401, detail="invalid phone number")
+    
+    if not phone_number[0:3].isdigit() or not phone_number[4:7].isdigit() or not phone_number[8:12].isdigit():
+      raise HTTPException(status_code=401, detail="invalid phone number")
+
+    return customerDAO().get_time_remaning3(phone_number, queue_code)

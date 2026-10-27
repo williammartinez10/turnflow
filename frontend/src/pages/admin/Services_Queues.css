@@ -292,14 +292,16 @@
 /* Displays Queue Name | Status | Edit in three columns */
 .queues-row {
     display: grid;
-    grid-template-columns: 1fr 120px 120px;
+    grid-template-columns: 1fr 180px 120px 120px;
     align-items: center;
     border: 1px solid var(--color-carbon);
     gap: 8px;
 }
 
 /* Adds spacing inside each queue row */
-.queues-row span,
+.queues-row span {
+    white-space: nowrap;
+}
 .queues-row button {
     padding: 12px;
 }

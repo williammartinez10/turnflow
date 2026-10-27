@@ -1,9 +1,10 @@
 import "./Services_Queues.css";
 import Header from "../../components/Header/Header";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Describes what information every Service object should contain
 type Service = {
+    serviceId: number;
     name: string;
     description: string;
     active: boolean;
@@ -13,12 +14,15 @@ type Service = {
 
 type Queue = {
     name: string;
+    queueCode: string;
     prefix: string;
     description: string;
     services: string[];
+    serviceIds: number[];
     active: boolean;
     currentWait: number;
     peopleWaiting: number;
+
 };
 
 function Services_Queues() {
@@ -48,6 +52,93 @@ function Services_Queues() {
     const [editQueuePrefix, setEditQueuePrefix] = useState("");
     const [editQueueDescription, setEditQueueDescription] = useState("");
     const [editQueueServices, setEditQueueServices] = useState<string[]>([]);
+    const [editQueueServiceIds, setEditQueueServiceIds] = useState<number[]>([]);
+
+    // Loads queues already saved in the database when the page opens.
+    useEffect(() => {
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        async function loadQueues() {
+            const response = await fetch(
+                `${apiBaseUrl}/database/queue/get_queue_list`,
+                {
+                    credentials: "include",
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const savedQueues = await response.json();
+
+            setQueues(
+                savedQueues.map((queue: {
+                    queue_code: string;
+                    queue_name: string | null;
+                    prefix: string | null;
+                    description: string | null;
+                    service_ids: number[];
+                    service_names: string[];
+                    active: boolean;
+                }) => ({
+                    name: queue.queue_name ?? "",
+                    queueCode: queue.queue_code,
+                    prefix: queue.prefix ?? "",
+                    description: queue.description ?? "",
+                    serviceIds: queue.service_ids ?? [],
+                    services: queue.service_names ?? [],
+                    active: queue.active,
+                    currentWait: 0,
+                    peopleWaiting: 0,
+                }))
+            );
+        }
+
+        void loadQueues();
+    }, []);
+
+    // Loads services already saved in the database when the page opens.
+    useEffect(() => {
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        async function loadServices() {
+            const response = await fetch(
+                `${apiBaseUrl}/database/service/get_service_list`,
+                {
+                    credentials: "include",
+                }
+            );
+
+            if (!response.ok) {
+                return;
+            }
+
+            const savedServices = await response.json();
+
+            setServices(
+                savedServices.map((service: {
+                    service_id: number;
+                    service_name: string;
+                    description: string | null;
+                    active: boolean;
+                    estimated_duration: number;
+                }) => ({
+                    serviceId: service.service_id,
+                    name: service.service_name,
+                    description: service.description ?? "",
+                    active: service.active,
+                    estimatedDuration: service.estimated_duration,
+                    currentWait: 0,
+                }))
+            );
+        }
+
+        void loadServices();
+    }, []);
+
 
     // Clears the New Service form and closes it without creating anything
     function cancelNewService() {
@@ -56,15 +147,44 @@ function Services_Queues() {
         setShowNewService(false);
     }
 
-    // Checks the service name, creates the new service, then resets the form
-    function createService() {
+// Creates the service in the database, then adds it to the page.
+    async function createService() {
         if (!newServiceName.trim()) {
+            alert("Enter a service name before creating the service.");
             return;
         }
+
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/service/add_service`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    service_name: newServiceName.trim(),
+                    description: newServiceDescription.trim(),
+                    active: true,
+                    estimated_duration: 0,
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            console.error("Could not create service.");
+            return;
+        }
+
+        const createdService = await response.json();
 
         setServices([
             ...services,
             {
+                serviceId: createdService.service_id,
                 name: newServiceName.trim(),
                 description: newServiceDescription.trim(),
                 active: true,
@@ -72,18 +192,51 @@ function Services_Queues() {
                 currentWait: 0,
             },
         ]);
+
         setNewServiceName("");
         setNewServiceDescription("");
         setShowNewService(false);
     }
 
-    // Saves changes made to the selected service and exits edit mode
-    function saveEdit() {
+
+    // Saves service changes to the database and then updates the page.
+    async function saveEdit() {
         if (editingIndex === null || !editName.trim()) {
             return;
         }
 
+        const service = services[editingIndex];
+
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/service/update_service`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    service_id: service.serviceId,
+                    service_name: editName.trim(),
+                    description: editDescription.trim(),
+                    active: editActive,
+                    estimated_duration: editDuration,
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Could not update service:", error);
+            alert(`Could not update service: ${error}`);
+            return;
+        }
+
         const updatedServices = [...services];
+
         updatedServices[editingIndex] = {
             ...updatedServices[editingIndex],
             name: editName.trim(),
@@ -93,6 +246,7 @@ function Services_Queues() {
         };
 
         setServices(updatedServices);
+
         setEditingIndex(null);
         setEditName("");
         setEditDescription("");
@@ -108,19 +262,68 @@ function Services_Queues() {
         setShowNewQueue(false);
     }
 
-    // Creates a queue from the form values, then resets and closes the form
-    function createQueue() {
+
+    // Creates the queue in the database, then adds it to the page.
+    async function createQueue() {
         if (!newQueueName.trim()) {
+            alert("Enter a queue name before creating the queue.");
             return;
         }
+
+        if (newQueueServices.length === 0) {
+            alert("Select at least one service before creating the queue.");
+            return;
+        }
+
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/queue/add_queue`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    queue_name: newQueueName.trim(),
+                    prefix: newQueuePrefix.trim(),
+                    description: newQueueDescription.trim(),
+
+                    // Temporary old field while we transition
+                    service: newQueueServices[0],
+
+                    // Proper service relationships
+                    service_ids: services
+                        .filter((service) => newQueueServices.includes(service.name))
+                        .map((service) => service.serviceId),
+
+                    active: newQueueActive,
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            console.error("Could not create queue.");
+            return;
+        }
+
+        const createdQueue = await response.json();
 
         setQueues([
             ...queues,
             {
                 name: newQueueName.trim(),
+                queueCode: createdQueue.queue_code,
                 prefix: newQueuePrefix.trim(),
                 description: newQueueDescription.trim(),
                 services: newQueueServices,
+
+                serviceIds: services
+                    .filter((service) => newQueueServices.includes(service.name))
+                    .map((service) => service.serviceId),
+
                 active: newQueueActive,
                 currentWait: 0,
                 peopleWaiting: 0,
@@ -136,8 +339,51 @@ function Services_Queues() {
     }
 
     // Saves the edited queue values and exits queue edit mode
-    function saveQueueEdit() {
+    // Saves edited queue values to the database and then updates the page.
+    async function saveQueueEdit() {
         if (editingQueueIndex === null || !editQueueName.trim()) {
+            return;
+        }
+
+        if (editQueueServiceIds.length === 0) {
+            alert("Select at least one service before saving the queue.");
+            return;
+        }
+
+        const queue = queues[editingQueueIndex];
+
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/queue/update_queue`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    queue_code: queue.queueCode,
+                    queue_name: editQueueName.trim(),
+                    prefix: editQueuePrefix.trim(),
+                    description: editQueueDescription.trim(),
+
+                    // Temporary old field while we transition
+                    service: editQueueServices[0],
+
+                    // Proper service relationships
+                    service_ids: editQueueServiceIds,
+
+                    active: editQueueActive,
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Could not update queue:", error);
+            alert(`Could not update queue: ${error}`);
             return;
         }
 
@@ -153,6 +399,7 @@ function Services_Queues() {
         };
 
         setQueues(updatedQueues);
+
         setEditingQueueIndex(null);
         setEditQueuePrefix("");
         setEditQueueDescription("");
@@ -271,7 +518,7 @@ function Services_Queues() {
 
                                 {queues
                                     .filter((queue) =>
-                                        queue.services.includes(services[editingIndex].name)
+                                        queue.serviceIds.includes(services[editingIndex].serviceId)
                                     )
                                     .map((queue, index) => (
                                         <p key={index}>{queue.name}</p>
@@ -345,6 +592,11 @@ function Services_Queues() {
                             className="queues-button"
                             type="button"
                             onClick={() => {
+                                if (services.length === 0) {
+                                    alert("Create at least one service before creating a queue.");
+                                    return;
+                                }
+
                                 setEditingQueueIndex(null);
                                 setShowNewQueue(true);
                             }}
@@ -511,14 +763,25 @@ function Services_Queues() {
                                             {/* Updates the temporary service selection until Save is pressed */}
                                             <input
                                                 type="checkbox"
-                                                checked={editQueueServices.includes(service.name)}
+                                                checked={editQueueServiceIds.includes(service.serviceId)}
                                                 onChange={(e) => {
                                                     if (e.target.checked) {
+                                                        setEditQueueServiceIds([
+                                                            ...editQueueServiceIds,
+                                                            service.serviceId,
+                                                        ]);
+
                                                         setEditQueueServices([
                                                             ...editQueueServices,
                                                             service.name,
                                                         ]);
                                                     } else {
+                                                        setEditQueueServiceIds(
+                                                            editQueueServiceIds.filter(
+                                                                (id) => id !== service.serviceId
+                                                            )
+                                                        );
+
                                                         setEditQueueServices(
                                                             editQueueServices.filter(
                                                                 (name) => name !== service.name
@@ -556,6 +819,10 @@ function Services_Queues() {
                                     {/* Shows the saved queue name */}
                                     <span>{queue.name}</span>
 
+                                    <span>
+                                        Code: {queue.queueCode}
+                                    </span>
+
                                     {/* Shows the queue's current status */}
                                     <span>
                                         {queue.active ? "Active" : "Disabled"}
@@ -572,6 +839,7 @@ function Services_Queues() {
                                             setEditQueuePrefix(queue.prefix);
                                             setEditQueueDescription(queue.description);
                                             setEditQueueServices(queue.services);
+                                            setEditQueueServiceIds(queue.serviceIds);
                                         }}
                                     >
                                         Edit

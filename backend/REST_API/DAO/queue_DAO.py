@@ -13,7 +13,7 @@ class Queue(BaseModel):
   service: Optional[str] = None
   admin_id: Optional[int] = None
   organization_name: Optional[str] = None
-  time_list = Optional[list[datetime.datetime] | int] = None
+  time_list: Optional[list[datetime.timedelta]] = None
 
 class queueDAO:
   def __init__(self):
@@ -35,7 +35,7 @@ class queueDAO:
           new_queue.queue_code,
           new_queue.service,
           new_queue.admin_id,
-          new_queue.date_time
+          new_queue.time_list
       ))
       cashe = cur.fetchone()
       new_queue.queue_id = cashe[0]
@@ -138,7 +138,7 @@ class queueDAO:
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
       UPDATE queue SET
-        time_list = %s
+        time_list = array_append(queue.time_list, %s)
         WHERE queue_code = %s
       RETURNING time_list
       """

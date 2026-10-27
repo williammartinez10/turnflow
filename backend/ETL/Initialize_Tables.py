@@ -36,7 +36,7 @@ queue_code TEXT,
 service TEXT,
 admin_id integer,
 FOREIGN KEY (admin_id) REFERENCES admin(admin_id),
-time_list integer[]
+time_list INTERVAL[]
 );
 
 CREATE TABLE customer(
@@ -51,7 +51,7 @@ status TEXT NOT NULL DEFAULT 'waiting'
 
 CREATE TABLE next_customer(
 next_customer_id integer PRIMARY KEY,
-FOREIGN KEY (next_customer_id) REFERENCES customer(customer_id),
+FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
 queue_id integer,
 FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
 time TIMESTAMPTZ

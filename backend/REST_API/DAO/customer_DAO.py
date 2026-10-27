@@ -77,8 +77,8 @@ class customerDAO:
       new_customer.customer_id = cashe[0]
       new_customer.time = cashe[1]
       new_customer.status = cashe[2]
-      if customerDAO.get_next_customer3(queue_id).customer_id == new_customer.customer_id:
-         customerDAO.set_next_customer3(new_customer.customer.id)
+      if customerDAO().get_next_customer3(new_customer.queue_code).customer_id == new_customer.customer_id:
+         customerDAO().set_next_customer3(new_customer.customer_id, new_customer.queue_code)
       #store and return entry just created in database
       return new_customer
 
@@ -137,6 +137,15 @@ class customerDAO:
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
+      DELETE FROM next_customer
+      WHERE next_customer_id = (
+        SELECT next_customer_id FROM next_customer
+        WHERE queue_id = %s
+      )
+      """
+      #set up query to make call to database
+      cur.execute(query, (queue_id,))
+      query = """
       DELETE FROM customer
       WHERE customer_id = (
         SELECT customer_id FROM customer
@@ -162,9 +171,10 @@ class customerDAO:
           time=cashe["time"],
           status=cashe["status"]
       )
-      next_customer = customerDAO.get_next_customer3(queue_code).customer_id
-      queueDAO.update_wait_time(next_customer.time - datetime.datetime.now(), next_customer.queue_code)
-      customerDAO.set_next_customer3(next_customer.customer_id)
+      next_customer = customerDAO().get_next_customer3(queue_code)
+      if next_customer != None:
+        queueDAO().update_wait_time(datetime.datetime.now(datetime.timezone.utc) - next_customer.time, next_customer.queue_code)
+        customerDAO().set_next_customer3(next_customer.customer_id, next_customer.queue_code)
       return retired_customer
       #return the customer removed from the specified queue
 
@@ -174,7 +184,7 @@ class customerDAO:
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      SELECT customer_id, queue_id
+      SELECT customer_id, queue_id, time
       FROM customer
       WHERE customer_id = (
         SELECT customer_id FROM customer
@@ -182,7 +192,6 @@ class customerDAO:
         ORDER BY ticket_id
         LIMIT 1
       )
-      RETURNING *
       """
       #set up query to make call to database
       cur.execute(query, (queue_id,))
@@ -191,35 +200,39 @@ class customerDAO:
       cur.close()
       self.pool.putconn(conn)
       if cashe == None:
-         raise HTTPException(status_code=404, detail="queue missing or empty")
+         return None
       next_customer = Customer(
           customer_id=cashe["customer_id"],
+          time=cashe["time"],
           queue_code=queue_code,
       )
       return next_customer
 
-  def set_next_customer3(self, next_customer: int):
+  def set_next_customer3(self, next_customer: int, queue_code):
+      queue_id = queueDAO().get_withcode_queue3(queue_code)
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
       INSERT INTO next_customer
-        (next_customer, time)
-        VALUES (%s, NOW())
-      ON CONFLICT (next_customer)
+        (next_customer_id, queue_id, time)
+        VALUES (%s, %s, NOW())
+      ON CONFLICT (next_customer_id)
         WHERE next_customer
       DO UPDATE SET 
-        next_customer = EXCLUDED.next_customer
+        next_customer_id = EXCLUDED.next_customer_id,
+        queue_id = EXCLUDED.queue_id,
         time = NOW()
-      RETURNING customer_id, time
+      RETURNING next_customer_id, queue_id, time
       """
       #set up query to make call to database
-      cur.execute(query, (next_customer.phone_number,))
+      cur.execute(query, (next_customer, queue_id,))
       cashe = cur.fetchone()
       conn.commit()
       cur.close()
       self.pool.putconn(conn)
       next_customer = Customer(
-          customer_id=cashe["customer_id"],
+          next_customer_id=cashe["next_customer_id"],
+          queue_id =["queue_id"],
           time=cashe["time"]
       )
       #store and return entry just created in database
@@ -268,4 +281,4 @@ class customerDAO:
 
     while(customer_list[customer_count].phone_number != phone_number):
        customer_count+=1
-    return customer_count * average_wait_timea
+    return customer_count * average_wait_time

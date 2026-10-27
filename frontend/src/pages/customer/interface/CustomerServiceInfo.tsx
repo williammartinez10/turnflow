@@ -14,13 +14,18 @@ function CustomerServiceInfo() {
   // Queue information passed from CustomerJoinQueue.
   const queueCode = location.state?.queueCode;
   const queueId = location.state?.queueId;
-  const service = location.state?.service;
+  // New changes
+  const serviceIds: number[] = location.state?.serviceIds ?? [];
+  const serviceNames: string[] = location.state?.serviceNames ?? [];
   const organizationName = location.state?.organizationName;
 
   // Use backend information when available, with placeholders for missing details.
   const serviceInfo = {
     organizationName: organizationName || "<Organization Name>",
-    serviceName: service || "<Service Name>",
+    serviceName:
+        serviceNames.length > 0
+            ? serviceNames.join(", ")
+            : "<Service Name>",
     queueName: queueCode || "<Queue Name>",
   };
 
@@ -30,7 +35,6 @@ function CustomerServiceInfo() {
       state: {
         queueCode,
         queueId,
-        service,
         organizationName,
       },
     });

@@ -17,7 +17,6 @@ function CustomerJoinDetails() {
 
   // Queue information passed from the previous page.
   const queueCode = location.state?.queueCode;
-  const service = location.state?.service;
   const organizationName = location.state?.organizationName;
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -146,7 +145,6 @@ function CustomerJoinDetails() {
       state: {
         queueCode,
         ticketNumber,
-        service,
         status: ticketStatus,
         organizationName,
       },

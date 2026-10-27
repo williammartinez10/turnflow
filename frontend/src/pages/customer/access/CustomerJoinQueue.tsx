@@ -9,15 +9,27 @@ import Header from "../../../components/Header/Header";
 /** Queue fields returned by the backend and passed through the joining flow. */
 interface Queue {
   queue_id: number;
-  service: string;
+  // New changes
+  service_ids: number[];
+  service_names: string[];
   queue_code: string;
   organization_name?: string | null;
 }
 
 // Dummy queues for testing without the backend.
 const mockQueues: Queue[] = [
-  { queue_id: 1, service: "Medicine", queue_code: "ABC-123-45" },
-  { queue_id: 2, service: "Lawyer", queue_code: "DEF-678-90" },
+  {
+    queue_id: 1,
+    service_ids: [1],
+    service_names: ["Medicine"],
+    queue_code: "ABC-123-45",
+  },
+  {
+    queue_id: 2,
+    service_ids: [2],
+    service_names: ["Lawyer"],
+    queue_code: "DEF-678-90",
+  },
 ];
 
 /**
@@ -75,7 +87,8 @@ function CustomerJoinQueue() {
       navigate("/service-information", {
         state: {
           queueCode: selectedQueue.queue_code,
-          service: selectedQueue.service,
+          serviceIds: selectedQueue.service_ids,
+          serviceNames: selectedQueue.service_names,
           queueId: selectedQueue.queue_id,
           organizationName: selectedQueue.organization_name,
         },

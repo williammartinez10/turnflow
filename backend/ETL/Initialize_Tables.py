@@ -1,5 +1,3 @@
-import pandas as pd
-import os
 import psycopg2
 
 DB_CONFIG = {

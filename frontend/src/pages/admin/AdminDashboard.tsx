@@ -16,6 +16,8 @@ function AdminDashboard() {
     const [organizationName, setOrganizationName] = useState("Loading...");
     // Stores the number of customers currently waiting in this admin's queues
     const [peopleWaiting, setPeopleWaiting] = useState(0);
+    // Stores the number of active queues owned by the logged-in admin
+    const [activeQueues, setActiveQueues] = useState(0);
     useEffect(() => {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -33,6 +35,20 @@ function AdminDashboard() {
             }
 
             const account = await response.json();
+
+            // Gets the number of active queues owned by this admin
+            const activeQueuesResponse = await fetch(
+                `${apiBaseUrl}/database/queue/count_active_${account.admin_id}`,
+                {
+                    credentials: "include",
+                }
+            );
+
+            if (activeQueuesResponse.ok) {
+                const activeQueueCount = await activeQueuesResponse.json();
+                setActiveQueues(activeQueueCount);
+            }
+
             setOrganizationName(account.organization_name);
 
             // Gets the number of customers waiting in queues owned by this admin
@@ -85,7 +101,7 @@ function AdminDashboard() {
 
                         <div className="admin-dashboard-item">
                             <strong>Active Queues</strong>
-                            <p>&lt;Count&gt;</p>
+                            <p>{activeQueues}</p>
                         </div>
 
                         <div className="admin-dashboard-item">

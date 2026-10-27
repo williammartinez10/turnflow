@@ -29,6 +29,9 @@ from backend.REST_API.DAO.staff_privilege_DAO import (
     Staff_Privilege,
 )
 
+from backend.REST_API.DAO.service_DAO import Service
+from backend.REST_API.handler.service_handler import serviceHandler
+
 app = FastAPI()
 
 # Create backend/.env containing SESSION_SECRET_KEY=<random key>.
@@ -80,6 +83,37 @@ async def list_customers1(queue_code: str, status_code=201):
 @app.get("/database/customer/count_waiting_{admin_id}")
 async def count_waiting_customers1(admin_id: int):
     return customerHandler().count_waiting_customers2(admin_id)
+
+@app.post("/database/service/add_service")
+async def add_service1(new_service: Service, request: Request, status_code=201):
+    return serviceHandler().add_service2(
+        new_service,
+        request.session.get("account")
+    )
+
+@app.get("/database/service/get_service_list")
+async def get_service_list1(request: Request):
+    return serviceHandler().get_service_list2(
+        request.session.get("account")
+    )
+
+@app.get("/database/queue/count_active_{admin_id}")
+async def count_active_queues1(admin_id: int):
+    return queueHandler().count_active_queues2(admin_id)
+
+@app.put("/database/queue/update_queue")
+async def update_queue1(updated_queue: Queue, request: Request):
+    return queueHandler().update_queue2(
+        updated_queue,
+        request.session.get("account")
+    )
+
+@app.put("/database/service/update_service")
+async def update_service1(updated_service: Service, request: Request):
+    return serviceHandler().update_service2(
+        updated_service,
+        request.session.get("account")
+    )
 
 # ===== End Dashboard Statistics =====
 

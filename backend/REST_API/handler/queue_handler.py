@@ -39,10 +39,10 @@ class queueHandler:
 
     new_queue.queue_code = queue_code
 
-    if not new_queue.service_ids:
+    if new_queue.service_id is None:
       raise HTTPException(
         status_code=400,
-        detail="At least one service is required"
+        detail="A service is required"
       )
     return queueDAO().add_queue3(new_queue)
 
@@ -52,12 +52,25 @@ class queueHandler:
   def get_withcode_queue2(self, queue_code: str):
     return queueDAO().get_withcode_queue3(queue_code)
 
-  def delete_queue2(self, queue_code: str):
-    result = queueDAO().delete_queue3(queue_code)
+  def get_active_withcode_queue2(self, queue_code: str):
+    return queueDAO().get_active_withcode_queue3(queue_code)
+
+  def delete_queue2(self, queue_code: str, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
+    result = queueDAO().delete_queue3(
+      queue_code,
+      account["admin_id"]
+    )
+
     return {
-      "message": "Queue" + queue_code + " successfully deleted",
+      "message": "Queue " + queue_code + " successfully deleted",
       "queue": result
-      }
+    }
 
   # ===== Dashboard Statistics =====
 
@@ -86,10 +99,10 @@ class queueHandler:
     if not updated_queue.queue_name:
       raise HTTPException(status_code=400, detail="queue_name is required")
 
-    if not updated_queue.service_ids:
+    if updated_queue.service_id is None:
       raise HTTPException(
         status_code=400,
-        detail="At least one service is required"
+        detail="A service is required"
       )
 
     return queueDAO().update_queue3(updated_queue)

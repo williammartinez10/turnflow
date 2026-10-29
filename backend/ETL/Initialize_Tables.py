@@ -12,7 +12,6 @@ conn = psycopg2.connect(**DB_CONFIG)
 cur = conn.cursor()
 query = """
 DROP TABLE IF EXISTS customer CASCADE;
-DROP TABLE IF EXISTS queue_service CASCADE;
 DROP TABLE IF EXISTS queue CASCADE;
 DROP TABLE IF EXISTS user_log CASCADE;
 DROP TABLE IF EXISTS staff_privilege CASCADE;
@@ -46,16 +45,9 @@ queue_code TEXT UNIQUE,
 queue_name TEXT,
 prefix TEXT,
 description TEXT,
-service TEXT,
+service_id INTEGER NOT NULL REFERENCES service(service_id),
 active BOOLEAN NOT NULL DEFAULT TRUE,
-admin_id INTEGER REFERENCES admin(admin_id)
-);
-
-CREATE TABLE queue_service(
-queue_id INTEGER NOT NULL REFERENCES queue(queue_id) ON DELETE CASCADE,
-service_id INTEGER NOT NULL REFERENCES service(service_id) ON DELETE CASCADE,
-
-PRIMARY KEY (queue_id, service_id)
+admin_id INTEGER NOT NULL REFERENCES admin(admin_id)
 );
 
 CREATE TABLE customer(

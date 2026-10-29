@@ -137,9 +137,16 @@ async def get_queue_list1(status_code=201):
 async def get_withcode_queue1(queue_code: str, status_code=201):
     return queueHandler().get_withcode_queue2(queue_code)
 
-@app.delete("/database/queue/delete_queue_{queue_code}")
-async def delete_queue1(queue_code: str, status_code=201):
-    return queueHandler().delete_queue2(queue_code)
+@app.get("/database/queue/get_active_withcode/{queue_code}")
+def get_active_withcode_queue(queue_code: str):
+    return queueHandler().get_active_withcode_queue2(queue_code)
+
+@app.delete("/database/queue/delete_queue/{queue_code}")
+async def delete_queue1(queue_code: str, request: Request):
+    return queueHandler().delete_queue2(
+        queue_code,
+        request.session.get("account")
+    )
 
 
 @app.post("/database/admin/add_admin", status_code=201)

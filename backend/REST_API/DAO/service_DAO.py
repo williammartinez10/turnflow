@@ -109,6 +109,20 @@ class serviceDAO:
 
         cashe = cur.fetchone()
 
+        if cashe is not None and updated_service.active is False:
+            cur.execute(
+                """
+                UPDATE queue
+                SET active = FALSE
+                WHERE service_id = %s
+                  AND admin_id = %s
+                """,
+                (
+                    updated_service.service_id,
+                    updated_service.admin_id
+                )
+            )
+
         conn.commit()
         cur.close()
         self.pool.putconn(conn)

@@ -69,10 +69,23 @@
 
 /* Spreads the service name, status, and wait time across the row */
 .services-summary {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr 180px 120px;
+    align-items: center;
     width: 100%;
+}
+
+/* Places Current Wait before Active so Active aligns with Queue status */
+.services-summary span:nth-child(2) {
+    grid-column: 3;
+}
+
+.services-summary span:nth-child(3) {
+    grid-column: 2;
+}
+
+.services-summary span {
+    grid-row: 1;
 }
 
 /* =========================================================
@@ -292,7 +305,7 @@
 /* Displays Queue Name | Status | Edit in three columns */
 .queues-row {
     display: grid;
-    grid-template-columns: 1fr 180px 120px 120px;
+    grid-template-columns: 1fr 180px 120px 120px 120px;
     align-items: center;
     border: 1px solid var(--color-carbon);
     gap: 8px;

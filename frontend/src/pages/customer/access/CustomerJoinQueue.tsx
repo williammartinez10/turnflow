@@ -10,27 +10,27 @@ import Header from "../../../components/Header/Header";
 interface Queue {
   queue_id: number;
   // New changes
-  service_ids: number[];
-  service_names: string[];
+  service_id: number;
+  service_name: string;
   queue_code: string;
   organization_name?: string | null;
 }
 
 // Dummy queues for testing without the backend.
-const mockQueues: Queue[] = [
-  {
-    queue_id: 1,
-    service_ids: [1],
-    service_names: ["Medicine"],
-    queue_code: "ABC-123-45",
-  },
-  {
-    queue_id: 2,
-    service_ids: [2],
-    service_names: ["Lawyer"],
-    queue_code: "DEF-678-90",
-  },
-];
+// const mockQueues: Queue[] = [
+//   {
+//     queue_id: 1,
+//     service_ids: [1],
+//     service_names: ["Medicine"],
+//     queue_code: "ABC-123-45",
+//   },
+//   {
+//     queue_id: 2,
+//     service_ids: [2],
+//     service_names: ["Lawyer"],
+//     queue_code: "DEF-678-90",
+//   },
+// ];
 
 /**
  * Lets a customer find a queue by code and review its service before joining.
@@ -57,38 +57,36 @@ function CustomerJoinQueue() {
     setError("");
     setIsLoading(true);
 
-    let queues: Queue[] = mockQueues;
+    let selectedQueue: Queue | null = null;
 
     try {
-      // Get queues from the backend.
       const response = await fetch(
-        "http://127.0.0.1:8000/database/queue/get_queue_list", {
-          method: "GET",
-        }
+          `http://127.0.0.1:8000/database/queue/get_active_withcode/${queueCode.trim()}`,
+          {
+            method: "GET",
+          }
       );
 
       if (!response.ok) {
-        throw new Error("Backend request failed");
+        setError("Queue not found or currently disabled.");
+        setIsLoading(false);
+        return;
       }
 
-      queues = await response.json();
+      selectedQueue = await response.json();
     } catch (error) {
-      // Fall back to dummy queues so the frontend can be tested without the backend.
-      console.warn("Could not load queues. Using mock data.", error);
+      console.warn("Could not connect to backend.", error);
+      setError("Could not connect to the server.");
+      setIsLoading(false);
+      return;
     }
-
-    // Find queue entered by the customer.
-    const selectedQueue = queues.find(
-      (queue) =>
-        queue.queue_code.toUpperCase() === queueCode.trim().toUpperCase()
-    );
 
     if (selectedQueue) {
       navigate("/service-information", {
         state: {
           queueCode: selectedQueue.queue_code,
-          serviceIds: selectedQueue.service_ids,
-          serviceNames: selectedQueue.service_names,
+          serviceId: selectedQueue.service_id,
+          serviceName: selectedQueue.service_name,
           queueId: selectedQueue.queue_id,
           organizationName: selectedQueue.organization_name,
         },

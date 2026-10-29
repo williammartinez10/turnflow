@@ -14,6 +14,7 @@ import StaffSignup from "./pages/signup/staff/StaffSignup/StaffSignup";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Services_Queues from "./pages/admin/Services_Queues";
 import RequireAdmin from "./components/RequireAdmin/RequireAdmin";
+import StaffDashboard from "./pages/staff/StaffDashboard";
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
         <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/admin/Services_Queues" element={<Services_Queues />} />
       </Route>
+
+      <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />
 
       {import.meta.env.DEV && (
         <Route path="/dev" element={<DevPage />} />

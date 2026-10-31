@@ -85,6 +85,7 @@ async def get_time_remaning(
     queue_code: str):
       return customerHandler().get_time_remaning2(phone_number, queue_code)
 
+
 @app.post("/database/queue/add_queue")
 async def add_queue1(new_queue: Queue, request: Request, status_code=201):
     return queueHandler().add_queue2(
@@ -93,22 +94,22 @@ async def add_queue1(new_queue: Queue, request: Request, status_code=201):
     )
 
 @app.get("/database/queue/get_queue_list")
-async def get_queue_list1(status_code=201):
-    return queueHandler().get_queue_list2()
+async def get_queue_list1(request: Request, status_code=201):
+    return queueHandler().get_queue_list2(request.session.get("account"))
 
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
-async def get_withcode_queue1(queue_code: str, status_code=201):
-    return queueHandler().get_withcode_queue2(queue_code)
+async def get_withcode_queue1(queue_code: str, request: Request, status_code=201):
+    return queueHandler().get_withcode_queue2(queue_code, request.session.get("account"))
 
 @app.delete("/database/queue/delete_queue_{queue_code}")
-async def delete_queue1(queue_code: str, status_code=201):
-    return queueHandler().delete_queue2(queue_code)
+async def delete_queue1(queue_code: str, request: Request, status_code=201):
+    return queueHandler().delete_queue2(queue_code, request)
 
 
 @app.post("/database/admin/add_admin", status_code=201)
-def add_admin1(new_admin: Admin, status_code=201):
+def add_admin1(new_admin: Admin, request: Request, status_code=201):
     """ Register an admin using signup validation and password hashing in handler. """
-    return adminHandler().add_admin2(new_admin)
+    return adminHandler().add_admin2(new_admin, request)
 
 # Credential verification uses POST; get-prefixed routes retrieve data.
 @app.post("/database/admin/verify_admin", status_code=201)

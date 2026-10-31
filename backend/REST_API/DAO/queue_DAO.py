@@ -26,8 +26,8 @@ class queueDAO:
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
       INSERT INTO queue
-      (queue_code, service, admin_id, time_list)
-      VALUES (%s, %s, %s, %s)
+      (queue_code, service, admin_id, organization_name, time_list)
+      VALUES (%s, %s, %s, %s, %s)
       RETURNING queue_id
       """
       #set up query to make call to database
@@ -35,6 +35,7 @@ class queueDAO:
           new_queue.queue_code,
           new_queue.service,
           new_queue.admin_id,
+          new_queue.organization_name,
           new_queue.time_list
       ))
       cashe = cur.fetchone()
@@ -46,7 +47,6 @@ class queueDAO:
       return new_queue
   
   def get_withcode_queue3(self, queue_code: str):
-    cashe: Queue
     conn = self.pool.getconn()
     cur = conn.cursor(cursor_factory=DictCursor)
     query = """
@@ -56,12 +56,20 @@ class queueDAO:
     #set up query to make call to database
     cur.execute(query, (queue_code,))
     cashe = cur.fetchone()
+    queue = Queue()
+    queue.queue_id = cashe[0]
+    queue.queue_code = cashe[1]
+    queue.service = cashe[2]
+    queue.admin_id = cashe[3]
+    queue.organization_name = cashe[4]
+    queue.time_list = cashe[5]
+
     conn.commit()
     cur.close()
     self.pool.putconn(conn)
     if cashe == None:
       raise HTTPException(status_code=404, detail="queue missing")
-    return cashe[0]
+    return queue
 
   def check_withcode_queue3(self, queue_code: str):
     cashe: Queue
@@ -106,7 +114,7 @@ class queueDAO:
       #return list of queues, unless it's empty in which case an error is returned
 
   def delete_queue3(self, queue_code: str):
-      queue_id = queueDAO().get_withcode_queue3(queue_code)
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
       cashe: Queue
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)

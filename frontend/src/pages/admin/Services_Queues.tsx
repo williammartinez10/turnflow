@@ -20,6 +20,7 @@ type Queue = {
     serviceName: string;
     serviceId: number | null;
     active: boolean;
+    pendingDisable: boolean;
     currentWait: number;
     peopleWaiting: number;
 
@@ -33,7 +34,6 @@ function Services_Queues() {
     const [services, setServices] = useState<Service[]>([]);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editName, setEditName] = useState("");
-    const [editActive, setEditActive] = useState(true);
     const [editDuration, setEditDuration] = useState(0);
     const [editDescription, setEditDescription] = useState("");
 
@@ -48,7 +48,6 @@ function Services_Queues() {
 
     const [editingQueueIndex, setEditingQueueIndex] = useState<number | null>(null);
     const [editQueueName, setEditQueueName] = useState("");
-    const [editQueueActive, setEditQueueActive] = useState(true);
     const [editQueuePrefix, setEditQueuePrefix] = useState("");
     const [editQueueDescription, setEditQueueDescription] = useState("");
     const [editQueueServiceId, setEditQueueServiceId] = useState<number | null>(null);
@@ -81,6 +80,7 @@ function Services_Queues() {
                 service_id: number;
                 service_name: string;
                 active: boolean;
+                pending_disable: boolean;
             }) => ({
                 name: queue.queue_name ?? "",
                 queueCode: queue.queue_code,
@@ -89,6 +89,7 @@ function Services_Queues() {
                 serviceId: queue.service_id ?? null,
                 serviceName: queue.service_name ?? "",
                 active: queue.active,
+                pendingDisable: queue.pending_disable,
                 currentWait: 0,
                 peopleWaiting: 0,
             }))
@@ -229,7 +230,6 @@ function Services_Queues() {
                     service_id: service.serviceId,
                     service_name: editName.trim(),
                     description: editDescription.trim(),
-                    active: editActive,
                     estimated_duration: editDuration,
                 }),
             }
@@ -248,7 +248,6 @@ function Services_Queues() {
             ...updatedServices[editingIndex],
             name: editName.trim(),
             description: editDescription.trim(),
-            active: editActive,
             estimatedDuration: editDuration,
         };
 
@@ -294,6 +293,11 @@ function Services_Queues() {
             return;
         }
 
+        if (newQueueActive && !selectedService.active) {
+            alert("An active queue cannot be created under a disabled service.");
+            return;
+        }
+
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -335,9 +339,8 @@ function Services_Queues() {
                 description: newQueueDescription.trim(),
                 serviceName: selectedService.name,
                 serviceId: newQueueServiceId,
-
-
                 active: newQueueActive,
+                pendingDisable: false,
                 currentWait: 0,
                 peopleWaiting: 0,
             }
@@ -393,7 +396,6 @@ function Services_Queues() {
 
                     service_id: editQueueServiceId,
 
-                    active: editQueueActive,
                 }),
             }
         );
@@ -414,7 +416,6 @@ function Services_Queues() {
             description: editQueueDescription.trim(),
             serviceName: selectedService.name,
             serviceId: editQueueServiceId,
-            active: editQueueActive,
         };
 
         setQueues(updatedQueues);
@@ -463,6 +464,101 @@ function Services_Queues() {
         }
 
         await loadQueues();
+    }
+
+    async function setQueueActive(queue: Queue, makeActive: boolean) {
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/queue/set_active/${queue.queueCode}?make_active=${makeActive}`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Could not change queue status:", error);
+            alert("Could not change queue status.");
+            return;
+        }
+
+        await loadQueues();
+    }
+
+    async function setServiceActive(
+        service: Service,
+        makeActive: boolean
+    ) {
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/service/set_active/${service.serviceId}?make_active=${makeActive}`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Could not change service status:", error);
+            alert("Could not change service status.");
+            return;
+        }
+
+        // Update the service immediately on the page.
+        setServices((currentServices) =>
+            currentServices.map((currentService) =>
+                currentService.serviceId === service.serviceId
+                    ? {
+                        ...currentService,
+                        active: makeActive,
+                    }
+                    : currentService
+            )
+        );
+
+        // Disabling a service may also change its queues.
+        await loadQueues();
+    }
+
+    async function deleteService(service: Service) {
+        const confirmed = window.confirm(
+            `Delete service "${service.name}"?`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        const response = await fetch(
+            `${apiBaseUrl}/database/service/delete_service/${service.serviceId}`,
+            {
+                method: "DELETE",
+                credentials: "include",
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Could not delete service:", error);
+            alert("Could not delete service.");
+            return;
+        }
+
+        setServices((currentServices) =>
+            currentServices.filter(
+                (currentService) =>
+                    currentService.serviceId !== service.serviceId
+            )
+        );
     }
 
 
@@ -552,6 +648,14 @@ function Services_Queues() {
                                 type="text"
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
+                                disabled={
+                                    services[editingIndex].active ||
+                                    queues.some(
+                                        (queue) =>
+                                            queue.serviceId === services[editingIndex].serviceId &&
+                                            (queue.active || queue.pendingDisable)
+                                    )
+                                }
                             />
 
                             {/* Lets the service description be changed */}
@@ -562,17 +666,7 @@ function Services_Queues() {
                                 onChange={(e) => setEditDescription(e.target.value)}
                             />
 
-                            <label>Status</label>
 
-                            <select
-                                value={editActive ? "active" : "disabled"}
-                                onChange={(e) =>
-                                    setEditActive(e.target.value === "active")
-                                }
-                            >
-                                <option value="active">Active</option>
-                                <option value="disabled">Disabled</option>
-                            </select>
 
                             {/* Shows which queues currently use this service */}
                             <div className="service-used-queues">
@@ -616,9 +710,18 @@ function Services_Queues() {
                                 <div className="services-summary">
                                     <span>{service.name}</span>
 
-                                    <span>
-                                        {service.active ? "Active" : "Inactive"}
-                                    </span>
+                                    <select
+                                        value={service.active ? "active" : "disabled"}
+                                        onChange={(e) => {
+                                            void setServiceActive(
+                                                service,
+                                                e.target.value === "active"
+                                            );
+                                        }}
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="disabled">Disabled</option>
+                                    </select>
 
                                     <span>
                                         Current Wait: {service.currentWait} min
@@ -633,12 +736,24 @@ function Services_Queues() {
                                         setEditingIndex(index);
                                         setEditName(service.name);
                                         setEditDescription(service.description);
-                                        setEditActive(service.active);
                                         setEditDuration(service.estimatedDuration);
                                     }}
                                 >
                                     Edit
                                 </button>
+
+                                {!service.active &&
+                                    !queues.some(
+                                        (queue) => queue.serviceId === service.serviceId
+                                    ) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => deleteService(service)}
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
+
                             </div>
                         ))}
                     </div>
@@ -710,25 +825,44 @@ function Services_Queues() {
                                     value={newQueueActive ? "active" : "disabled"}
                                     onChange={(e) => setNewQueueActive(e.target.value === "active")}
                                 >
-                                    <option value="active">Active</option>
+                                    <option
+                                        value="active"
+                                        disabled={
+                                            newQueueServiceId !== null &&
+                                            !services.find(
+                                                (service) => service.serviceId === newQueueServiceId
+                                            )?.active
+                                        }
+                                    >
+                                        Active
+                                    </option>
                                     <option value="disabled">Disabled</option>
                                 </select>
 
-                                {/* Lists existing services so multiple ones can be assigned to this queue */}
+                                {/* Lists existing services so one can be assigned to this queue */}
 
                                 <div className="queue-services-selection">
-                                    <p>Services in Queue</p>
+                                    <p>Service</p>
 
                                     <label htmlFor="queue-service">Service</label>
 
                                     <select
                                         id="queue-service"
                                         value={newQueueServiceId ?? ""}
-                                        onChange={(e) =>
-                                            setNewQueueServiceId(
-                                                e.target.value ? Number(e.target.value) : null
-                                            )
-                                        }
+                                        onChange={(e) => {
+                                            const serviceId =
+                                                e.target.value ? Number(e.target.value) : null;
+
+                                            setNewQueueServiceId(serviceId);
+
+                                            const selectedService = services.find(
+                                                (service) => service.serviceId === serviceId
+                                            );
+
+                                            if (selectedService && !selectedService.active) {
+                                                setNewQueueActive(false);
+                                            }
+                                        }}
                                     >
                                         <option value="">Select a service</option>
 
@@ -738,6 +872,7 @@ function Services_Queues() {
                                                 value={service.serviceId}
                                             >
                                                 {service.name}
+                                                {!service.active ? " (Disabled)" : ""}
                                             </option>
                                         ))}
                                     </select>
@@ -778,6 +913,10 @@ function Services_Queues() {
                                     type="text"
                                     value={editQueueName}
                                     onChange={(e) => setEditQueueName(e.target.value)}
+                                    disabled={
+                                        queues[editingQueueIndex].active ||
+                                        queues[editingQueueIndex].pendingDisable
+                                    }
                                 />
 
                                 {/* Lets the queue prefix be changed while editing */}
@@ -786,6 +925,10 @@ function Services_Queues() {
                                     type="text"
                                     value={editQueuePrefix}
                                     onChange={(e) => setEditQueuePrefix(e.target.value)}
+                                    disabled={
+                                        queues[editingQueueIndex].active ||
+                                        queues[editingQueueIndex].pendingDisable
+                                    }
                                 />
 
                                 {/* Lets the queue description be changed while editing */}
@@ -796,22 +939,12 @@ function Services_Queues() {
                                     onChange={(e) => setEditQueueDescription(e.target.value)}
                                 />
 
-                                {/* Changes whether the selected queue is active or disabled */}
-                                <label>Status</label>
-                                <select
-                                    value={editQueueActive ? "active" : "disabled"}
-                                    onChange={(e) =>
-                                        setEditQueueActive(e.target.value === "active")
-                                    }
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="disabled">Disabled</option>
-                                </select>
+
 
                                 {/* Shows the services currently available to assign to this queue */}
 
                                 <div className="queue-services-selection">
-                                    <p>Services in Queue</p>
+                                    <p>Service</p>
 
                                     <label htmlFor="edit-queue-service">Service</label>
 
@@ -823,6 +956,10 @@ function Services_Queues() {
                                                 e.target.value ? Number(e.target.value) : null
                                             )
                                         }
+                                        disabled={
+                                            queues[editingQueueIndex].active ||
+                                            queues[editingQueueIndex].pendingDisable
+                                        }
                                     >
                                         <option value="">Select a service</option>
 
@@ -832,12 +969,13 @@ function Services_Queues() {
                                                 value={service.serviceId}
                                             >
                                                 {service.name}
+                                                {!service.active ? " (Disabled)" : ""}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
 
-                                {/* ===== End Services assigned to queue ===== */}
+                                {/* ===== End Service assigned to queue ===== */}
 
                                 <div className="queues-form-actions">
                                     {/* Discards the temporary edit values and closes Edit Queue mode */}
@@ -865,9 +1003,43 @@ function Services_Queues() {
                                     </span>
 
                                     {/* Shows the queue's current status */}
-                                    <span>
-                                        {queue.active ? "Active" : "Disabled"}
-                                    </span>
+                                    <select
+                                        value={
+                                            queue.pendingDisable
+                                                ? "pending"
+                                                : queue.active
+                                                    ? "active"
+                                                    : "disabled"
+                                        }
+                                        onChange={(e) => {
+                                            if (e.target.value === "active") {
+                                                void setQueueActive(queue, true);
+                                            }
+
+                                            if (e.target.value === "disabled") {
+                                                void setQueueActive(queue, false);
+                                            }
+                                        }}
+                                    >
+                                        <option
+                                            value="active"
+                                            disabled={
+                                                !services.find(
+                                                    (service) => service.serviceId === queue.serviceId
+                                                )?.active
+                                            }
+                                        >
+                                            Active
+                                        </option>
+
+                                        {queue.pendingDisable && (
+                                            <option value="pending" disabled>
+                                                Pending Disable
+                                            </option>
+                                        )}
+
+                                        <option value="disabled">Disabled</option>
+                                    </select>
 
                                     <button
                                         // Loads this queue's saved values into the Edit Queue form above
@@ -876,7 +1048,6 @@ function Services_Queues() {
                                             setShowNewQueue(false);
                                             setEditingQueueIndex(index);
                                             setEditQueueName(queue.name);
-                                            setEditQueueActive(queue.active);
                                             setEditQueuePrefix(queue.prefix);
                                             setEditQueueDescription(queue.description);
                                             setEditQueueServiceId(queue.serviceId);
@@ -885,12 +1056,14 @@ function Services_Queues() {
                                         Edit
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => deleteQueue(queue)}
-                                    >
-                                        Delete
-                                    </button>
+                                    {!queue.active && !queue.pendingDisable && (
+                                        <button
+                                            type="button"
+                                            onClick={() => deleteQueue(queue)}
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
 
                                 </div>
                             ))}

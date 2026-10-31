@@ -47,6 +47,7 @@ prefix TEXT,
 description TEXT,
 service_id INTEGER NOT NULL REFERENCES service(service_id),
 active BOOLEAN NOT NULL DEFAULT TRUE,
+pending_disable BOOLEAN NOT NULL DEFAULT FALSE,
 admin_id INTEGER NOT NULL REFERENCES admin(admin_id)
 );
 
@@ -55,8 +56,14 @@ customer_id serial PRIMARY KEY,
 ticket_id integer,
 phone_number TEXT,
 queue_id integer,
-FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
+FOREIGN KEY (queue_id)
+    REFERENCES queue(queue_id)
+    ON DELETE CASCADE,
+
 time TIMESTAMPTZ,
+called_time TIMESTAMPTZ,
+completed_time TIMESTAMPTZ,
+
 status TEXT NOT NULL DEFAULT 'waiting'
 );
 

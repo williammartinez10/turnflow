@@ -24,14 +24,21 @@ class serviceHandler:
         return serviceDAO().add_service3(new_service)
 
     def get_service_list2(self, account: dict | None):
-        # Require an Admin session before loading services.
         if account is None:
-            raise HTTPException(status_code=401, detail="Not logged in.")
+            raise HTTPException(
+                status_code=401,
+                detail="Not logged in."
+            )
 
         if account.get("role") != "admin":
-            raise HTTPException(status_code=403, detail="Admin access required.")
+            raise HTTPException(
+                status_code=403,
+                detail="Admin access required."
+            )
 
-        return serviceDAO().get_service_list3(account["admin_id"])
+        return serviceDAO().get_service_list3(
+            account["admin_id"]
+        )
 
     # ===== Service Editing =====
 
@@ -57,3 +64,43 @@ class serviceHandler:
         return serviceDAO().update_service3(updated_service)
 
     # ===== End Service Editing =====
+
+    def set_service_active2(
+            self,
+            service_id: int,
+            make_active: bool,
+            account: dict | None
+    ):
+        if account is None:
+            raise HTTPException(status_code=401, detail="Not logged in.")
+
+        if account.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Admin access required.")
+
+        return serviceDAO().set_service_active3(
+            service_id,
+            account["admin_id"],
+            make_active
+        )
+
+    def delete_service2(
+            self,
+            service_id: int,
+            account: dict | None
+    ):
+        if account is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Not logged in."
+            )
+
+        if account.get("role") != "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="Admin access required."
+            )
+
+        return serviceDAO().delete_service3(
+            service_id,
+            account["admin_id"]
+        )

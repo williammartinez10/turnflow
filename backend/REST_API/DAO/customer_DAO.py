@@ -13,7 +13,9 @@ class Customer(BaseModel):
   ticket_id: Optional[int] = None
   phone_number: Optional[str] = None
   queue_code: Optional[str] = None
-  time: Optional[datetime.datetime | str] = None
+  time: Optional[datetime.datetime] = None
+  called_time: Optional[datetime.datetime] = None
+  completed_time: Optional[datetime.datetime] = None
   status: Optional[str] = None
 
 class customerDAO:
@@ -48,7 +50,8 @@ class customerDAO:
          ticket_id = 1
       else:
         ticket_id = ticket_id[0].ticket_id+1
-      queue_id = queueDAO().get_withcode_queue3(new_customer.queue_code)
+      queue = queueDAO().get_active_withcode_queue3(new_customer.queue_code)
+      queue_id = queue.queue_id
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
@@ -85,16 +88,21 @@ class customerDAO:
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      SELECT customer.ticket_id AS ticket_number,
-      queue.queue_code,
-      queue.service,
-      customer.status,
-      admin.organization_name
+      SELECT
+          customer.ticket_id AS ticket_number,
+          queue.queue_code,
+          service.service_name AS service,
+          customer.status,
+          admin.organization_name
       FROM customer
-      JOIN queue ON customer.queue_id = queue.queue_id
-      LEFT JOIN admin ON queue.admin_id = admin.admin_id
+               JOIN queue
+                    ON customer.queue_id = queue.queue_id
+               JOIN service
+                    ON queue.service_id = service.service_id
+               LEFT JOIN admin
+                         ON queue.admin_id = admin.admin_id
       WHERE queue.queue_code = %s
-      AND customer.ticket_id = %s
+        AND customer.ticket_id = %s \
       """
       #set up query to make call to database
       cur.execute(query, (queue_code, ticket_number))
@@ -162,15 +170,20 @@ class customerDAO:
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
       query = """
-      DELETE FROM customer
-      WHERE customer_id = (
-        SELECT customer_id FROM customer
-        WHERE queue_id = %s
-        ORDER BY ticket_id
-        LIMIT 1
-      )
-      RETURNING *
-      """
+              UPDATE customer
+              SET
+                  status = 'called',
+                  called_time = NOW()
+              WHERE customer_id = (
+                  SELECT customer_id
+                  FROM customer
+                  WHERE queue_id = %s
+                    AND status = 'waiting'
+                  ORDER BY ticket_id
+                  LIMIT 1
+              )
+              RETURNING * \
+              """
       #set up query to make call to database
       cur.execute(query, (queue_id,))
       cashe = cur.fetchone()
@@ -185,7 +198,66 @@ class customerDAO:
           phone_number=cashe["phone_number"],
           queue_code=queue_code,
           time=cashe["time"],
+          called_time=cashe["called_time"],
           status=cashe["status"]
       )
       return retired_customer
       #return the customer removed from the specified queue
+
+  def complete_customer3(self, queue_code: str, ticket_id: int):
+      queue_id = queueDAO().get_withcode_queue3(queue_code)
+
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+
+      query = """
+              UPDATE customer
+              SET
+                  status = 'completed',
+                  completed_time = NOW()
+              WHERE queue_id = %s
+                AND ticket_id = %s
+                AND status = 'called'
+              RETURNING * \
+              """
+
+      cur.execute(query, (queue_id, ticket_id))
+      cashe = cur.fetchone()
+
+      if cashe is not None:
+          cur.execute(
+              """
+              SELECT COUNT(*)
+              FROM customer
+              WHERE queue_id = %s
+                AND status IN ('waiting', 'called', 'skipped')
+              """,
+              (queue_id,)
+          )
+
+          active_tickets = cur.fetchone()[0]
+
+          if active_tickets == 0:
+              cur.execute(
+                  """
+                  UPDATE queue
+                  SET
+                      active = FALSE,
+                      pending_disable = FALSE
+                  WHERE queue_id = %s
+                    AND pending_disable = TRUE
+                  """,
+                  (queue_id,)
+              )
+
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+
+      if cashe is None:
+          raise HTTPException(
+              status_code=404,
+              detail="Called customer not found."
+          )
+
+      return Customer(**cashe)

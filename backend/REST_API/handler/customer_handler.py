@@ -51,3 +51,9 @@ class customerHandler:
       "message": "Customer from queue " + queue_code + " successfully popped from queue",
       "customer": result
       }
+
+  def complete_customer2(self, queue_code: str, ticket_id: int):
+    return customerDAO().complete_customer3(
+      queue_code,
+      ticket_id
+    )

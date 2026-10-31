@@ -46,8 +46,22 @@ class queueHandler:
       )
     return queueDAO().add_queue3(new_queue)
 
-  def get_queue_list2(self):
-    return queueDAO().get_queue_list3()
+  def get_queue_list2(self, account: dict | None):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "admin":
+      raise HTTPException(
+        status_code=403,
+        detail="Admin access required."
+      )
+
+    return queueDAO().get_queue_list3(
+      account["admin_id"]
+    )
 
   def get_withcode_queue2(self, queue_code: str):
     return queueDAO().get_withcode_queue3(queue_code)
@@ -108,3 +122,21 @@ class queueHandler:
     return queueDAO().update_queue3(updated_queue)
 
   # ===== End Queue Editing =====
+
+  def set_queue_active2(
+          self,
+          queue_code: str,
+          make_active: bool,
+          account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
+    return queueDAO().set_queue_active3(
+      queue_code,
+      account["admin_id"],
+      make_active
+    )

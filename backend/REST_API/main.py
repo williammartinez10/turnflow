@@ -72,11 +72,11 @@ async def get_ticket1(queue_code: str, ticket_number: int):
     return customerHandler().get_ticket2(queue_code, ticket_number)
 
 @app.get("/database/customer/get_queue_{queue_code}")
-async def list_customers1(queue_code: str, status_code=201):
+async def list_customers1(queue_code: str, request: Request, status_code=201):
     return customerHandler().list_customers2(queue_code)
 
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
-async def pop_customer(queue_code: str, status_code=201):
+async def pop_customer(queue_code: str, request: Request, status_code=201):
     return customerHandler().pop_customer2(queue_code)
 
 @app.get("/database/customer/get_time_remaning")
@@ -128,12 +128,12 @@ def verify_admin1(
     return account
 
 @app.delete("/database/admin/delete_admin")
-def delete_admin1(new_admin: Admin, status_code=201):
+def delete_admin1(new_admin: Admin, request: Request, status_code=201):
     return adminHandler().delete_admin2(new_admin)
 
 
 @app.post("/database/staff/add_staff", status_code=201)
-def add_staff1(new_Staff: Staff, status_code=201):
+def add_staff1(new_Staff: Staff, request: Request, status_code=201):
     """ Register a staff account using signup validation and password hashing in handler. """
     return staffHandler().add_staff2(new_Staff)
 
@@ -153,7 +153,7 @@ def verify_staff1(
     return account
 
 @app.delete("/database/staff/delete_staff")
-def delete_staff1(new_Staff: Staff, status_code=201):
+def delete_staff1(new_Staff: Staff, request: Request, status_code=201):
     return staffHandler().delete_staff2(new_Staff)
 
 

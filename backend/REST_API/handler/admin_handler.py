@@ -103,7 +103,14 @@ class adminHandler:
     account["role"] = "admin"
     return account
 
-  def delete_admin2(self, admin: Admin):
+  def delete_admin2(self, admin: Admin, account: dict | None):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
     if admin.admin_id is None:
       raise HTTPException(status_code=400, detail="admin_id is required")
 

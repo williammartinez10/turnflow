@@ -10,7 +10,14 @@ password_hash = PasswordHash.recommended()
 
 
 class staffHandler:
-  def add_staff2(self, new_staff: Staff):
+  def add_staff2(self, account: dict | None, new_staff: Staff):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
     """
     Validate signup data and create a staff account with a password hash.
     
@@ -92,7 +99,14 @@ class staffHandler:
     account["role"] = "staff"
     return account
 
-  def delete_staff2(self, staff: Staff):
+  def delete_staff2(self, account: dict | None, staff: Staff):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
     if staff.staff_id is None:
       raise HTTPException(status_code=400, detail="staff_id is required")
 

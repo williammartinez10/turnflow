@@ -2,7 +2,6 @@ from backend.REST_API.DAO.queue_DAO import queueDAO, Queue
 
 from backend.REST_API.DAO.staff_privilege_DAO import staff_privilegeDAO
 
-from backend.REST_API.handler.staff_privilege_handler import staff_privilegeHandler
 from fastapi import HTTPException
 
 class queueHandler:

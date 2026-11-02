@@ -5,7 +5,7 @@ import CustomerQueueStatus from "./CustomerQueueStatus";
 
 /**
  * Checks the existing status-page layout, placeholder content, and ticket, queue,
- * and organization details received through router state.
+ * service, and organization details received through router state.
  * These are UI tests, not live-update tests.
  */
 describe("CustomerQueueStatus", () => {
@@ -47,7 +47,7 @@ describe("CustomerQueueStatus", () => {
             state: {
               ticketNumber: "1",
               queueCode: "ABC-123-45",
-              service: "Medicine",
+              serviceName: "Medicine",
               status: "waiting",
               organizationName: "William's Org",
             },

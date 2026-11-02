@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CustomerFindTicket from "./CustomerFindTicket";
@@ -79,16 +79,16 @@ describe("CustomerFindTicket", () => {
     fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "123456" },});
     fireEvent.click(screen.getByRole("button", {name: "View Queue Status",}));
 
-    await screen.findByRole("button", { name: "View Queue Status" });
-
-    expect(mockNavigate).toHaveBeenCalledWith("/queue-status", {
-      state: {
-        ticketNumber: "123456",
-        queueCode: "ABC-123-45",
-        service: "Medicine",
-        status: "waiting",
-        organizationName: "William's Org",
-      },
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/queue-status", {
+        state: {
+          ticketNumber: "123456",
+          queueCode: "ABC-123-45",
+          serviceName: "Medicine",
+          status: "waiting",
+          organizationName: "William's Org",
+        },
+      });
     });
   });
 

@@ -14,6 +14,7 @@ function CustomerQueueStatus() {
   // Ticket and queue information passed from registration or ticket lookup.
   const ticketNumber = location.state?.ticketNumber || "<###>";
   const queueCode = location.state?.queueCode || "<Queue Name>";
+  const serviceName = location.state?.serviceName || "<Service Name>";
   const organizationName = location.state?.organizationName;
 
   // Display the stored status without inferring it from missing ticket data.
@@ -49,6 +50,7 @@ function CustomerQueueStatus() {
   const queueStatus = {
     organizationName: organizationName || "<Organization Name>",
     queueName: queueCode,
+    serviceName,
     position: "<Position>",
     nowServing: "<###>",
     peopleAhead: "<Count>",
@@ -72,6 +74,9 @@ function CustomerQueueStatus() {
               {queueStatus.organizationName}
             </p>
 
+            <p className="customer-queue-status-service">
+              Service: <span>{queueStatus.serviceName}</span>
+            </p>
           </div>
 
           <div className="customer-queue-ticket">

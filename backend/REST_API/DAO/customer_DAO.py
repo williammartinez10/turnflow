@@ -116,7 +116,8 @@ class customerDAO:
       #return the matching ticket without customer contact information
 
   def list_customers3(self, queue_code: str):
-      queue_id = queueDAO().get_withcode_queue3(queue_code)
+      queue = queueDAO().get_withcode_queue3(queue_code)
+      queue_id = queue.queue_id      
       customer_list: list[Customer] = []
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)

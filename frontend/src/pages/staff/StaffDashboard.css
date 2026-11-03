@@ -1,0 +1,53 @@
+.staff-dashboard-page {
+    min-height: 100vh;
+}
+
+.staff-dashboard-main {
+    display: flex;
+    justify-content: center;
+}
+
+.staff-dashboard-content {
+    width: 90%;
+    max-width: 1100px;
+}
+
+.staff-dashboard-title {
+    text-align: center;
+}
+
+.staff-organization {
+    margin-top: 30px;
+}
+
+.staff-organization h2 {
+    margin-bottom: 8px;
+}
+
+.staff-organization p {
+    margin: 5px 0;
+}
+
+.staff-assigned-section {
+    margin-top: 40px;
+}
+
+.staff-assigned-list {
+    margin-top: 25px;
+}
+
+.staff-assigned-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border: 1px solid #aaa;
+    padding: 20px;
+
+    margin-bottom: 25px;
+}
+
+.staff-dashboard-note {
+    text-align: center;
+    margin-top: 20px;
+}

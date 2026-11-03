@@ -39,6 +39,16 @@ class customerHandler:
     if account is None:
       raise HTTPException(status_code=401, detail="Not logged in.")
 
+    if account.get("role") != "staff" and account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Staff or admin access required.")
+
+    if account.get("role" != "admin"):
+      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
+
+      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Staff missing privileges.")
+    return customerDAO().list_customers3(queue_code)
+
   # ===== Dashboard Statistics =====
 
   # Returns the number of active customers waiting in this admin's queues.
@@ -47,15 +57,19 @@ class customerHandler:
 
   # ===== End Dashboard Statistics =====
 
-  def pop_customer2(self, queue_code: str):
+  def pop_customer2(self, queue_code: str, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
     if account.get("role") != "staff" and account.get("role") != "admin":
       raise HTTPException(status_code=403, detail="Staff or admin access required.")
 
-    staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
+    if account.get("role" != "admin"):
+      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
 
-    if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
-      raise HTTPException(status_code=403, detail="Staff missing privileges.")
-    return customerDAO().list_customers3(queue_code)
+      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Staff missing privileges.")
+    return customerDAO().pop_customer3(queue_code)
 
 #  def pop_customer2(self, queue_code: str, account: dict | None):
 #    if account is None:
@@ -73,6 +87,7 @@ class customerHandler:
 #      "message": "Customer from queue " + queue_code + " successfully popped from queue",
 #      "customer": result
 #      }
+# commented out for future storage
 
   def complete_customer2(self, queue_code: str, ticket_id: int):
     return customerDAO().complete_customer3(
@@ -80,7 +95,7 @@ class customerHandler:
       ticket_id
     )
   
-  def get_time_remaning2(phone_number: str, queue_code: str):
+  def get_time_remaning2(self, phone_number: str, queue_code: str):
     if not phone_number:
       raise HTTPException(status_code=401, detail="phone_number is required")
     if not queue_code:

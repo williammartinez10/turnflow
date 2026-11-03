@@ -34,7 +34,6 @@ description TEXT,
 active BOOLEAN NOT NULL DEFAULT TRUE,
 estimated_duration INTEGER NOT NULL DEFAULT 0,
 admin_id INTEGER NOT NULL REFERENCES admin(admin_id),
-
 UNIQUE (admin_id, service_name)
 );
 

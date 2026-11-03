@@ -112,7 +112,7 @@ async def pop_customer(queue_code: str, request: Request, status_code=201):
     return customerHandler().pop_customer2(queue_code, request.session.get("account"))
 
 @app.get("/database/customer/get_time_remaning")
-async def get_time_remaning(
+async def get_time_remaning1(
     phone_number: str,
     queue_code: str):
       return customerHandler().get_time_remaning2(phone_number, queue_code)
@@ -237,8 +237,8 @@ async def get_queue_list1(request: Request, status_code=201):
     )
 
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
-async def get_withcode_queue1(queue_code: str, status_code=201):
-    return queueHandler().get_withcode_queue2(queue_code)
+async def get_withcode_queue1(queue_code: str, request: Request, status_code=201):
+    return queueHandler().get_withcode_queue2(queue_code, request.session.get("account"))
 
 @app.get("/database/queue/get_active_withcode/{queue_code}")
 def get_active_withcode_queue(queue_code: str):
@@ -351,3 +351,31 @@ def logout1(request: Request):
     """ Clear this browser session and confirm logout. """
     request.session.clear()
     return {"message": "Logged out."}
+
+
+
+#todo list / complaints
+  
+  #what to do about organization_name?
+
+  #am I satisfied with get_withcode_queue changes?
+
+  #pop_customer rework dilema
+
+  #technically speaking service estimated_duration is already covered by next_customer but that's a conflict
+  
+  #service ID should be able to take the name of the service rather than the ID
+
+  #queue id creation requires a bunch of checks to make sure the data is completely filled out
+
+  #    "called_time": null,
+  #  "completed_time": null,
+  #when adding customer
+
+  #count_waiting_customers1 and count_active_queues1 returns a raw integer, imo should return a json but ¯\_(ツ)_/¯
+
+  #pop_customer and complete_customer1 WIP
+
+  #get_time_remaning1 heavy WIP
+
+  #

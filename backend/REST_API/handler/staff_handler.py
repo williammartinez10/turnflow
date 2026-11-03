@@ -10,7 +10,7 @@ password_hash = PasswordHash.recommended()
 
 
 class staffHandler:
-  def add_staff2(self, account: dict | None, new_staff: Staff):
+  def add_staff2(self, new_staff: Staff, account: dict | None):
 
     if account is None:
       raise HTTPException(status_code=401, detail="Not logged in.")
@@ -99,7 +99,7 @@ class staffHandler:
     account["role"] = "staff"
     return account
 
-  def delete_staff2(self, account: dict | None, staff: Staff):
+  def delete_staff2(self, staff: Staff, account: dict | None):
 
     if account is None:
       raise HTTPException(status_code=401, detail="Not logged in.")

@@ -74,8 +74,8 @@ class queueDAO:
 
       query = """
       INSERT INTO queue
-      (queue_code, queue_name, prefix, description, service_id, active, admin_id)
-      VALUES (%s, %s, %s, %s, %s, %s, %s)
+      (queue_code, queue_name, prefix, description, service_id, active, admin_id, organization_name, time_list)
+      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
       RETURNING queue_id
       """
       #set up query to make call to database
@@ -371,6 +371,15 @@ class queueDAO:
 
     # Changing the Queue name starts a new history for this Queue.
     if name_is_changing:
+        cur.execute(
+        """
+        DELETE FROM next_customer
+        WHERE next_customer_id = (
+          SELECT next_customer_id FROM next_customer
+          WHERE queue_id = %s
+        )
+        """, (current_queue["queue_id"],)
+        )
         cur.execute(
             """
             DELETE FROM customer

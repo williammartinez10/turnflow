@@ -159,7 +159,7 @@ function CustomerQueueStatus() {
       ? unavailable
       : ticket.now_serving?.length
         ? ticket.now_serving.join(", ")
-        : "No active service",
+        : "Not serving yet",
     peopleAhead: !ticket
       ? unavailable
       : ticket.status === "called"

@@ -119,7 +119,7 @@ describe("Customer joining flow", () => {
     // The ticket number and waiting position are both 1.
     expect(screen.getAllByText("1")).toHaveLength(2);
     expect(screen.getByText("0")).toBeInTheDocument();
-    expect(screen.getByText("No active service")).toBeInTheDocument();
+    expect(screen.getByText("Not serving yet")).toBeInTheDocument();
     expect(screen.getByText("Medicine")).toBeInTheDocument();
     expect(screen.getByText("William's Org")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe("Customer joining flow", () => {
     // The ticket number and waiting position are both 1.
     expect(screen.getAllByText("1")).toHaveLength(2);
     expect(screen.getByText("0")).toBeInTheDocument();
-    expect(screen.getByText("No active service")).toBeInTheDocument();
+    expect(screen.getByText("Not serving yet")).toBeInTheDocument();
     expect(screen.getByText("Medicine")).toBeInTheDocument();
     expect(screen.getByText("William's Org")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();

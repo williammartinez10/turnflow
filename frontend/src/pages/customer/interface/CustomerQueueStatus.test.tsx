@@ -186,10 +186,10 @@ describe("CustomerQueueStatus", () => {
       expect(screen.getByText("Called")).toBeInTheDocument();
       expect(screen.getByText("0")).toBeInTheDocument();
       expect(screen.getByText("Your turn")).toBeInTheDocument();
-      expect(screen.getByText("No active service")).toBeInTheDocument();
+      expect(screen.getByText("Not serving yet")).toBeInTheDocument();
     } else {
       expect(screen.getAllByText("Not applicable")).toHaveLength(2);
-      expect(screen.getByText("No active service")).toBeInTheDocument();
+      expect(screen.getByText("Not serving yet")).toBeInTheDocument();
     }
   });
 

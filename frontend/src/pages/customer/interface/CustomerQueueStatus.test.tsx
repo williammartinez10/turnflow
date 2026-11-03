@@ -5,7 +5,7 @@ import CustomerQueueStatus from "./CustomerQueueStatus";
 
 /**
  * Checks the existing status-page layout, retrieved ticket and Queue information,
- * Customer status, and automatic refresh using mocked backend responses.
+ * Customer status, automatic refresh, and completed-ticket confirmation.
  * These tests do not contact a live API or database.
  */
 describe("CustomerQueueStatus", () => {
@@ -99,6 +99,8 @@ describe("CustomerQueueStatus", () => {
     expect(screen.getByText("5, 6")).toBeInTheDocument();
     expect(screen.getByText("Not available yet")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Join a Queue" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Find Another Ticket" })).not.toBeInTheDocument();
   });
 
 
@@ -116,7 +118,7 @@ describe("CustomerQueueStatus", () => {
 
   it.each([
     ["called", "It's Your Turn"],
-    ["completed", "Completed"],
+    ["completed", "Service completed"],
     ["skipped", "Skipped"],
     ["no_show", "No Show"],
     ["unknown", "Status Unavailable"],
@@ -157,18 +159,38 @@ describe("CustomerQueueStatus", () => {
 
     expect(await screen.findByRole("heading", { name: title })).toBeInTheDocument();
 
-    if (status === "called") {
+    if (status === "completed") {
+      expect(screen.getByText(
+        "Your service for ticket 16 has been completed."
+      )).toBeInTheDocument();
+
+      expect(screen.getByRole("link", { name: "Join a Queue" })).toHaveAttribute(
+        "href",
+        "/join-queue"
+      );
+
+      expect(screen.getByRole("link", { name: "Find Another Ticket" })).toHaveAttribute(
+        "href",
+        "/find-ticket"
+      );
+
+      expect(screen.queryByText("Your Position")).not.toBeInTheDocument();
+      expect(screen.queryByText("Now Serving")).not.toBeInTheDocument();
+      expect(screen.queryByText("People Ahead")).not.toBeInTheDocument();
+      expect(screen.queryByText("Estimated Wait")).not.toBeInTheDocument();
+
+      expect(screen.queryByText(
+        "Queue status refreshes automatically every 5 seconds."
+      )).not.toBeInTheDocument();
+    } else if (status === "called") {
       expect(screen.getByText("Called")).toBeInTheDocument();
       expect(screen.getByText("0")).toBeInTheDocument();
       expect(screen.getByText("Your turn")).toBeInTheDocument();
-    } else if (status === "completed") {
-      expect(screen.getAllByText("Completed")).toHaveLength(2);
-      expect(screen.getAllByText("—")).toHaveLength(2);
+      expect(screen.getByText("No active service")).toBeInTheDocument();
     } else {
       expect(screen.getAllByText("Not applicable")).toHaveLength(2);
+      expect(screen.getByText("No active service")).toBeInTheDocument();
     }
-
-    expect(screen.getByText("No active service")).toBeInTheDocument();
   });
 
 
@@ -271,6 +293,73 @@ describe("CustomerQueueStatus", () => {
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10000);
+    });
+
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+
+  it("shows the completion view and stops refreshing when service is completed", async () => {
+    vi.useFakeTimers();
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/queue-status",
+            state: {
+              ticketNumber: "16",
+              queueCode: "ABC-123-45",
+            },
+          },
+        ]}
+      >
+        <CustomerQueueStatus />
+      </MemoryRouter>
+    );
+
+    // Complete the initial waiting-ticket request.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(screen.getByText("Your Position")).toBeInTheDocument();
+
+
+    // Return a completed ticket on the next refresh.
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ticket_number: 16,
+        queue_code: "ABC-123-45",
+        queue_name: "Merge Test A",
+        service: "Medicine",
+        status: "completed",
+        organization_name: "William's Org",
+        position: null,
+        people_ahead: null,
+        now_serving: [],
+      }),
+    } as Response);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+
+    expect(screen.getByRole("heading", { name: "Service completed" })).toBeInTheDocument();
+    expect(screen.getByText("16")).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
+    expect(screen.queryByText("Your Position")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Join a Queue" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Find Another Ticket" })).toBeInTheDocument();
+
+
+    // Completed tickets must not schedule another refresh.
+    vi.mocked(fetch).mockClear();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15000);
     });
 
     expect(fetch).not.toHaveBeenCalled();

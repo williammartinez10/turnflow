@@ -1,7 +1,7 @@
 import "./CustomerQueueStatus.css";
 import { useEffect, useState } from "react";
-import { Clock3, Info, Ticket } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { CheckCircle2, Clock3, Info, Ticket } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import Header from "../../../components/Header/Header";
 
 /** Ticket information and Queue statistics returned by the backend. */
@@ -19,7 +19,8 @@ interface TicketStatus {
 
 /**
  * Displays ticket, queue, service, and status information.
- * Retrieves current Queue statistics and refreshes them every five seconds.
+ * Refreshes current Queue statistics every five seconds until service is completed.
+ * Completed tickets display a confirmation and options to join or find a Queue ticket.
  * Estimated waiting time remains pending.
  */
 function CustomerQueueStatus() {
@@ -37,7 +38,7 @@ function CustomerQueueStatus() {
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-  // Retrieve current ticket information and refresh it every five seconds.
+  // Retrieve current ticket information and refresh it until service is completed.
   useEffect(() => {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -54,6 +55,8 @@ function CustomerQueueStatus() {
     setIsLoading(true);
 
     const getTicket = async () => {
+      let shouldRefresh = true;
+
       try {
         const params = new URLSearchParams({
           queue_code: queueCode,
@@ -74,6 +77,7 @@ function CustomerQueueStatus() {
         if (!controller.signal.aborted) {
           setTicket(retrievedTicket);
           setError("");
+          shouldRefresh = retrievedTicket.status !== "completed";
         }
       } catch {
         if (!controller.signal.aborted) {
@@ -86,8 +90,10 @@ function CustomerQueueStatus() {
         if (!controller.signal.aborted) {
           setIsLoading(false);
 
-          // Schedule the next request after this one finishes.
-          timer = setTimeout(getTicket, 5000);
+          // Completed tickets no longer need Queue updates.
+          if (shouldRefresh) {
+            timer = setTimeout(getTicket, 5000);
+          }
         }
       }
     };
@@ -132,6 +138,8 @@ function CustomerQueueStatus() {
     description: "Look up your ticket again to retrieve its current status.",
   };
 
+  // Show the completion view only after confirmation from the backend.
+  const isCompleted = ticket?.status === "completed";
   const unavailable = isLoading ? "Loading..." : "Unavailable";
 
 
@@ -142,13 +150,11 @@ function CustomerQueueStatus() {
     serviceName: ticket?.service || serviceName || "Service unavailable",
     position: !ticket
       ? unavailable
-      : ticket.status === "completed"
-        ? "Completed"
-        : ticket.status === "called"
-          ? "Called"
-          : ticket.status === "waiting"
-            ? ticket.position ?? "Unavailable"
-            : "Not applicable",
+      : ticket.status === "called"
+        ? "Called"
+        : ticket.status === "waiting"
+          ? ticket.position ?? "Unavailable"
+          : "Not applicable",
     nowServing: !ticket
       ? unavailable
       : ticket.now_serving?.length
@@ -156,18 +162,14 @@ function CustomerQueueStatus() {
         : "No active service",
     peopleAhead: !ticket
       ? unavailable
-      : ticket.status === "completed"
-        ? "—"
-        : ticket.status === "called"
-          ? 0
-          : ticket.status === "waiting"
-            ? ticket.people_ahead ?? "Unavailable"
-            : "Not applicable",
-    estimatedWait: ticket?.status === "completed"
-      ? "—"
-      : ticket?.status === "called"
-        ? "Your turn"
-        : "Not available yet",
+      : ticket.status === "called"
+        ? 0
+        : ticket.status === "waiting"
+          ? ticket.people_ahead ?? "Unavailable"
+          : "Not applicable",
+    estimatedWait: ticket?.status === "called"
+      ? "Your turn"
+      : "Not available yet",
   };
 
 
@@ -211,59 +213,89 @@ function CustomerQueueStatus() {
             </div>
           </div>
 
-          <div className="customer-queue-status-grid">
-            <div className="customer-queue-status-item">
-              <span className="customer-queue-status-label">
-                Your Position
-              </span>
+          {!isCompleted && (
+            <div className="customer-queue-status-grid">
+              <div className="customer-queue-status-item">
+                <span className="customer-queue-status-label">
+                  Your Position
+                </span>
 
-              <span className="customer-queue-status-value">
-                {queueStatus.position}
-              </span>
+                <span className="customer-queue-status-value">
+                  {queueStatus.position}
+                </span>
+              </div>
+
+              <div className="customer-queue-status-item">
+                <span className="customer-queue-status-label">
+                  Now Serving
+                </span>
+
+                <span className="customer-queue-status-value">
+                  {queueStatus.nowServing}
+                </span>
+              </div>
+
+              <div className="customer-queue-status-item">
+                <span className="customer-queue-status-label">
+                  People Ahead
+                </span>
+
+                <span className="customer-queue-status-value">
+                  {queueStatus.peopleAhead}
+                </span>
+              </div>
+
+              <div className="customer-queue-status-item">
+                <span className="customer-queue-status-label">
+                  Estimated Wait
+                </span>
+
+                <span className="customer-queue-status-value">
+                  {queueStatus.estimatedWait}
+                </span>
+              </div>
             </div>
-
-            <div className="customer-queue-status-item">
-              <span className="customer-queue-status-label">
-                Now Serving
-              </span>
-
-              <span className="customer-queue-status-value">
-                {queueStatus.nowServing}
-              </span>
-            </div>
-
-            <div className="customer-queue-status-item">
-              <span className="customer-queue-status-label">
-                People Ahead
-              </span>
-
-              <span className="customer-queue-status-value">
-                {queueStatus.peopleAhead}
-              </span>
-            </div>
-
-            <div className="customer-queue-status-item">
-              <span className="customer-queue-status-label">
-                Estimated Wait
-              </span>
-
-              <span className="customer-queue-status-value">
-                {queueStatus.estimatedWait}
-              </span>
-            </div>
-          </div>
+          )}
 
           <div className="customer-queue-current-status">
             <div className="customer-queue-current-status-icon">
-              <Clock3 size={24} strokeWidth={2} />
+              {isCompleted ? (
+                <CheckCircle2 size={24} strokeWidth={2} />
+              ) : (
+                <Clock3 size={24} strokeWidth={2} />
+              )}
             </div>
 
             <div className="customer-queue-current-status-text">
-              <h2>{currentStatus.title}</h2>
+              <h2>
+                {isCompleted ? "Service completed" : currentStatus.title}
+              </h2>
 
-              <p>{currentStatus.description}</p>
+              <p>
+                {isCompleted
+                  ? `Your service for ticket ${ticket.ticket_number} has been completed.`
+                  : currentStatus.description}
+              </p>
             </div>
           </div>
+
+          {isCompleted && (
+            <div className="customer-queue-completed-actions">
+              <Link
+                className="customer-queue-join-another"
+                to="/join-queue"
+              >
+                Join a Queue
+              </Link>
+
+              <Link
+                className="customer-queue-find-another"
+                to="/find-ticket"
+              >
+                Find Another Ticket
+              </Link>
+            </div>
+          )}
 
           {error && (
             <p role="alert">
@@ -271,13 +303,15 @@ function CustomerQueueStatus() {
             </p>
           )}
 
-          <div className="customer-queue-update-info">
-            <Info size={18} strokeWidth={2} />
+          {!isCompleted && (
+            <div className="customer-queue-update-info">
+              <Info size={18} strokeWidth={2} />
 
-            <p>
-              Queue status refreshes automatically every 5 seconds.
-            </p>
-          </div>
+              <p>
+                Queue status refreshes automatically every 5 seconds.
+              </p>
+            </div>
+          )}
         </section>
       </main>
     </div>

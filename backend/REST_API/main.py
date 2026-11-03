@@ -99,8 +99,8 @@ async def get_ticket1(queue_code: str, ticket_number: int):
 
 # Gets the customers currently associated with a specific queue.
 @app.get("/database/customer/get_queue_{queue_code}")
-async def list_customers1(queue_code: str, status_code=201):
-    return customerHandler().list_customers2(queue_code)
+async def list_customers1(queue_code: str, request: Request, status_code=201):
+    return customerHandler().list_customers2(queue_code, request.session.get("account"))
 
 # Counts how many customers are currently waiting for the selected admin.
 @app.get("/database/customer/count_waiting_{admin_id}")
@@ -108,8 +108,14 @@ async def count_waiting_customers1(admin_id: int):
     return customerHandler().count_waiting_customers2(admin_id)
 
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
-async def pop_customer(queue_code: str, status_code=201):
-    return customerHandler().pop_customer2(queue_code)
+async def pop_customer(queue_code: str, request: Request, status_code=201):
+    return customerHandler().pop_customer2(queue_code, request.session.get("account"))
+
+@app.get("/database/customer/get_time_remaning")
+async def get_time_remaning(
+    phone_number: str,
+    queue_code: str):
+      return customerHandler().get_time_remaning2(phone_number, queue_code)
 
 @app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
 async def complete_customer1(queue_code: str, ticket_id: int):
@@ -123,9 +129,9 @@ async def complete_customer1(queue_code: str, ticket_id: int):
 # verifying, or deleting an admin account.
 
 @app.post("/database/admin/add_admin", status_code=201)
-def add_admin1(new_admin: Admin, status_code=201):
+def add_admin1(new_admin: Admin, request: Request, status_code=201):
     """ Register an admin using signup validation and password hashing in handler. """
-    return adminHandler().add_admin2(new_admin)
+    return adminHandler().add_admin2(new_admin, request.session.get("account"))
 
 # Credential verification uses POST; get-prefixed routes retrieve data.
 @app.post("/database/admin/verify_admin", status_code=201)
@@ -144,8 +150,8 @@ def verify_admin1(
     return account
 
 @app.delete("/database/admin/delete_admin")
-def delete_admin1(new_admin: Admin, status_code=201):
-    return adminHandler().delete_admin2(new_admin)
+def delete_admin1(new_admin: Admin, request: Request, status_code=201):
+    return adminHandler().delete_admin2(new_admin, request.session.get("account"))
 
 # ===== Service API Routes =====
 # These routes receive service-related requests from the frontend
@@ -250,9 +256,9 @@ async def delete_queue1(queue_code: str, request: Request):
 # verifying, or deleting a staff account.
 
 @app.post("/database/staff/add_staff", status_code=201)
-def add_staff1(new_Staff: Staff, status_code=201):
+def add_staff1(new_Staff: Staff, request: Request, status_code=201):
     """ Register a staff account using signup validation and password hashing in handler. """
-    return staffHandler().add_staff2(new_Staff)
+    return staffHandler().add_staff2(new_Staff, request.session.get("account"))
 
 @app.post("/database/staff/verify_staff", status_code=201)
 def verify_staff1(
@@ -270,17 +276,17 @@ def verify_staff1(
     return account
 
 @app.delete("/database/staff/delete_staff")
-def delete_staff1(new_Staff: Staff, status_code=201):
-    return staffHandler().delete_staff2(new_Staff)
+def delete_staff1(new_Staff: Staff, request: Request, status_code=201):
+    return staffHandler().delete_staff2(new_Staff, request.session.get("account"))
 
 
 @app.post("/database/staff_privilege/add_staff_privilege", status_code=201)
-async def add_staff_privilege1(new_staff_privilege: Staff_Privilege):
-    return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege)
+async def add_staff_privilege1(new_staff_privilege: Staff_Privilege, request: Request):
+    return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege, request.session.get("account"))
 
 @app.get("/database/staff_privilege/get_staff_privilege_list")
-async def get_staff_privilege_list1(status_code=201):
-    return staff_privilegeHandler().get_staff_privilege_list2()
+async def get_staff_privilege_list1(request: Request, status_code=201):
+    return staff_privilegeHandler().get_staff_privilege_list2(request.session.get("account"))
 
 @app.get("/database/staff_privilege/get_with_staff_privilege_staff_list_{staff_privilege}")
 async def get_with_staff_privilege_staff_list1(staff_privilege: str, status_code=201):
@@ -289,9 +295,10 @@ async def get_with_staff_privilege_staff_list1(staff_privilege: str, status_code
     )
 
 @app.delete("/database/staff_privilege/delete_staff_privilege_{staff_privilege}")
-async def delete_staff_privilege_staff1(staff_privilege: str, status_code=201):
+async def delete_staff_privilege_staff1(staff_privilege: str, request: Request, status_code=201):
     return staff_privilegeHandler().delete_staff_privilege_staff2(
-        staff_privilege
+        staff_privilege,
+        request.session.get("account")
     )
 
 

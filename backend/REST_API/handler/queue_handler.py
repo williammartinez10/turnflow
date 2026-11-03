@@ -1,4 +1,7 @@
 from backend.REST_API.DAO.queue_DAO import queueDAO, Queue
+
+from backend.REST_API.DAO.staff_privilege_DAO import staff_privilegeDAO
+
 from fastapi import HTTPException
 import random
 import string
@@ -23,13 +26,17 @@ class queueHandler:
 
     # Use the signed-in Admin instead of an ID supplied in the request.
     new_queue.admin_id = account["admin_id"]
-    new_queue.organization_name = None
 
     # Validate required fields explicitly
     # if not new_queue.queue_code:
     #   raise HTTPException(status_code=401, detail="queue_code is required")
     # if queueDAO().check_withcode_queue3(new_queue.queue_code) != None:
     #   raise HTTPException(status_code=401, detail="queue_code in use")
+
+    if not new_queue.organization_name:
+      raise HTTPException(status_code=401, detail="organization_name is required")
+    if not new_queue.time_list:
+      raise HTTPException(status_code=401, detail="initial time_list is required")
 
     # Generate a unique queue code.
     queue_code = self.generate_queue_code()
@@ -63,7 +70,18 @@ class queueHandler:
       account["admin_id"]
     )
 
-  def get_withcode_queue2(self, queue_code: str):
+  def get_withcode_queue2(self, queue_code: str, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "staff" and account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Staff or admin access required.")
+
+    staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
+
+    if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Staff missing privileges.")
+
     return queueDAO().get_withcode_queue3(queue_code)
 
   def get_active_withcode_queue2(self, queue_code: str):

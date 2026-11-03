@@ -23,6 +23,8 @@ class Queue(BaseModel):
 
     admin_id: Optional[int] = None
     organization_name: Optional[str] = None
+    organization_name: Optional[str] = None
+    time_list: Optional[list[datetime.timedelta]] = None
 
 class queueDAO:
   def __init__(self):
@@ -85,6 +87,8 @@ class queueDAO:
           new_queue.service_id,
           new_queue.active,
           new_queue.admin_id
+          new_queue.organization_name,
+          new_queue.time_list
       ))
       cashe = cur.fetchone()
       new_queue.queue_id = cashe[0]
@@ -175,13 +179,11 @@ class queueDAO:
     #set up query to make call to database
     cur.execute(query, (queue_code,))
     cashe = cur.fetchone()
-
+    conn.commit()
     cur.close()
     self.pool.putconn(conn)
-
-    if cashe is None:
-        return None
-
+    if cashe == None:
+       return cashe
     return cashe[0]
 
   def get_queue_list3(self, admin_id: int):
@@ -224,6 +226,8 @@ class queueDAO:
       #return list of queues, unless it's empty in which case an error is returned
 
   def delete_queue3(self, queue_code: str, admin_id: int):
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
+      cashe: Queue
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
 
@@ -253,11 +257,25 @@ class queueDAO:
       if cashe is None:
           raise HTTPException(
               status_code=409,
-              detail="Queue must be disabled before it can be deleted."
+              detail="Queue must be disabled before it can be deleted, queue missing or empty."
           )
+          #this seems verbose but I'm not sure how to more cleanly express it outside of breaking up the function
 
-      return Queue(**cashe)
+      retired_queue = Queue(**cashe)
+      return retired_queue
 
+    
+    
+    
+          if cashe == None:
+         raise HTTPException(status_code=404, detail="queue missing or empty")
+      retired_queue = Queue(**cashe)
+      return retired_queue
+      #return deleted queue, unless it's empty in which case an error is returned
+    
+    
+    
+    
   # Counts active queues owned by the admin.
   def count_active_queues3(self, admin_id: int):
     conn = self.pool.getconn()
@@ -532,3 +550,29 @@ class queueDAO:
         )
 
     return Queue(**cashe)
+      if cashe == None:
+         raise HTTPException(status_code=404, detail="queue missing or empty")
+      retired_queue = Queue(**cashe)
+      return retired_queue
+      #return deleted queue, unless it's empty in which case an error is returned
+
+  def update_wait_time(self, new_wait_time: datetime.datetime, queue_code: str):
+      
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      UPDATE queue SET
+        time_list = array_append(queue.time_list, %s)
+        WHERE queue_code = %s
+      RETURNING time_list
+      """
+      #set up query to make call to database
+      cur.execute(query, (
+          new_wait_time,
+          queue_code,
+      ))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      #store and return entry just created in database

@@ -12,20 +12,19 @@ conn = psycopg2.connect(**DB_CONFIG)
 cur = conn.cursor()
 query = """
 DROP TABLE IF EXISTS customer CASCADE;
+DROP TABLE IF EXISTS next_customer CASCADE;
 DROP TABLE IF EXISTS queue CASCADE;
-DROP TABLE IF EXISTS user_log CASCADE;
 DROP TABLE IF EXISTS staff_privilege CASCADE;
 DROP TABLE IF EXISTS staff CASCADE;
 DROP TABLE IF EXISTS service CASCADE;
 DROP TABLE IF EXISTS admin CASCADE;
-
 
 CREATE TABLE admin(
 admin_id serial PRIMARY KEY,
 full_name TEXT,
 email TEXT,
 password TEXT,
-organization_name TEXT
+organization_name TEXT,
 );
 
 CREATE TABLE service(
@@ -49,7 +48,8 @@ service_id INTEGER NOT NULL REFERENCES service(service_id),
 active BOOLEAN NOT NULL DEFAULT TRUE,
 pending_disable BOOLEAN NOT NULL DEFAULT FALSE,
 admin_id INTEGER NOT NULL REFERENCES admin(admin_id)
-);
+organization_name TEXT,
+time_list INTERVAL[]
 
 CREATE TABLE customer(
 customer_id serial PRIMARY KEY,
@@ -67,22 +67,23 @@ completed_time TIMESTAMPTZ,
 status TEXT NOT NULL DEFAULT 'waiting'
 );
 
+CREATE TABLE next_customer(
+next_customer_id integer PRIMARY KEY,
+FOREIGN KEY (next_customer_id) REFERENCES customer(customer_id),
+queue_id integer,
+FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
+time TIMESTAMPTZ
+);
+
 -- Allow only one active ticket per phone number in each queue.
 CREATE UNIQUE INDEX customer_unique_active_phone_per_queue
 ON customer (queue_id, phone_number)
 WHERE status IN ('waiting', 'called', 'skipped');
 
-CREATE TABLE user_log(
-log_id serial PRIMARY KEY,
-phone_number TEXT,
-queue_code TEXT,
-time TIMESTAMPTZ
-);
-
 CREATE TABLE staff_privilege(
 staff_priv_id serial PRIMARY KEY,
 staff_privilege TEXT,
-staff_with_priv integer[]
+staff_with_priv TEXT[]
 );
 
 CREATE TABLE staff(
@@ -97,3 +98,12 @@ conn.commit()
 cur.close()
 conn.close()
 print("Tables Created")
+
+# unused
+# DROP TABLE IF EXISTS user_log CASCADE;
+# CREATE TABLE user_log(
+# log_id serial PRIMARY KEY,
+# phone_number TEXT,
+# queue_code TEXT,
+# time TIMESTAMPTZ
+# );

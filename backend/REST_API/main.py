@@ -3,7 +3,7 @@
 import os
 from starlette.middleware.sessions import SessionMiddleware
 
-from fastapi import Body, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Body, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 # Imports the handlers and data models used by the API routes.
@@ -35,6 +35,9 @@ from backend.REST_API.DAO.staff_privilege_DAO import (
 
 from backend.REST_API.DAO.service_DAO import Service
 from backend.REST_API.handler.service_handler import serviceHandler
+
+# Sends SMS messages using the backend's Twilio configuration.
+from backend.REST_API.sms import send_sms
 
 # Creates the FastAPI application.
 # When the frontend sends an HTTP request to an API route,
@@ -87,10 +90,43 @@ app.add_middleware(
 # These routes receive customer-related requests from the frontend
 # and pass them to the customer handler, where the backend logic is applied.
 
-# Adds a new customer to a queue.
-@app.post("/database/customer/add_customer")
-async def add_customer1(new_customer: Customer, status_code=201):
-    return customerHandler().add_customer2(new_customer)
+# Adds a Customer to a Queue and schedules a registration-confirmation SMS.
+@app.post("/database/customer/add_customer", status_code=201)
+async def add_customer1(
+    new_customer: Customer,
+    background_tasks: BackgroundTasks,
+):
+    customer = customerHandler().add_customer2(new_customer)
+
+    # Retrieve organization and service info for the confirmation.
+    # A lookup failure must not invalidate an already-created ticket.
+    try:
+        ticket = customerHandler().get_ticket2(
+            customer.queue_code,
+            customer.ticket_id,
+        )
+        organization = ticket.get("organization_name") or "the organization"
+        service = ticket.get("service") or "the selected service"
+    except Exception:
+        organization = "the organization"
+        service = "the selected service"
+
+    # Submit the SMS after returning the successful registration response.
+    # Duplicate or invalid registrations raise an error before reaching this step.
+    background_tasks.add_task(
+        send_sms,
+        customer.phone_number,
+        "TurnFlow: Registration confirmed.\n\n"
+        f"Ticket: #{customer.ticket_id}\n"
+        f"Organization: {organization}\n"
+        f"Service: {service}\n"
+        f"Queue code: {customer.queue_code}\n\n"
+        "We'll notify you when it's your turn. "
+        "Check your status on the TurnFlow website."
+    )
+
+    return customer
+
 
 # Gets the information for a specific customer ticket in a queue.
 @app.get("/database/customer/get_ticket")
@@ -107,9 +143,42 @@ async def list_customers1(queue_code: str, status_code=201):
 async def count_waiting_customers1(admin_id: int):
     return customerHandler().count_waiting_customers2(admin_id)
 
+# Calls the next waiting Customer and schedules a turn-notification SMS.
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
-async def pop_customer(queue_code: str, status_code=201):
-    return customerHandler().pop_customer2(queue_code)
+async def pop_customer(
+    queue_code: str,
+    background_tasks: BackgroundTasks,
+    status_code=201,
+):
+    result = customerHandler().pop_customer2(queue_code)
+    customer = result["customer"]
+
+    # Retrieve organization and service info after the Customer is called.
+    # A lookup failure must not undo the successful Queue operation.
+    try:
+        ticket = customerHandler().get_ticket2(
+            customer.queue_code,
+            customer.ticket_id,
+        )
+        organization = ticket.get("organization_name") or "the organization"
+        service = ticket.get("service") or "the selected service"
+    except Exception:
+        organization = "the organization"
+        service = "the selected service"
+
+    # Notify only after the backend successfully marks the ticket as called.
+    background_tasks.add_task(
+        send_sms,
+        customer.phone_number,
+        "TurnFlow: It's your turn!\n\n"
+        f"Ticket: #{customer.ticket_id}\n"
+        f"Organization: {organization}\n"
+        f"Service: {service}\n"
+        f"Queue code: {customer.queue_code}\n\n"
+        "Please proceed to the service counter."
+    )
+
+    return result
 
 @app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
 async def complete_customer1(queue_code: str, ticket_id: int):

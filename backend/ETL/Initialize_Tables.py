@@ -24,7 +24,7 @@ admin_id serial PRIMARY KEY,
 full_name TEXT,
 email TEXT,
 password TEXT,
-organization_name TEXT,
+organization_name TEXT
 );
 
 CREATE TABLE service(
@@ -47,9 +47,10 @@ description TEXT,
 service_id INTEGER NOT NULL REFERENCES service(service_id),
 active BOOLEAN NOT NULL DEFAULT TRUE,
 pending_disable BOOLEAN NOT NULL DEFAULT FALSE,
-admin_id INTEGER NOT NULL REFERENCES admin(admin_id)
+admin_id INTEGER NOT NULL REFERENCES admin(admin_id),
 organization_name TEXT,
 time_list INTERVAL[]
+);
 
 CREATE TABLE customer(
 customer_id serial PRIMARY KEY,

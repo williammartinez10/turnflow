@@ -86,7 +86,7 @@ class queueDAO:
           new_queue.description,
           new_queue.service_id,
           new_queue.active,
-          new_queue.admin_id
+          new_queue.admin_id,
           new_queue.organization_name,
           new_queue.time_list
       ))
@@ -263,18 +263,6 @@ class queueDAO:
 
       retired_queue = Queue(**cashe)
       return retired_queue
-
-    
-    
-    
-          if cashe == None:
-         raise HTTPException(status_code=404, detail="queue missing or empty")
-      retired_queue = Queue(**cashe)
-      return retired_queue
-      #return deleted queue, unless it's empty in which case an error is returned
-    
-    
-    
     
   # Counts active queues owned by the admin.
   def count_active_queues3(self, admin_id: int):
@@ -550,11 +538,6 @@ class queueDAO:
         )
 
     return Queue(**cashe)
-      if cashe == None:
-         raise HTTPException(status_code=404, detail="queue missing or empty")
-      retired_queue = Queue(**cashe)
-      return retired_queue
-      #return deleted queue, unless it's empty in which case an error is returned
 
   def update_wait_time(self, new_wait_time: datetime.datetime, queue_code: str):
       

@@ -46,6 +46,23 @@ describe("Customer joining flow", () => {
           };
         }
 
+        if (url.endsWith("/database/customer/get_ticket?queue_code=ABC-123-45&ticket_number=1")) {
+          return {
+            ok: true,
+            json: async () => ({
+              ticket_number: 1,
+              queue_code: "ABC-123-45",
+              queue_name: "General Consultation",
+              service: "Medicine",
+              status: "waiting",
+              organization_name: "William's Org",
+              position: 1,
+              people_ahead: 0,
+              now_serving: [],
+            }),
+          };
+        }
+
         throw new Error(`Unexpected request: ${url}`);
       })
     );
@@ -95,12 +112,18 @@ describe("Customer joining flow", () => {
 
 
     // Queue Status
+    expect(await screen.findByRole("heading", { name: "General Consultation" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
+
+
+    // The ticket number and waiting position are both 1.
+    expect(screen.getAllByText("1")).toHaveLength(2);
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText("No active service")).toBeInTheDocument();
     expect(screen.getByText("Medicine")).toBeInTheDocument();
     expect(screen.getByText("William's Org")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();
+    expect(screen.getByText("Not available yet")).toBeInTheDocument();
   });
 
 
@@ -118,9 +141,13 @@ describe("Customer joining flow", () => {
             json: async () => ({
               ticket_number: 1,
               queue_code: "ABC-123-45",
+              queue_name: "General Consultation",
               service: "Medicine",
               status: "waiting",
               organization_name: "William's Org",
+              position: 1,
+              people_ahead: 0,
+              now_serving: [],
             }),
           };
         }
@@ -142,9 +169,14 @@ describe("Customer joining flow", () => {
 
 
     // Queue Status
-    expect(await screen.findByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "ABC-123-45" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "General Consultation" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
+
+
+    // The ticket number and waiting position are both 1.
+    expect(screen.getAllByText("1")).toHaveLength(2);
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText("No active service")).toBeInTheDocument();
     expect(screen.getByText("Medicine")).toBeInTheDocument();
     expect(screen.getByText("William's Org")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();

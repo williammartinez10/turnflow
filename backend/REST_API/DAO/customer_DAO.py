@@ -1,5 +1,5 @@
 from backend.REST_API.dbconfig import PG_DB_CONFIG, POOL_CONFIG
-from backend.REST_API.DAO.queue_DAO import queueDAO
+from backend.REST_API.DAO.queue_DAO import queueDAO, Queue
 import psycopg2
 from pydantic import BaseModel
 from typing import Optional
@@ -76,11 +76,12 @@ class customerDAO:
               status_code=409,
               detail="You already have an active ticket in this queue. Use Find My Ticket to view it."
           )
-
       new_customer.ticket_id = ticket_id
       new_customer.customer_id = cashe[0]
       new_customer.time = cashe[1]
       new_customer.status = cashe[2]
+      if customerDAO().get_next_customer3(new_customer.queue_code).customer_id == new_customer.customer_id:
+         customerDAO().set_next_customer3(new_customer.customer_id, new_customer.queue_code)
       #store and return entry just created in database
       return new_customer
 
@@ -143,8 +144,7 @@ class customerDAO:
       #return the matching ticket with its Queue information and current statistics
 
   def list_customers3(self, queue_code: str):
-      queue = queueDAO().get_withcode_queue3(queue_code)
-      queue_id = queue.queue_id      
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
       customer_list: list[Customer] = []
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
@@ -193,8 +193,7 @@ class customerDAO:
 
 
   def pop_customer3(self, queue_code: str):
-      queue = queueDAO().get_withcode_queue3(queue_code)
-      queue_id = queue.queue_id
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
       cashe: Customer
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
@@ -211,8 +210,26 @@ class customerDAO:
                   ORDER BY ticket_id
                   LIMIT 1
               )
-              RETURNING * \
+              RETURNING *
               """
+#      DELETE FROM next_customer
+#      WHERE next_customer_id = (
+#        SELECT next_customer_id FROM next_customer
+#        WHERE queue_id = %s
+#      )
+#      """
+#      #set up query to make call to database
+#      cur.execute(query, (queue_id,))
+#      query = """
+#      DELETE FROM customer
+#      WHERE customer_id = (
+#        SELECT customer_id FROM customer
+#        WHERE queue_id = %s
+#        ORDER BY ticket_id
+#        LIMIT 1
+#      )
+#      RETURNING *
+#      """ old pop_customer code, under verification
       #set up query to make call to database
       cur.execute(query, (queue_id,))
       cashe = cur.fetchone()
@@ -230,12 +247,15 @@ class customerDAO:
           called_time=cashe["called_time"],
           status=cashe["status"]
       )
+      next_customer = customerDAO().get_next_customer3(queue_code)
+      if next_customer != None:
+        queueDAO().update_wait_time(datetime.datetime.now(datetime.timezone.utc) - next_customer.time, next_customer.queue_code)
+        customerDAO().set_next_customer3(next_customer.customer_id, next_customer.queue_code)
       return retired_customer
       #return the customer removed from the specified queue
 
   def complete_customer3(self, queue_code: str, ticket_id: int):
-      queue = queueDAO().get_withcode_queue3(queue_code)
-      queue_id = queue.queue_id
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
 
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)
@@ -291,3 +311,113 @@ class customerDAO:
           )
 
       return Customer(**cashe)
+
+  def get_next_customer3(self, queue_code: str):
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
+      cashe: Customer
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      SELECT customer_id, queue_id, time
+      FROM customer
+      WHERE customer_id = (
+        SELECT customer_id FROM customer
+        WHERE queue_id = %s
+        ORDER BY ticket_id
+        LIMIT 1
+      )
+      """
+      #set up query to make call to database
+      cur.execute(query, (queue_id,))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      if cashe == None:
+         return None
+      next_customer = Customer(
+          customer_id=cashe["customer_id"],
+          time=cashe["time"],
+          queue_code=queue_code,
+      )
+      return next_customer
+
+  def set_next_customer3(self, next_customer: int, queue_code):
+      queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id
+      conn = self.pool.getconn()
+      cur = conn.cursor(cursor_factory=DictCursor)
+      query = """
+      INSERT INTO next_customer
+        (next_customer_id, queue_id, time)
+        VALUES (%s, %s, NOW())
+      ON CONFLICT (next_customer_id)
+        WHERE next_customer
+      DO UPDATE SET 
+        next_customer_id = EXCLUDED.next_customer_id,
+        queue_id = EXCLUDED.queue_id,
+        time = NOW()
+      RETURNING next_customer_id, queue_id, time
+      """
+      #set up query to make call to database
+      cur.execute(query, (next_customer, queue_id,))
+      cashe = cur.fetchone()
+      conn.commit()
+      cur.close()
+      self.pool.putconn(conn)
+      next_customer = Customer(
+          next_customer_id=cashe["next_customer_id"],
+          queue_id =["queue_id"],
+          time=cashe["time"]
+      )
+      #store and return entry just created in database
+      return next_customer
+
+  def get_time_remaning3(self, phone_number: str, queue_code: str):
+    time_list: list[int]
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT time_list FROM queue
+    WHERE queue_code = %s
+    """
+    #set up query to make call to database
+    cur.execute(query, (queue_code,))
+    cashe = cur.fetchone()
+    if cashe == None:
+      raise HTTPException(status_code=404, detail="queue missing")
+    time_list = cashe["time_list"]
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+
+    queue = queueDAO().get_active_withcode_queue3(queue_code)
+    queue_id = queue.queue_id
+    customer_list: list[Customer]
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+    query = """
+    SELECT * FROM customer
+    WHERE queue_id = %s
+    """
+    #set up query to make call to database
+    cur.execute(query, (queue_id,))
+    customer_list = cur.fetchall()
+    conn.commit()
+    cur.close()
+    if customer_list == []:
+      raise HTTPException(status_code=404, detail="queue empty")
+
+    average_count = 0
+    item_list_sum = datetime.timedelta(0)
+    for time_waited in time_list:
+       average_count += 1
+       item_list_sum = item_list_sum + time_waited
+    average_wait_time = time_waited / average_count
+       
+    customer_count = 0
+
+    while True:
+        customer_count += 1
+        if customer_list[customer_count-1]["phone_number"] == phone_number:
+            break
+    return customer_count * average_wait_time

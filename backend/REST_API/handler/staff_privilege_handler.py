@@ -3,7 +3,13 @@ from fastapi import HTTPException
 
 
 class staff_privilegeHandler:
-  def add_staff_privilege2(self, new_staff_privilege: Staff_Privilege):
+  def add_staff_privilege2(self, new_staff_privilege: Staff_Privilege, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+    
     # Validate required fields explicitly.
     if not new_staff_privilege.staff_privilege:
       raise HTTPException(status_code=401, detail="staff_privilege is required")
@@ -11,7 +17,13 @@ class staff_privilegeHandler:
     # A privilege may start without any staff assigned.
     return staff_privilegeDAO().add_staff_privilege3(new_staff_privilege)
 
-  def get_staff_privilege_list2(self):
+  def get_staff_privilege_list2(self, account: dict | None):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
     return staff_privilegeDAO().get_staff_privilege_list3()
 
   def get_with_staff_privilege_staff_list2(self, staff_privilege: str):
@@ -19,7 +31,14 @@ class staff_privilegeHandler:
       staff_privilege
     )
 
-  def delete_staff_privilege_staff2(self, staff_privilege: str):
+  def delete_staff_privilege_staff2(self, staff_privilege: str, account: dict | None):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
     result = staff_privilegeDAO().delete_staff_privilege3(staff_privilege)
     return {
       "message": "Staff Privilege " + staff_privilege + " successfully deleted",

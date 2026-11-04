@@ -135,8 +135,8 @@ async def get_ticket1(queue_code: str, ticket_number: int):
 
 # Gets the customers currently associated with a specific queue.
 @app.get("/database/customer/get_queue_{queue_code}")
-async def list_customers1(queue_code: str, status_code=201):
-    return customerHandler().list_customers2(queue_code)
+async def list_customers1(queue_code: str, request: Request, status_code=201):
+    return customerHandler().list_customers2(queue_code, request.session.get("account"))
 
 # Counts how many customers are currently waiting for the selected admin.
 @app.get("/database/customer/count_waiting_{admin_id}")
@@ -147,11 +147,14 @@ async def count_waiting_customers1(admin_id: int):
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
 async def pop_customer(
     queue_code: str,
+    request: Request,
     background_tasks: BackgroundTasks,
     status_code=201,
 ):
-    result = customerHandler().pop_customer2(queue_code)
-    customer = result["customer"]
+    customer = customerHandler().pop_customer2(
+        queue_code,
+        request.session.get("account")
+    )
 
     # Retrieve organization and service info after the Customer is called.
     # A lookup failure must not undo the successful Queue operation.
@@ -178,7 +181,15 @@ async def pop_customer(
         "Please proceed to the service counter."
     )
 
-    return result
+    return customer
+
+
+@app.get("/database/customer/get_time_remaning")
+async def get_time_remaning1(
+    phone_number: str,
+    queue_code: str,
+):
+    return customerHandler().get_time_remaning2(phone_number, queue_code)
 
 @app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
 async def complete_customer1(queue_code: str, ticket_id: int):
@@ -192,9 +203,9 @@ async def complete_customer1(queue_code: str, ticket_id: int):
 # verifying, or deleting an admin account.
 
 @app.post("/database/admin/add_admin", status_code=201)
-def add_admin1(new_admin: Admin, status_code=201):
+def add_admin1(new_admin: Admin, request: Request, status_code=201):
     """ Register an admin using signup validation and password hashing in handler. """
-    return adminHandler().add_admin2(new_admin)
+    return adminHandler().add_admin2(new_admin, request.session.get("account"))
 
 # Credential verification uses POST; get-prefixed routes retrieve data.
 @app.post("/database/admin/verify_admin", status_code=201)
@@ -213,8 +224,8 @@ def verify_admin1(
     return account
 
 @app.delete("/database/admin/delete_admin")
-def delete_admin1(new_admin: Admin, status_code=201):
-    return adminHandler().delete_admin2(new_admin)
+def delete_admin1(new_admin: Admin, request: Request, status_code=201):
+    return adminHandler().delete_admin2(new_admin, request.session.get("account"))
 
 # ===== Service API Routes =====
 # These routes receive service-related requests from the frontend
@@ -300,8 +311,8 @@ async def get_queue_list1(request: Request, status_code=201):
     )
 
 @app.get("/database/queue/get_withcode_queue_{queue_code}")
-async def get_withcode_queue1(queue_code: str, status_code=201):
-    return queueHandler().get_withcode_queue2(queue_code)
+async def get_withcode_queue1(queue_code: str, request: Request, status_code=201):
+    return queueHandler().get_withcode_queue2(queue_code, request.session.get("account"))
 
 @app.get("/database/queue/get_active_withcode/{queue_code}")
 def get_active_withcode_queue(queue_code: str):
@@ -319,9 +330,9 @@ async def delete_queue1(queue_code: str, request: Request):
 # verifying, or deleting a staff account.
 
 @app.post("/database/staff/add_staff", status_code=201)
-def add_staff1(new_Staff: Staff, status_code=201):
+def add_staff1(new_Staff: Staff, request: Request, status_code=201):
     """ Register a staff account using signup validation and password hashing in handler. """
-    return staffHandler().add_staff2(new_Staff)
+    return staffHandler().add_staff2(new_Staff, request.session.get("account"))
 
 @app.post("/database/staff/verify_staff", status_code=201)
 def verify_staff1(
@@ -339,17 +350,17 @@ def verify_staff1(
     return account
 
 @app.delete("/database/staff/delete_staff")
-def delete_staff1(new_Staff: Staff, status_code=201):
-    return staffHandler().delete_staff2(new_Staff)
+def delete_staff1(new_Staff: Staff, request: Request, status_code=201):
+    return staffHandler().delete_staff2(new_Staff, request.session.get("account"))
 
 
 @app.post("/database/staff_privilege/add_staff_privilege", status_code=201)
-async def add_staff_privilege1(new_staff_privilege: Staff_Privilege):
-    return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege)
+async def add_staff_privilege1(new_staff_privilege: Staff_Privilege, request: Request):
+    return staff_privilegeHandler().add_staff_privilege2(new_staff_privilege, request.session.get("account"))
 
 @app.get("/database/staff_privilege/get_staff_privilege_list")
-async def get_staff_privilege_list1(status_code=201):
-    return staff_privilegeHandler().get_staff_privilege_list2()
+async def get_staff_privilege_list1(request: Request, status_code=201):
+    return staff_privilegeHandler().get_staff_privilege_list2(request.session.get("account"))
 
 @app.get("/database/staff_privilege/get_with_staff_privilege_staff_list_{staff_privilege}")
 async def get_with_staff_privilege_staff_list1(staff_privilege: str, status_code=201):
@@ -358,9 +369,10 @@ async def get_with_staff_privilege_staff_list1(staff_privilege: str, status_code
     )
 
 @app.delete("/database/staff_privilege/delete_staff_privilege_{staff_privilege}")
-async def delete_staff_privilege_staff1(staff_privilege: str, status_code=201):
+async def delete_staff_privilege_staff1(staff_privilege: str, request: Request, status_code=201):
     return staff_privilegeHandler().delete_staff_privilege_staff2(
-        staff_privilege
+        staff_privilege,
+        request.session.get("account")
     )
 
 
@@ -413,3 +425,31 @@ def logout1(request: Request):
     """ Clear this browser session and confirm logout. """
     request.session.clear()
     return {"message": "Logged out."}
+
+
+
+#todo list / complaints
+  
+  #what to do about organization_name?
+
+  #am I satisfied with get_withcode_queue changes?
+
+  #pop_customer rework dilema
+
+  #technically speaking service estimated_duration is already covered by next_customer but that's a conflict
+  
+  #service ID should be able to take the name of the service rather than the ID
+
+  #queue id creation requires a bunch of checks to make sure the data is completely filled out
+
+  #    "called_time": null,
+  #  "completed_time": null,
+  #when adding customer
+
+  #count_waiting_customers1 and count_active_queues1 returns a raw integer, imo should return a json but ¯\_(ツ)_/¯
+
+  #pop_customer and complete_customer1 WIP
+
+  #get_time_remaning1 heavy WIP
+
+  #

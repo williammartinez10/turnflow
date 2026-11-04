@@ -1,267 +1,179 @@
-/* =========================================================
-   PAGE LAYOUT
-   Controls the overall Services & Queues page appearance
-   ========================================================= */
+/* ============= Page and layout ============= */
 
 .services-queues-page {
     min-height: 100vh;
+    min-height: 100dvh;
     background: var(--color-neutral);
     color: #303030;
 }
 
-/* Adds space between the header and the page content */
 .services-queues-main {
-    padding: 80px 24px;
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 60px;
 }
 
-/* Main page title */
-.services-queues-title {
-    text-align: center;
-}
-
-/* Centers the general content unless a section overrides it */
 .services-queues-content {
+    width: 100%;
+    max-width: 1100px;
+    animation: slide-up 0.4s ease-out;
+}
+
+.services-queues-title {
+    margin: 0 0 32px;
+    font-size: 32px;
     text-align: center;
 }
 
-/* Section titles such as Services and Queues */
 .services-and-queues-title {
-    text-align: left;
+    margin: 0 0 18px;
+    font-size: 21px;
 }
-
-
-/* =========================================================
-   MAIN ACTION BUTTONS
-   Shared appearance for New Service and New Queue
-   ========================================================= */
-
-.services-button,
-.queues-button {
-    padding: 12px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-
-/* =========================================================
-   SERVICES SECTION
-   Controls the list and normal display of created services
-   ========================================================= */
-
-/* Adds space before the created services list */
-.services-list {
-    margin-top: 24px;
-}
-
-/* Each service is displayed as a row */
-.services-row {
-    display: grid;
-    grid-template-columns: 1fr 120px 120px;
-    align-items: center;
-    border: 1px solid var(--color-carbon);
-}
-
-/* Gives the service information and buttons spacing */
-.services-row span,
-.services-row button {
-    padding: 12px;
-}
-
-/* Spreads the service name, status, and wait time across the row */
-.services-summary {
-    display: grid;
-    grid-template-columns: 1fr 180px 120px;
-    align-items: center;
-    width: 100%;
-}
-
-/* Places Current Wait before Active so Active aligns with Queue status */
-.services-summary span:nth-child(2) {
-    grid-column: 3;
-}
-
-.services-summary span:nth-child(3) {
-    grid-column: 2;
-}
-
-.services-summary span {
-    grid-row: 1;
-}
-
-/* =========================================================
-   CREATE SERVICE FORM
-   Uses a two-column layout: label on left, input on right
-   ========================================================= */
-
-.services-new-form {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 12px 16px;
-    align-items: center;
-
-    max-width: 700px;
-    margin: 24px auto 0;
-
-    text-align: left;
-}
-
-/* Makes the Service Name and Description fields fill their column */
-.services-new-form input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-}
-
-.services-form-actions {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-/* Shared styling for Service and Queue form action buttons */
-.services-form-actions button,
-.queues-form-actions button {
-    padding: 10px 16px;
-}
-
-/* =========================================================
-   EDIT SERVICE FORM
-   ========================================================= */
-
-.services-edit-form-top {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 12px 16px;
-    align-items: center;
-
-    max-width: 700px;
-    margin: 24px auto 0;
-
-    text-align: left;
-}
-
-/* Makes the Edit Service title span both columns */
-.services-edit-form-top h3 {
-    grid-column: 1 / -1;
-    text-align: center;
-}
-
-/* Makes the text fields fill the available form space */
-.services-edit-form-top input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-}
-
-/* Used in Queues takes a full row because it may contain multiple queues */
-.service-used-queues {
-    grid-column: 1 / -1;
-    text-align: left;
-}
-
-/* Keeps Cancel and Save together below the form */
-.services-form-actions {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-
-/* =========================================================
-   QUEUES SECTION
-   Controls spacing for the queue management area
-   ========================================================= */
 
 .queues-content {
     margin-top: 40px;
 }
 
-/* Adds space before the created queues list */
-.queues-list {
-    margin-top: 24px;
+
+/* ============= Controls ============= */
+
+.services-queues-content button,
+.services-queues-content input,
+.services-queues-content select {
+    min-height: 44px;
+    border: 1px solid var(--color-carbon);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #303030;
+    font: inherit;
+    font-size: 14px;
 }
 
-
-/* =========================================================
-   CREATE QUEUE FORM
-   Uses a two-column layout: label on left, input on right
-   ========================================================= */
-
-.queues-new-form {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 12px 16px;
-    align-items: center;
-
-    max-width: 700px;
-    margin: 24px auto 0;
-
-    text-align: left;
+.services-queues-content button {
+    padding: 12px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s,
+                transform 0.2s, box-shadow 0.2s;
 }
 
-/* Makes regular text fields and dropdowns fill their grid column.
-   Checkboxes are excluded so they stay small. */
-.queues-new-form input:not([type="checkbox"]),
-.queues-new-form select {
+.services-queues-content input,
+.services-queues-content select {
     width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
+    min-width: 0;
+    padding: 12px;
 }
 
-/* Makes Create Queue span across both form columns */
-.queues-new-form h3 {
-    grid-column: 1 / -1;
-    text-align: center;
+/* A custom arrow allows consistent spacing from the dropdown border. */
+.services-queues-content select {
+    appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23303030' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
 }
 
-/* Gives buttons inside the Create Queue form more space */
-.queues-new-form button {
-    padding: 10px 16px;
+.services-queues-content label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.services-queues-content button:hover:not(:disabled) {
+    border-color: #303030;
+    background: #f7f7f7;
+}
+
+/* Cancel is first and Create or Save is last in the current forms. */
+.services-queues-content .services-button,
+.services-queues-content .queues-button,
+.services-form-actions button:last-child,
+.queues-form-actions button:last-child {
+    border-color: transparent;
+    background: var(--color-watermelon);
+    color: #ffffff;
+}
+
+.services-queues-content .services-button:hover:not(:disabled),
+.services-queues-content .queues-button:hover:not(:disabled),
+.services-form-actions button:last-child:hover:not(:disabled),
+.queues-form-actions button:last-child:hover:not(:disabled) {
+    border-color: transparent;
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+/* Matches hover specificity so pressing removes the raised effect. */
+.services-queues-content button:active:not(:disabled),
+.services-queues-content .services-button:active:not(:disabled),
+.services-queues-content .queues-button:active:not(:disabled),
+.services-form-actions button:last-child:active:not(:disabled),
+.queues-form-actions button:last-child:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.services-queues-content input:disabled,
+.services-queues-content select:disabled,
+.services-queues-content button:disabled {
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.services-queues-content input:disabled,
+.services-queues-content select:disabled {
+    background-color: #eeeeee;
+}
+
+.services-queues-content button:disabled {
+    background-color: #dddddd;
+}
+
+.services-queues-content button:focus-visible,
+.services-queues-content input:focus-visible,
+.services-queues-content select:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 3px;
 }
 
 
-/* =========================================================
-   EDIT QUEUE FORM
-   Uses the same two-column structure as Create Queue
-   ========================================================= */
+/* ============= Forms and panels ============= */
 
-.queues-edit-form {
+.services-new-form,
+.services-edit-form-top,
+.queues-new-form,
+.queues-edit-form,
+.services-row,
+.queues-row {
     display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 12px 16px;
     align-items: center;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+}
 
+.services-new-form,
+.services-edit-form-top,
+.queues-new-form,
+.queues-edit-form {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 14px 20px;
+    width: 100%;
     max-width: 700px;
     margin: 24px auto 0;
-
-    text-align: left;
+    padding: 24px;
 }
 
-/* Makes Edit Queue span across both form columns */
+.services-edit-form-top h3,
+.queues-new-form h3,
 .queues-edit-form h3 {
     grid-column: 1 / -1;
+    margin: 0 0 8px;
+    font-size: 20px;
     text-align: center;
 }
 
-/* Makes regular edit fields fill their column while
-   leaving checkboxes at their normal size */
-.queues-edit-form input:not([type="checkbox"]),
-.queues-edit-form select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-}
-
-
-/* =========================================================
-   QUEUE FORM ACTIONS
-   Keeps Create/Cancel or Save/Cancel together
-   ========================================================= */
-
+.services-form-actions,
 .queues-form-actions {
     grid-column: 1 / -1;
     display: flex;
@@ -270,51 +182,172 @@
     margin-top: 8px;
 }
 
-
-/* =========================================================
-   SERVICES ASSIGNED TO A QUEUE
-   Controls the service checkbox area inside queue forms
-   ========================================================= */
-
-/* Makes the entire Services in Queue area span both columns */
+.service-used-queues,
 .queue-services-selection {
     grid-column: 1 / -1;
-    text-align: left;
+    min-width: 0;
 }
 
-/* Keeps each checkbox next to its service name */
+.service-used-queues p,
+.queue-services-selection p {
+    margin: 0 0 12px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
 .queue-services-selection label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-right: 18px;
-}
-
-/* Prevents checkboxes from stretching like normal text inputs */
-.queue-services-selection input[type="checkbox"] {
-    width: auto;
-    margin: 0;
+    display: block;
+    margin-bottom: 10px;
 }
 
 
-/* =========================================================
-   QUEUE LIST
-   Controls how saved queues appear below the forms
-   ========================================================= */
+/* ============= Service and Queue lists ============= */
 
-/* Displays Queue Name | Status | Edit in three columns */
-.queues-row {
+.services-list,
+.queues-list {
     display: grid;
-    grid-template-columns: 1fr 180px 120px 120px 120px;
-    align-items: center;
-    border: 1px solid var(--color-carbon);
-    gap: 8px;
+    gap: 12px;
+    margin-top: 24px;
 }
 
-/* Adds spacing inside each queue row */
-.queues-row span {
-    white-space: nowrap;
+.services-row,
+.queues-row {
+    gap: 12px;
+    padding: 18px;
 }
-.queues-row button {
-    padding: 12px;
+
+.services-row {
+    grid-template-columns: minmax(0, 1fr) 90px 90px;
+}
+
+.queues-row {
+    grid-template-columns: minmax(0, 1fr) 180px 160px 90px 90px;
+}
+
+.services-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px 160px;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.services-summary span,
+.queues-row span {
+    overflow-wrap: anywhere;
+}
+
+.queues-row span {
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.services-summary span:first-child,
+.queues-row span:first-child {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.services-summary span:last-child,
+.queues-row span:nth-child(2) {
+    color: #666666;
+}
+
+.services-summary span:last-child {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Delete is the third child in Service rows and fifth in Queue rows. */
+.services-row > button:nth-child(3),
+.queues-row > button:nth-child(5) {
+    border-color: #efb9ba;
+    color: #e52e32;
+}
+
+.services-row > button:nth-child(3):hover:not(:disabled),
+.queues-row > button:nth-child(5):hover:not(:disabled) {
+    border-color: #e52e32;
+    background: #fff1f1;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 900px) {
+    .services-row,
+    .queues-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .services-summary,
+    .queues-row > span,
+    .queues-row > select {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .services-queues-main {
+        padding: 30px 18px 50px;
+    }
+
+    .services-queues-title {
+        font-size: 28px;
+    }
+
+    .services-and-queues-title {
+        font-size: 20px;
+    }
+
+    .services-new-form,
+    .services-edit-form-top,
+    .queues-new-form,
+    .queues-edit-form,
+    .services-row,
+    .services-summary {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .services-new-form,
+    .services-edit-form-top,
+    .queues-new-form,
+    .queues-edit-form {
+        gap: 10px;
+        padding: 18px;
+    }
+
+    .services-summary {
+        gap: 14px;
+    }
+
+    .services-row > button {
+        width: 100%;
+    }
+
+    .services-row,
+    .queues-row {
+        padding: 16px;
+    }
+
+    .services-form-actions button,
+    .queues-form-actions button {
+        flex: 1;
+    }
 }

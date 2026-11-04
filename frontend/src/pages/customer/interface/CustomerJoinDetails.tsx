@@ -17,6 +17,7 @@ function CustomerJoinDetails() {
 
   // Queue information passed from the previous page.
   const queueCode = location.state?.queueCode;
+  const serviceName: string = location.state?.serviceName ?? "";
   const organizationName = location.state?.organizationName;
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -90,7 +91,7 @@ function CustomerJoinDetails() {
       `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 
     try {
-      // Register the customer in the selected queue.
+      // The backend determines the service from the selected queue.
       const response = await fetch(
         "http://127.0.0.1:8000/database/customer/add_customer",
         {
@@ -144,6 +145,7 @@ function CustomerJoinDetails() {
     navigate("/queue-status", {
       state: {
         queueCode,
+        serviceName,
         ticketNumber,
         status: ticketStatus,
         organizationName,

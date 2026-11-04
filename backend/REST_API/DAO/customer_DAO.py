@@ -92,29 +92,56 @@ class customerDAO:
       SELECT
           customer.ticket_id AS ticket_number,
           queue.queue_code,
+          queue.queue_name,
           service.service_name AS service,
           customer.status,
-          admin.organization_name
+          admin.organization_name,
+          CASE
+              WHEN customer.status = 'waiting'
+              THEN (
+                  SELECT COUNT(*)
+                  FROM customer AS ahead
+                  WHERE ahead.queue_id = customer.queue_id
+                  AND ahead.status = 'waiting'
+                  AND ahead.ticket_id < customer.ticket_id
+              )
+              ELSE NULL
+          END AS people_ahead,
+          ARRAY(
+              SELECT serving.ticket_id
+              FROM customer AS serving
+              WHERE serving.queue_id = customer.queue_id
+              AND serving.status = 'called'
+              ORDER BY serving.ticket_id
+          ) AS now_serving
       FROM customer
-               JOIN queue
-                    ON customer.queue_id = queue.queue_id
-               JOIN service
-                    ON queue.service_id = service.service_id
-               LEFT JOIN admin
-                         ON queue.admin_id = admin.admin_id
+      JOIN queue ON customer.queue_id = queue.queue_id
+      JOIN service ON queue.service_id = service.service_id
+      LEFT JOIN admin ON queue.admin_id = admin.admin_id
       WHERE queue.queue_code = %s
-        AND customer.ticket_id = %s
+      AND customer.ticket_id = %s
       """
-      #set up query to make call to database
+      # Retrieve the ticket and Queue statistics without Customer contact information.
       cur.execute(query, (queue_code, ticket_number))
       cashe = cur.fetchone()
       conn.commit()
       cur.close()
       self.pool.putconn(conn)
+
       if cashe == None:
           raise HTTPException(status_code=404, detail="ticket missing")
-      return dict(cashe)
-      #return the matching ticket without customer contact information
+
+      ticket = dict(cashe)
+
+      # Position 1 identifies the next eligible waiting Customer.
+      # Customers with another status do not have a waiting position.
+      if ticket["status"] == "waiting":
+          ticket["position"] = ticket["people_ahead"] + 1
+      else:
+          ticket["position"] = None
+
+      return ticket
+      #return the matching ticket with its Queue information and current statistics
 
   def list_customers3(self, queue_code: str):
       queue_id = queueDAO().get_withcode_queue3(queue_code).queue_id

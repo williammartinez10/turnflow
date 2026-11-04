@@ -60,12 +60,12 @@ function CustomerFindTicket() {
 
       const ticket = await response.json();
 
-      // If the ticket exists, navigate to its Queue Status page.
+      // Map the backend's service field to the shared router-state field.
       navigate("/queue-status", {
         state: {
           ticketNumber: String(ticket.ticket_number),
           queueCode: ticket.queue_code,
-          service: ticket.service,
+          serviceName: ticket.service,
           status: ticket.status,
           organizationName: ticket.organization_name,
         },

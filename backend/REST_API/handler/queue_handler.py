@@ -24,19 +24,12 @@ class queueHandler:
     if account.get("role") != "admin":
       raise HTTPException(status_code=403, detail="Admin access required.")
 
-    # Use the signed-in Admin instead of an ID supplied in the request.
+    # Derive ownership and organization from the signed-in Admin.
     new_queue.admin_id = account["admin_id"]
+    new_queue.organization_name = account.get("organization_name")
 
-    # Validate required fields explicitly
-    # if not new_queue.queue_code:
-    #   raise HTTPException(status_code=401, detail="queue_code is required")
-    # if queueDAO().check_withcode_queue3(new_queue.queue_code) != None:
-    #   raise HTTPException(status_code=401, detail="queue_code in use")
-
-    if not new_queue.organization_name:
-      raise HTTPException(status_code=401, detail="organization_name is required")
-    if not new_queue.time_list:
-      raise HTTPException(status_code=401, detail="initial time_list is required")
+    # New queues have no recorded service times yet.
+    new_queue.time_list = []
 
     # Generate a unique queue code.
     queue_code = self.generate_queue_code()

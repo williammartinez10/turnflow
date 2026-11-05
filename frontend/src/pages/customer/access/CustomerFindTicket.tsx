@@ -87,7 +87,10 @@ function CustomerFindTicket() {
             Find My Ticket
           </h1>
 
-          <p className="customer-find-ticket-description">
+          <p
+            className="customer-find-ticket-description"
+            id="customer-find-ticket-description"
+          >
             Enter your queue code and ticket number to view your queue status.
           </p>
 
@@ -108,6 +111,7 @@ function CustomerFindTicket() {
               name="queue-code"
               type="text"
               placeholder="Enter your queue code"
+              aria-describedby="customer-find-ticket-description"
               required
             />
 
@@ -126,10 +130,14 @@ function CustomerFindTicket() {
               inputMode="numeric"
               pattern="[0-9]+"
               placeholder="Enter your ticket number"
+              aria-describedby="ticket-number-help"
               required
             />
 
-            <p className="ticket-number-help">
+            <p
+              className="ticket-number-help"
+              id="ticket-number-help"
+            >
               Enter the ticket number you received when joining the queue.
             </p>
 

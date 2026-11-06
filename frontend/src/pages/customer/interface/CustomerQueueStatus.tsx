@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, Clock3, Info, Ticket } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Header from "../../../components/Header/Header";
+import CustomerStatusAnnouncement from "./CustomerStatusAnnouncement";
 
 /** Ticket information and Queue statistics returned by the backend. */
 interface TicketStatus {
@@ -20,6 +21,7 @@ interface TicketStatus {
 /**
  * Displays ticket, queue, service, and status information.
  * Refreshes current Queue statistics every five seconds until service is completed.
+ * Announces ticket status and position changes to screen readers.
  * Completed tickets display a confirmation and options to join or find a Queue ticket.
  * Estimated waiting time remains pending.
  */
@@ -176,6 +178,15 @@ function CustomerQueueStatus() {
   return (
     <div className="customer-queue-status-page">
       <Header />
+
+      <CustomerStatusAnnouncement
+        ticketNumber={ticket?.ticket_number ?? ticketNumber}
+        status={ticket?.status}
+        title={currentStatus.title}
+        description={currentStatus.description}
+        position={ticket?.position}
+        peopleAhead={ticket?.people_ahead}
+      />
 
       <main className="customer-queue-status-main">
         <section className="customer-queue-status-content">

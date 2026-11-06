@@ -7,6 +7,7 @@
     --color-neutral: #EFEFEF;
 }
 
+
 /* ============= Global reset ============= */
 
 * {
@@ -16,4 +17,148 @@
 body {
     margin: 0;
     font-family: Tahoma, sans-serif;
+}
+
+/* Keeps announcements available to screen readers without displaying them. */
+.screen-reader-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/* ============= Public-page contrast ============= */
+
+:is(
+    .home-page,
+    .login-page,
+    .admin-signup-page,
+    .staff-code-page,
+    .staff-signup-page,
+    .customer-join-queue-page,
+    .customer-find-ticket-page,
+    .customer-service-info-page,
+    .customer-join-details-page,
+    .customer-queue-status-page,
+    .queue-confirmation-overlay
+) {
+    --color-carbon: #666666;
+    --color-watermelon: #D92B30;
+}
+
+:is(
+    .home-page .customer-button,
+    .login-form-button,
+    .admin-signup-form-button,
+    .staff-code-form-button,
+    .staff-signup-form-button,
+    .find-queue-button,
+    .find-ticket-submit-button,
+    .customer-service-info-join-button,
+    .customer-join-details-button,
+    .customer-queue-join-another,
+    .queue-confirmation-button
+):hover:not(:disabled) {
+    background: #C52227;
+}
+
+:is(
+    .login-page,
+    .admin-signup-page,
+    .staff-code-page,
+    .staff-signup-page,
+    .customer-join-queue-page,
+    .customer-find-ticket-page,
+    .customer-join-details-page
+) input::placeholder {
+    color: #666666;
+    opacity: 1;
+}
+
+/* Override existing inline error colors and required-label colors. */
+:is(
+    .login-page,
+    .admin-signup-page,
+    .staff-code-page,
+    .staff-signup-page,
+    .customer-join-queue-page,
+    .customer-find-ticket-page,
+    .customer-service-info-page,
+    .customer-join-details-page,
+    .customer-queue-status-page
+) [role="alert"],
+:is(
+    .login-page,
+    .admin-signup-page,
+    .staff-signup-page
+) label::after {
+    color: #B91C1C !important;
+}
+
+.home-page [role="alert"] {
+    color: #FFB4B4 !important;
+}
+
+
+/* Prevent the Header from covering focused content on short viewports. */
+@media (max-height: 500px) {
+    .home-page .home-header,
+    :is(
+        .login-page,
+        .admin-signup-page,
+        .staff-code-page,
+        .staff-signup-page,
+        .customer-join-queue-page,
+        .customer-find-ticket-page,
+        .customer-service-info-page,
+        .customer-join-details-page,
+        .customer-queue-status-page
+    ) .header {
+        position: static;
+    }
+}
+
+
+/* ============= Reduced motion ============= */
+
+@media (prefers-reduced-motion: reduce) {
+    :is(
+        .home-page,
+        .login-page,
+        .admin-signup-page,
+        .staff-code-page,
+        .staff-signup-page,
+        .customer-join-queue-page,
+        .customer-find-ticket-page,
+        .customer-service-info-page,
+        .customer-join-details-page,
+        .customer-queue-status-page,
+        .queue-confirmation-overlay
+    ) * {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+
+    :is(
+        .home-page,
+        .login-page,
+        .admin-signup-page,
+        .staff-code-page,
+        .staff-signup-page,
+        .customer-join-queue-page,
+        .customer-find-ticket-page,
+        .customer-service-info-page,
+        .customer-join-details-page,
+        .customer-queue-status-page,
+        .queue-confirmation-overlay
+    ) :is(button, a):not(.password-input-toggle):hover {
+        transform: none !important;
+    }
 }

@@ -15,34 +15,39 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Services_Queues from "./pages/admin/Services_Queues";
 import RequireAdmin from "./components/RequireAdmin/RequireAdmin";
 import StaffDashboard from "./pages/staff/StaffDashboard";
+import PageAccessibility from "./components/PageAccessibility/PageAccessibility";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/join-queue" element={<CustomerJoinQueue />} />
-      <Route path="/find-ticket" element={<CustomerFindTicket />} />
-      <Route path="/service-information" element={<CustomerServiceInfo />} />
-      <Route path="/join-details" element={<CustomerJoinDetails />} />
-      <Route path="/queue-status" element={<CustomerQueueStatus />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup/admin" element={<AdminSignup />} />
-      <Route path="/signup/staff/staff_code" element={<StaffCode />} />
-      <Route path="/signup/staff" element={<StaffSignup />} />
+    <>
+      <PageAccessibility />
 
-      {/* Check the Admin session before displaying these pages. */}
-      <Route element={<RequireAdmin />}>
-        <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
-        <Route path="/admin/Services_Queues" element={<Services_Queues />} />
-      </Route>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/join-queue" element={<CustomerJoinQueue />} />
+        <Route path="/find-ticket" element={<CustomerFindTicket />} />
+        <Route path="/service-information" element={<CustomerServiceInfo />} />
+        <Route path="/join-details" element={<CustomerJoinDetails />} />
+        <Route path="/queue-status" element={<CustomerQueueStatus />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup/admin" element={<AdminSignup />} />
+        <Route path="/signup/staff/staff_code" element={<StaffCode />} />
+        <Route path="/signup/staff" element={<StaffSignup />} />
 
-      <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />
+        {/* Check the Admin session before displaying these pages. */}
+        <Route element={<RequireAdmin />}>
+          <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
+          <Route path="/admin/Services_Queues" element={<Services_Queues />} />
+        </Route>
 
-      {import.meta.env.DEV && (
-        <Route path="/dev" element={<DevPage />} />
-      )}
+        <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />
 
-    </Routes>
+        {import.meta.env.DEV && (
+          <Route path="/dev" element={<DevPage />} />
+        )}
+
+      </Routes>
+    </>
   );
 }
 

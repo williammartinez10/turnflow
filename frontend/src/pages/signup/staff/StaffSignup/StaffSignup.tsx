@@ -1,6 +1,6 @@
 import "./StaffSignup.css";
 import { useState, SyntheticEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
@@ -9,6 +9,7 @@ import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
  * Applies browser validation and presents account-creation feedback from the backend.
  */
 function StaffSignup() {
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,7 @@ function StaffSignup() {
     const formData = new FormData(e.currentTarget);
     const apiBaseUrl =
       import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    let accountCreated = false;
 
     setError("");
     setSuccess("");
@@ -62,9 +64,8 @@ function StaffSignup() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         setError(
           typeof data.detail === "string"
             ? data.detail
@@ -73,9 +74,33 @@ function StaffSignup() {
         return;
       }
 
-      setSuccess("Staff account created successfully.");
+      accountCreated = true;
+
+      const loginResponse = await fetch(`${apiBaseUrl}/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: String(formData.get("email") ?? "").trim().toLowerCase(),
+          password: formData.get("password"),
+        }),
+      });
+
+      if (!loginResponse.ok) {
+        setSuccess("Account created. Please log in to continue.");
+        return;
+      }
+
+      window.dispatchEvent(new Event("session-changed"));
+      navigate("/staff/StaffDashboard", { replace: true });
     } catch {
-      setError("Could not create the account. Please try again.");
+      if (accountCreated) {
+        setSuccess("Account created. Please log in to continue.");
+      } else {
+        setError("Could not create the account. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

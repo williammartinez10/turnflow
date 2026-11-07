@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StaffSignup from "./StaffSignup";
 
@@ -34,24 +34,35 @@ describe("StaffSignup", () => {
   });
 
 
-  it("submits the signup fields and shows successful registration", async () => {
+  it("submits the signup fields, signs in, and opens the Staff dashboard", async () => {
     const signupData = {
       full_name: "Staff Test",
       email: "staff.test@example.com",
       password: "LocalTestPass123!",
     };
 
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 201,
-      json: async () => ({ staff_id: 1 }),
-    });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => ({ staff_id: 1 }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+      });
 
     vi.stubGlobal("fetch", fetchMock);
 
     render(
-      <MemoryRouter>
-        <StaffSignup />
+      <MemoryRouter initialEntries={["/signup/staff"]}>
+        <Routes>
+          <Route path="/signup/staff" element={<StaffSignup />} />
+          <Route
+            path="/staff/StaffDashboard"
+            element={<h1>Staff Dashboard</h1>}
+          />
+        </Routes>
       </MemoryRouter>
     );
 
@@ -60,11 +71,12 @@ describe("StaffSignup", () => {
     fireEvent.change(screen.getByLabelText("Password"), {target: { value: signupData.password },});
     fireEvent.click(screen.getByRole("button", { name: "Create Staff Account" }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Staff account created successfully.");
+    expect(await screen.findByRole("heading", { name: "Staff Dashboard" })).toBeInTheDocument();
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
       expect.stringMatching(/\/database\/staff\/add_staff$/),
       expect.objectContaining({
         method: "POST",
@@ -76,6 +88,19 @@ describe("StaffSignup", () => {
 
     const requestOptions = fetchMock.mock.calls[0][1];
     expect(JSON.parse(requestOptions.body)).toEqual(signupData);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/\/auth\/login$/),
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          email: signupData.email,
+          password: signupData.password,
+        }),
+      })
+    );
   });
 
 

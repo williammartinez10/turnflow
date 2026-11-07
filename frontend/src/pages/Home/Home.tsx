@@ -37,6 +37,11 @@ function Home() {
 
       const account = await response.json();
 
+      if (account.role === "staff") {
+        navigate("/staff/StaffDashboard");
+        return;
+      }
+
       navigate(
         account.role === "admin" ? "/admin/AdminDashboard" : "/login"
       );

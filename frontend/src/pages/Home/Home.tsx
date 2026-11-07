@@ -51,7 +51,7 @@ function Home() {
     <div className="home-page">
       <header className="home-header">
         <div className="home-brand">
-          <span className="home-brand-icon">
+          <span className="home-brand-icon" aria-hidden="true">
             <ClockCheck size={24} />
           </span>
           <span>TurnFlow</span>
@@ -69,12 +69,13 @@ function Home() {
           <button
             className="customer-button"
             type="button"
+            aria-describedby="home-customer-note"
             onClick={() => navigate("/join-queue")}
           >
             Continue as Customer <span aria-hidden="true">→</span>
           </button>
 
-          <p className="home-note">No account needed.</p>
+          <p className="home-note" id="home-customer-note">No account needed.</p>
 
           <div className="home-divider" />
 
@@ -84,10 +85,15 @@ function Home() {
               className="staff-login-link"
               to="/login"
               onClick={handleAccountAccess}
-              aria-busy={isChecking}
+              aria-label="Staff or Admin access"
+              aria-disabled={isChecking || undefined}
             >
-              {isChecking ? "Checking..." : "Here"}
+              Here
             </Link>
+          </p>
+
+          <p className="screen-reader-only" role="status" aria-atomic="true">
+            {isChecking ? "Checking your session. Please wait." : ""}
           </p>
 
           {error && (

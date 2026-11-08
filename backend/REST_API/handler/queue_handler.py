@@ -77,10 +77,10 @@ class queueHandler:
     if account.get("role") != "staff" and account.get("role") != "admin":
       raise HTTPException(status_code=403, detail="Staff or admin access required.")
 
-    staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
-
-    if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
-      raise HTTPException(status_code=403, detail="Staff missing privileges.")
+    if account.get("role") != "admin":
+      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
+      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Staff missing privileges.")
 
     return queueDAO().get_withcode_queue3(queue_code)
 

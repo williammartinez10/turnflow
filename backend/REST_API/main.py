@@ -378,4 +378,6 @@ def logout1(request: Request):
 
   #get_time_remaning1 heavy WIP
 
-  #
+  #admin login should b required to delete admin accounts
+
+  #it appears the timeout runs out regardless of if your doing something or not

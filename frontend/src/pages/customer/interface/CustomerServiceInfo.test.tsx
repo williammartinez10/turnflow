@@ -64,7 +64,8 @@ describe("CustomerServiceInfo", () => {
             state: {
               queueCode: "ABC-123-45",
               queueId: 1,
-              service: "Medicine",
+              serviceId: 1,
+              serviceName: "Medicine",
               organizationName: "William's Org",
             },
           },
@@ -84,7 +85,8 @@ describe("CustomerServiceInfo", () => {
       state: {
         queueCode: "ABC-123-45",
         queueId: 1,
-        service: "Medicine",
+        serviceId: 1,
+        serviceName: "Medicine",
         organizationName: "William's Org",
       },
     });

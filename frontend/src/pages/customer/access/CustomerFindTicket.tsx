@@ -147,6 +147,10 @@ function CustomerFindTicket() {
               </p>
             )}
 
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Finding your ticket. Please wait." : ""}
+            </p>
+
             <button
               className="find-ticket-submit-button"
               type="submit"

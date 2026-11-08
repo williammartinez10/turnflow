@@ -142,7 +142,7 @@ describe("Login", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password.");
 
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
 

@@ -146,6 +146,10 @@ function Login() {
               {success}
             </p>}
 
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Logging in. Please wait." : ""}
+            </p>
+
             <button
               className="login-form-button"
               type="submit"

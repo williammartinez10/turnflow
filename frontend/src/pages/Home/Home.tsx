@@ -90,7 +90,7 @@ function Home() {
               className="staff-login-link"
               to="/login"
               onClick={handleAccountAccess}
-              aria-label="Staff or Admin access"
+              aria-label="Here: Staff or Admin access"
               aria-disabled={isChecking || undefined}
             >
               Here

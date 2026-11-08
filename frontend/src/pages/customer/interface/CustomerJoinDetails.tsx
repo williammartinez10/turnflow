@@ -252,6 +252,10 @@ function CustomerJoinDetails() {
               </p>
             )}
 
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Joining the queue. Please wait." : ""}
+            </p>
+
             <button
               className="customer-join-details-button"
               ref={continueButtonRef}

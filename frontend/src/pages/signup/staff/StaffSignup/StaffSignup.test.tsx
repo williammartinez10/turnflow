@@ -129,7 +129,7 @@ describe("StaffSignup", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Email is already registered.");
     
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
 

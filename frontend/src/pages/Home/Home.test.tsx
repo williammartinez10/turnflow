@@ -24,7 +24,7 @@ describe("Home", () => {
     expect(screen.getByText("TurnFlow")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /continue as customer/i })).toBeInTheDocument();
 
-    const loginLink = screen.getByRole("link", { name: "Staff or Admin access" });
+    const loginLink = screen.getByRole("link", {name: "Here: Staff or Admin access",});
 
     expect(loginLink).toBeInTheDocument();
     expect(loginLink).toHaveAttribute("href", "/login");
@@ -56,7 +56,7 @@ describe("Home", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(screen.getByRole("link", { name: "Staff or Admin access" }));
+    fireEvent.click(screen.getByRole("link", { name: "Here: Staff or Admin access", }));
 
     expect(await screen.findByRole("heading", { name: destination })).toBeInTheDocument();
 
@@ -79,15 +79,14 @@ describe("Home", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(screen.getByRole("link", { name: "Staff or Admin access" }));
+    fireEvent.click(screen.getByRole("link", { name: "Here: Staff or Admin access", }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not check your session. Please try again.");
-  
-    expect(screen.getByRole("link", { name: "Staff or Admin access" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Here: Staff or Admin access", })).toBeInTheDocument();
   });
 
-  
-    it("supports keyboard navigation and explains customer access", async () => {
+
+  it("supports keyboard navigation and explains customer access", async () => {
     const user = userEvent.setup();
 
     render(
@@ -100,7 +99,7 @@ describe("Home", () => {
     );
 
     const customerButton = screen.getByRole("button", {name: /continue as customer/i,});
-    const loginLink = screen.getByRole("link", {name: "Staff or Admin access",});
+    const loginLink = screen.getByRole("link", {name: "Here: Staff or Admin access",});
 
     expect(customerButton).toHaveAccessibleDescription("No account needed.");
 
@@ -140,7 +139,7 @@ describe("Home", () => {
     );
 
     const loginLink = screen.getByRole("link", {
-      name: "Staff or Admin access",
+      name: "Here: Staff or Admin access",
     });
 
     fireEvent.click(loginLink);

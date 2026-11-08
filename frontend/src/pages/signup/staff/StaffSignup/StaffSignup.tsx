@@ -185,6 +185,10 @@ function StaffSignup() {
               </p>
             )}
 
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Creating your staff account. Please wait." : ""}
+            </p>
+
             <button
               className="staff-signup-form-button"
               type="submit"

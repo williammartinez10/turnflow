@@ -61,10 +61,10 @@ function CustomerJoinQueue() {
 
     try {
       const response = await fetch(
-          `http://127.0.0.1:8000/database/queue/get_active_withcode/${queueCode.trim()}`,
-          {
-            method: "GET",
-          }
+        `http://127.0.0.1:8000/database/queue/get_active_withcode/${queueCode.trim()}`,
+        {
+          method: "GET",
+        }
       );
 
       if (!response.ok) {
@@ -137,17 +137,27 @@ function CustomerJoinQueue() {
                 placeholder="XXX-XXX-XX"
                 value={queueCode}
                 onChange={(e) => setQueueCode(e.target.value)}
+                aria-describedby="queue-code-help"
                 required
               />
             </div>
 
+            <p className="queue-code-help" id="queue-code-help">
+              Enter the code provided by the organization, including any hyphens.
+            </p>
+
             {error && (
-              <p 
-                role="alert" 
-                style={{ color: "#ff0000", textAlign: "center" }}>
+              <p
+                role="alert"
+                style={{ color: "#ff0000", textAlign: "center" }}
+              >
                 {error}
               </p>
             )}
+
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Finding your queue. Please wait." : ""}
+            </p>
 
             <button
               className="find-queue-button"

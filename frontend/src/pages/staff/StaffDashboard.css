@@ -1,0 +1,185 @@
+/* ============= Page ============= */
+
+.staff-dashboard-page {
+    min-height: 100dvh;
+    background: var(--color-neutral);
+    color: #303030;
+}
+
+
+/* ============= Main ============= */
+
+.staff-dashboard-main {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 60px;
+}
+
+.staff-dashboard-content {
+    width: 100%;
+    max-width: 1000px;
+    animation: slide-up 0.4s ease-out;
+}
+
+.staff-dashboard-title {
+    margin: 0 0 28px;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+}
+
+
+/* ============= Organization information ============= */
+
+.staff-organization {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.staff-organization h2 {
+    margin: 0 0 8px;
+    color: #666666;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.staff-organization p {
+    margin: 0;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+/* ============= Staff Status ============= */
+
+.staff-status-section {
+    margin: 32px 0;
+    text-align: center;
+}
+
+.staff-status-section h2 {
+    margin: 0 0 8px;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.staff-status-section p {
+    margin: 0 0 16px;
+    font-size: 16px;
+}
+
+.staff-status-section button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #303030;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.staff-status-section button:hover {
+    background: var(--color-watermelon);
+}
+
+.staff-status-section button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 3px;
+}
+
+
+/* ============= Assigned Queues ============= */
+
+.staff-assigned-section {
+    margin-top: 32px;
+}
+
+.staff-assigned-section h2 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.staff-assigned-list {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.staff-assigned-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.staff-assigned-row span:first-child {
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.staff-assigned-row span:last-child {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--color-sky);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* ============= Note ============= */
+
+.staff-dashboard-note {
+    margin: 20px 0 0;
+    color: #666666;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 600px) {
+    .staff-dashboard-main {
+        padding: 30px 18px 50px;
+    }
+
+    .staff-dashboard-title {
+        font-size: 28px;
+    }
+
+    .staff-assigned-section h2 {
+        font-size: 20px;
+    }
+
+    .staff-assigned-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px;
+    }
+}

@@ -1,31 +1,171 @@
-/*Background Format*/
+/* ============= Page ============= */
+
 .admin-dashboard-page {
-    min-height: 100vh;
+    min-height: 100dvh;
     background: var(--color-neutral);
     color: #303030;
 }
 
-.admin-dashboard-main {
-    padding: 80px 24px;
-}
-/*Background Format*/
 
-/*Title*/
-.admin-dashboard-title {
+/* ============= Main ============= */
+
+.admin-dashboard-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+    animation: slide-up 0.4s ease-out;
+}
+
+
+/* ============= Organization information ============= */
+
+.admin-dashboard-content {
+    margin-bottom: 28px;
     text-align: center;
 }
 
-/*Table*/
+.admin-dashboard-title {
+    margin: 0 0 28px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.admin-dashboard-content p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.admin-dashboard-content p strong {
+    color: #666666;
+    font-size: 14px;
+}
+
+.admin-invitation-code {
+    max-width: 420px;
+    margin: 24px auto 0;
+    padding: 20px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.admin-invitation-code button {
+    margin-top: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: white;
+    font: inherit;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.admin-invitation-code button:hover {
+    background: #e52e32;
+}
+
+.admin-invitation-code button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+/* ============= Statistics ============= */
+
 .admin-dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 
 .admin-dashboard-item {
-    padding: 20px;
-    border: 1px solid var(--color-carbon);
+    padding: 24px 20px;
+    border: 1px solid #cfcfcf;
     border-radius: 8px;
-    background: white;
+    background: #ffffff;
+    text-align: center;
 }
-/*Table*/
+
+.admin-dashboard-item strong {
+    color: #666666;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.admin-dashboard-item p {
+    margin: 12px 0 0;
+    font-size: 30px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+
+/* ============= Navigation ============= */
+
+.admin-dashboard-navigation {
+    margin: 28px 0 0;
+    color: #666666;
+    font-size: 14px;
+    line-height: 2;
+    text-align: center;
+}
+
+.admin-dashboard-navigation a {
+    color: #303030;
+    font-weight: 700;
+    text-underline-offset: 4px;
+    transition: color 0.2s;
+}
+
+.admin-dashboard-navigation a:hover {
+    color: #e52e32;
+}
+
+.admin-dashboard-navigation a:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 4px;
+}
+
+
+/* ============= Animation ============= */
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============= Mobile ============= */
+
+@media (max-width: 600px) {
+    .admin-dashboard-main {
+        padding: 30px 18px 50px;
+    }
+
+    .admin-dashboard-title {
+        font-size: 28px;
+    }
+
+    .admin-dashboard-grid {
+        gap: 12px;
+    }
+
+    .admin-dashboard-item {
+        padding: 20px 12px;
+    }
+
+    .admin-dashboard-item p {
+        font-size: 26px;
+    }
+}

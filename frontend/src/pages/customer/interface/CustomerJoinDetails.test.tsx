@@ -171,7 +171,8 @@ describe("CustomerJoinDetails", () => {
             state: {
               queueCode: "ABC-123-45",
               queueId: 1,
-              service: "medicine",
+              serviceId: 1,
+              serviceName: "Medicine",
               organizationName: "William's Org",
             },
           },
@@ -187,13 +188,27 @@ describe("CustomerJoinDetails", () => {
     expect(screen.getByRole("heading", { name: "You're in the queue!" })).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
 
+    expect(fetch).toHaveBeenCalledWith(
+      "http://127.0.0.1:8000/database/customer/add_customer",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone_number: "787-123-4567",
+          queue_code: "ABC-123-45",
+        }),
+      }
+    );
+
     fireEvent.click(await screen.findByRole("button", { name: "View Queue Status" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/queue-status", {
       state: {
         queueCode: "ABC-123-45",
+        serviceName: "Medicine",
         ticketNumber: "1",
-        service: "medicine",
         status: "waiting",
         organizationName: "William's Org",
       },
@@ -211,5 +226,35 @@ describe("CustomerJoinDetails", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/service-information", {state: null,});
+  });
+
+
+  it("preserves queue and service information when Cancel is clicked", () => {
+    const selectedQueue = {
+      queueCode: "ABC-123-45",
+      queueId: 1,
+      serviceId: 1,
+      serviceName: "Medicine",
+      organizationName: "William's Org",
+    };
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/join-details",
+            state: selectedQueue,
+          },
+        ]}
+      >
+        <CustomerJoinDetails />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/service-information", {
+      state: selectedQueue,
+    });
   });
 });

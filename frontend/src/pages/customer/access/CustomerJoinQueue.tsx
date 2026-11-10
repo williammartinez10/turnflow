@@ -9,16 +9,28 @@ import Header from "../../../components/Header/Header";
 /** Queue fields returned by the backend and passed through the joining flow. */
 interface Queue {
   queue_id: number;
-  service: string;
+  // New changes
+  service_id: number;
+  service_name: string;
   queue_code: string;
   organization_name?: string | null;
 }
 
 // Dummy queues for testing without the backend.
-const mockQueues: Queue[] = [
-  { queue_id: 1, service: "Medicine", queue_code: "ABC-123-45" },
-  { queue_id: 2, service: "Lawyer", queue_code: "DEF-678-90" },
-];
+// const mockQueues: Queue[] = [
+//   {
+//     queue_id: 1,
+//     service_ids: [1],
+//     service_names: ["Medicine"],
+//     queue_code: "ABC-123-45",
+//   },
+//   {
+//     queue_id: 2,
+//     service_ids: [2],
+//     service_names: ["Lawyer"],
+//     queue_code: "DEF-678-90",
+//   },
+// ];
 
 /**
  * Lets a customer find a queue by code and review its service before joining.
@@ -45,37 +57,36 @@ function CustomerJoinQueue() {
     setError("");
     setIsLoading(true);
 
-    let queues: Queue[] = mockQueues;
+    let selectedQueue: Queue | null = null;
 
     try {
-      // Get queues from the backend.
       const response = await fetch(
-        "http://127.0.0.1:8000/database/queue/get_queue_list", {
+        `http://127.0.0.1:8000/database/queue/get_active_withcode/${queueCode.trim()}`,
+        {
           method: "GET",
         }
       );
 
       if (!response.ok) {
-        throw new Error("Backend request failed");
+        setError("Queue not found or currently disabled.");
+        setIsLoading(false);
+        return;
       }
 
-      queues = await response.json();
+      selectedQueue = await response.json();
     } catch (error) {
-      // Fall back to dummy queues so the frontend can be tested without the backend.
-      console.warn("Could not load queues. Using mock data.", error);
+      console.warn("Could not connect to backend.", error);
+      setError("Could not connect to the server.");
+      setIsLoading(false);
+      return;
     }
-
-    // Find queue entered by the customer.
-    const selectedQueue = queues.find(
-      (queue) =>
-        queue.queue_code.toUpperCase() === queueCode.trim().toUpperCase()
-    );
 
     if (selectedQueue) {
       navigate("/service-information", {
         state: {
           queueCode: selectedQueue.queue_code,
-          service: selectedQueue.service,
+          serviceId: selectedQueue.service_id,
+          serviceName: selectedQueue.service_name,
           queueId: selectedQueue.queue_id,
           organizationName: selectedQueue.organization_name,
         },
@@ -126,17 +137,27 @@ function CustomerJoinQueue() {
                 placeholder="XXX-XXX-XX"
                 value={queueCode}
                 onChange={(e) => setQueueCode(e.target.value)}
+                aria-describedby="queue-code-help"
                 required
               />
             </div>
 
+            <p className="queue-code-help" id="queue-code-help">
+              Enter the code provided by the organization, including any hyphens.
+            </p>
+
             {error && (
-              <p 
-                role="alert" 
-                style={{ color: "#ff0000", textAlign: "center" }}>
+              <p
+                role="alert"
+                style={{ color: "#ff0000", textAlign: "center" }}
+              >
                 {error}
               </p>
             )}
+
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Finding your queue. Please wait." : ""}
+            </p>
 
             <button
               className="find-queue-button"

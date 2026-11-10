@@ -204,6 +204,10 @@ function AdminSignup() {
               </p>
             )}
 
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Creating your admin account. Please wait." : ""}
+            </p>
+
             <button
               className="admin-signup-form-button"
               type="submit"

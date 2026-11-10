@@ -68,6 +68,24 @@ class staffHandler:
         detail="Email is already registered."
       )
 
+    if not new_staff.invitation_code:
+      raise HTTPException(
+        status_code=400,
+        detail="Invitation code is required."
+      )
+
+    organization = adminDAO().get_admin_by_invitation_code3(
+      new_staff.invitation_code.strip().upper()
+    )
+
+    if organization is None:
+      raise HTTPException(
+        status_code=404,
+        detail="Invalid invitation code."
+      )
+
+    new_staff.admin_id = organization["admin_id"]
+
     # Hash the password before storing it in the database.
     hashed_password = password_hash.hash(new_staff.password)
     return dao.add_staff3(new_staff, hashed_password)
@@ -92,7 +110,14 @@ class staffHandler:
     account["role"] = "staff"
     return account
 
-  def delete_staff2(self, staff: Staff):
+  def delete_staff2(self, staff: Staff, account: dict | None):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
     if staff.staff_id is None:
       raise HTTPException(status_code=400, detail="staff_id is required")
 
@@ -101,3 +126,128 @@ class staffHandler:
       "message": "Staff " + result["email"] + " successfully deleted",
       "staff": result
     }
+
+  def set_active2(self, active: bool, account: dict | None):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "staff":
+      raise HTTPException(
+        status_code=403,
+        detail="Staff access required."
+      )
+
+    result = staffDAO().set_active3(
+      account["staff_id"],
+      active
+    )
+
+    return result
+
+  def get_staff_list2(self, account: dict | None):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "admin":
+      raise HTTPException(
+        status_code=403,
+        detail="Admin access required."
+      )
+
+    return staffDAO().get_staff_list3(
+      account["admin_id"]
+    )
+
+  def assign_queue2(
+          self,
+          staff_id: int,
+          queue_id: int,
+          account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "admin":
+      raise HTTPException(
+        status_code=403,
+        detail="Admin access required."
+      )
+
+    return staffDAO().assign_queue3(
+      staff_id,
+      queue_id,
+      account["admin_id"]
+    )
+
+  def unassign_queue2(
+          self,
+          staff_id: int,
+          queue_id: int,
+          account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "admin":
+      raise HTTPException(
+        status_code=403,
+        detail="Admin access required."
+      )
+
+    return staffDAO().unassign_queue3(
+      staff_id,
+      queue_id,
+      account["admin_id"]
+    )
+
+  def get_assigned_queues2(
+          self,
+          staff_id: int,
+          account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "admin":
+      raise HTTPException(
+        status_code=403,
+        detail="Admin access required."
+      )
+
+    return staffDAO().get_assigned_queues3(
+      staff_id,
+      account["admin_id"]
+    )
+
+  def get_my_assigned_queues2(self, account: dict | None):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "staff":
+      raise HTTPException(
+        status_code=403,
+        detail="Staff access required."
+      )
+
+    return staffDAO().get_assigned_queues3(
+      account["staff_id"],
+      account["admin_id"]
+    )

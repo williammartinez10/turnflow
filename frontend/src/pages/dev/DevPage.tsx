@@ -15,7 +15,8 @@ function DevPage() {
             <Link to="/signup/admin">Admin Signup</Link><br />
             <Link to="/signup/staff">Staff Signup</Link><br />
             <Link to="/admin/AdminDashboard">Admin Dashboard</Link><br />
-            <Link to="/admin/Services_Queues">Services & Queues</Link>
+            <Link to="/admin/Services_Queues">Services & Queues</Link><br />
+            <Link to="/staff/StaffDashboard">Staff Dashboard</Link>
         </div>
     );
 }

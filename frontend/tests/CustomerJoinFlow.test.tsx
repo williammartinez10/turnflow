@@ -5,8 +5,8 @@ import App from "../src/App";
 
 /**
  * Exercises the frontend journey from queue-code entry to registration, ticket
- * confirmation, and queue status through App routes. Queue lookup and registration
- * responses are mocked, so this does not contact a live API or database.
+ * confirmation, and queue status through App routes. Also checks returning-ticket
+ * lookup and completed tickets. Responses are mocked without contacting the backend.
  */
 describe("Customer joining flow", () => {
   // Restore fetch and other stubbed globals so they do not affect later tests.
@@ -22,17 +22,16 @@ describe("Customer joining flow", () => {
           return { ok: false, status: 401 };
         }
 
-        if (url.endsWith("/database/queue/get_queue_list")) {
+        if (url.endsWith("/database/queue/get_active_withcode/ABC-123-45")) {
           return {
             ok: true,
-            json: async () => [
-              {
-                queue_id: 1,
-                queue_code: "ABC-123-45",
-                service: "Medicine",
-                organization_name: "William's Org",
-              },
-            ],
+            json: async () => ({
+              queue_id: 1,
+              queue_code: "ABC-123-45",
+              service_id: 1,
+              service_name: "Medicine",
+              organization_name: "William's Org",
+            }),
           };
         }
 
@@ -43,6 +42,23 @@ describe("Customer joining flow", () => {
               customer_id: 1,
               ticket_id: 1,
               status: "waiting",
+            }),
+          };
+        }
+
+        if (url.endsWith("/database/customer/get_ticket?queue_code=ABC-123-45&ticket_number=1")) {
+          return {
+            ok: true,
+            json: async () => ({
+              ticket_number: 1,
+              queue_code: "ABC-123-45",
+              queue_name: "General Consultation",
+              service: "Medicine",
+              status: "waiting",
+              organization_name: "William's Org",
+              position: 1,
+              people_ahead: 0,
+              now_serving: [],
             }),
           };
         }
@@ -70,6 +86,18 @@ describe("Customer joining flow", () => {
     fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
 
 
+    // Cancel registration and confirm the selected service is preserved.
+    expect(screen.getByRole("heading", { name: "Join Queue" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.getByRole("heading", { name: "Service Information" })).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
+    expect(screen.getByText("ABC-123-45")).toBeInTheDocument();
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Join Queue" }));
+
+
     // Join Details
     expect(screen.getByRole("heading", { name: "Join Queue" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Phone Number"), {target: { value: "7871234567" },});
@@ -84,10 +112,134 @@ describe("Customer joining flow", () => {
 
 
     // Queue Status
+    expect(await screen.findByRole("heading", { name: "General Consultation" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
-    expect(screen.getByText(/Medicine/)).toBeInTheDocument();
+
+
+    // The ticket number and waiting position are both 1.
+    expect(screen.getAllByText("1")).toHaveLength(2);
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText("Not serving yet")).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
     expect(screen.getByText("William's Org")).toBeInTheDocument();
-    expect(screen.getByText("Waiting")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();
+    expect(screen.getByText("Not available yet")).toBeInTheDocument();
+  });
+
+
+  it("allows a returning customer to retrieve a ticket and view its service", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.endsWith("/auth/get_current_account")) {
+          return { ok: false, status: 401 };
+        }
+
+        if (url.endsWith("/database/customer/get_ticket?queue_code=ABC-123-45&ticket_number=1")) {
+          return {
+            ok: true,
+            json: async () => ({
+              ticket_number: 1,
+              queue_code: "ABC-123-45",
+              queue_name: "General Consultation",
+              service: "Medicine",
+              status: "waiting",
+              organization_name: "William's Org",
+              position: 1,
+              people_ahead: 0,
+              now_serving: [],
+            }),
+          };
+        }
+
+        throw new Error(`Unexpected request: ${url}`);
+      })
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/find-ticket"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    // Find My Ticket
+    fireEvent.change(screen.getByLabelText("Queue Code"), {target: { value: "ABC-123-45" },});
+    fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "1" },});
+    fireEvent.click(screen.getByRole("button", { name: "View Queue Status" }));
+
+
+    // Queue Status
+    expect(await screen.findByRole("heading", { name: "General Consultation" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Queue Status" })).toBeInTheDocument();
+
+
+    // The ticket number and waiting position are both 1.
+    expect(screen.getAllByText("1")).toHaveLength(2);
+    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getByText("Not serving yet")).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Waiting" })).toBeInTheDocument();
+  });
+
+
+  it.each([
+    ["Find Another Ticket", "Find My Ticket"],
+    ["Join a Queue", "Join a Queue"],
+  ])("allows a customer with a completed ticket to choose %s", async (action, destination) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.endsWith("/auth/get_current_account")) {
+          return { ok: false, status: 401 };
+        }
+
+        if (url.endsWith("/database/customer/get_ticket?queue_code=ABC-123-45&ticket_number=5")) {
+          return {
+            ok: true,
+            json: async () => ({
+              ticket_number: 5,
+              queue_code: "ABC-123-45",
+              queue_name: "General Consultation",
+              service: "Medicine",
+              status: "completed",
+              organization_name: "William's Org",
+              position: null,
+              people_ahead: null,
+              now_serving: [],
+            }),
+          };
+        }
+
+        throw new Error(`Unexpected request: ${url}`);
+      })
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/find-ticket"]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    // Find the completed ticket.
+    fireEvent.change(screen.getByLabelText("Queue Code"), {target: { value: "ABC-123-45" },});
+    fireEvent.change(screen.getByLabelText("Ticket Number"), {target: { value: "5" },});
+    fireEvent.click(screen.getByRole("button", { name: "View Queue Status" }));
+
+
+    // Completion view
+    expect(await screen.findByRole("heading", { name: "Service completed" })).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByText("Medicine")).toBeInTheDocument();
+    expect(screen.getByText("William's Org")).toBeInTheDocument();
+    expect(screen.queryByText("Your Position")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Join a Queue" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Find Another Ticket" })).toBeInTheDocument();
+
+
+    // Both completion actions open their corresponding Customer page.
+    fireEvent.click(screen.getByRole("link", { name: action }));
+
+    expect(screen.getByRole("heading", { name: destination })).toBeInTheDocument();
   });
 });

@@ -53,6 +53,34 @@ function Services_Queues() {
     const [editQueueServiceId, setEditQueueServiceId] = useState<number | null>(null);
 
 
+    const [statusMessage, setStatusMessage] = useState("");
+
+    useEffect(() => {
+        if (editingIndex === null) return;
+
+        const trigger = document.activeElement;
+        document.querySelector<HTMLInputElement>(
+            ".services-edit-form-top input:not(:disabled)"
+        )?.focus();
+
+        return () => {
+            if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
+        };
+    }, [editingIndex]);
+
+    useEffect(() => {
+        if (editingQueueIndex === null) return;
+
+        const trigger = document.activeElement;
+        document.querySelector<HTMLInputElement>(
+            ".queues-edit-form input:not(:disabled)"
+        )?.focus();
+
+        return () => {
+            if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
+        };
+    }, [editingQueueIndex]);
+
     // Loads queues already saved in the database.
     async function loadQueues() {
         const apiBaseUrl =
@@ -165,6 +193,8 @@ function Services_Queues() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Creating service. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/service/add_service`,
             {
@@ -183,6 +213,7 @@ function Services_Queues() {
         );
 
         if (!response.ok) {
+            setStatusMessage("Could not create service.");
             console.error("Could not create service.");
             return;
         }
@@ -204,6 +235,7 @@ function Services_Queues() {
         setNewServiceName("");
         setNewServiceDescription("");
         setShowNewService(false);
+        setStatusMessage("Service created.");
     }
 
 
@@ -217,6 +249,8 @@ function Services_Queues() {
 
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        setStatusMessage("Saving service. Please wait.");
 
         const response = await fetch(
             `${apiBaseUrl}/database/service/update_service`,
@@ -237,6 +271,7 @@ function Services_Queues() {
 
         if (!response.ok) {
             const error = await response.text();
+            setStatusMessage("Could not update service.");
             console.error("Could not update service:", error);
             alert(`Could not update service: ${error}`);
             return;
@@ -259,6 +294,7 @@ function Services_Queues() {
         setEditingIndex(null);
         setEditName("");
         setEditDescription("");
+        setStatusMessage("Service saved.");
     }
 
     // Clears the New Queue form and closes it without creating a queue
@@ -301,6 +337,8 @@ function Services_Queues() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Creating queue. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/queue/add_queue`,
             {
@@ -324,6 +362,7 @@ function Services_Queues() {
         );
 
         if (!response.ok) {
+            setStatusMessage("Could not create queue.");
             console.error("Could not create queue.");
             return;
         }
@@ -352,6 +391,7 @@ function Services_Queues() {
         setNewQueueServiceId(null);
         setNewQueueActive(true);
         setShowNewQueue(false);
+        setStatusMessage("Queue created.");
     }
 
     // Saves the edited queue values and exits queue edit mode
@@ -380,6 +420,8 @@ function Services_Queues() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Saving queue. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/queue/update_queue`,
             {
@@ -402,6 +444,7 @@ function Services_Queues() {
 
         if (!response.ok) {
             const error = await response.text();
+            setStatusMessage("Could not update queue.");
             console.error("Could not update queue:", error);
             alert(`Could not update queue: ${error}`);
             return;
@@ -425,6 +468,7 @@ function Services_Queues() {
         setEditQueueDescription("");
         setEditQueueName("");
         setEditQueueServiceId(null);
+        setStatusMessage("Queue saved.");
     }
 
     // Discards unsaved queue changes and exits edit mode
@@ -448,6 +492,8 @@ function Services_Queues() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Deleting queue. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/queue/delete_queue/${queue.queueCode}`,
             {
@@ -458,17 +504,21 @@ function Services_Queues() {
 
         if (!response.ok) {
             const error = await response.text();
+            setStatusMessage("Could not delete queue.");
             console.error("Could not delete queue:", error);
             alert("Could not delete queue.");
             return;
         }
 
         await loadQueues();
+        setStatusMessage("Queue deleted.");
     }
 
     async function setQueueActive(queue: Queue, makeActive: boolean) {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        setStatusMessage("Updating queue status. Please wait.");
 
         const response = await fetch(
             `${apiBaseUrl}/database/queue/set_active/${queue.queueCode}?make_active=${makeActive}`,
@@ -480,12 +530,14 @@ function Services_Queues() {
 
         if (!response.ok) {
             const error = await response.text();
+            setStatusMessage("Could not change queue status.");
             console.error("Could not change queue status:", error);
             alert("Could not change queue status.");
             return;
         }
 
         await loadQueues();
+        setStatusMessage("Queue status updated.");
     }
 
     async function setServiceActive(
@@ -494,6 +546,8 @@ function Services_Queues() {
     ) {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+        setStatusMessage("Updating service status. Please wait.");
 
         const response = await fetch(
             `${apiBaseUrl}/database/service/set_active/${service.serviceId}?make_active=${makeActive}`,
@@ -505,6 +559,7 @@ function Services_Queues() {
 
         if (!response.ok) {
             const error = await response.text();
+            setStatusMessage("Could not change service status.");
             console.error("Could not change service status:", error);
             alert("Could not change service status.");
             return;
@@ -524,6 +579,7 @@ function Services_Queues() {
 
         // Disabling a service may also change its queues.
         await loadQueues();
+        setStatusMessage("Service status updated.");
     }
 
     async function deleteService(service: Service) {
@@ -538,6 +594,8 @@ function Services_Queues() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Deleting service. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/service/delete_service/${service.serviceId}`,
             {
@@ -548,6 +606,7 @@ function Services_Queues() {
 
         if (!response.ok) {
             const error = await response.text();
+            setStatusMessage("Could not delete service.");
             console.error("Could not delete service:", error);
             alert("Could not delete service.");
             return;
@@ -559,6 +618,7 @@ function Services_Queues() {
                     currentService.serviceId !== service.serviceId
             )
         );
+        setStatusMessage("Service deleted.");
     }
 
 
@@ -576,6 +636,9 @@ function Services_Queues() {
                 <section className="services-queues-content">
                     {/* Main title for this page */}
                     <h1 className="services-queues-title">Services & Queues</h1>
+                    <p className="screen-reader-only" role="status" aria-atomic="true">
+                        {statusMessage}
+                    </p>
                     {/* Marks the beginning of the Services management area */}
                     <h2 className="services-and-queues-title">Services</h2>
 
@@ -643,8 +706,9 @@ function Services_Queues() {
                             <h3>Edit Service</h3>
 
                             {/* Lets the service name be changed */}
-                            <label>Service Name</label>
+                            <label htmlFor="edit-service-name">Service Name</label>
                             <input
+                                id="edit-service-name"
                                 type="text"
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
@@ -659,8 +723,9 @@ function Services_Queues() {
                             />
 
                             {/* Lets the service description be changed */}
-                            <label>Description</label>
+                            <label htmlFor="edit-service-description">Description</label>
                             <input
+                                id="edit-service-description"
                                 type="text"
                                 value={editDescription}
                                 onChange={(e) => setEditDescription(e.target.value)}
@@ -711,6 +776,7 @@ function Services_Queues() {
                                     <span>{service.name}</span>
 
                                     <select
+                                        aria-label={`Status for service ${service.name}`}
                                         value={service.active ? "active" : "disabled"}
                                         onChange={(e) => {
                                             void setServiceActive(
@@ -731,6 +797,7 @@ function Services_Queues() {
                                 {/* Loads this service's values into the Edit Service form above */}
                                 <button
                                     type="button"
+                                    aria-label={`Edit service ${service.name}`}
                                     onClick={() => {
                                         setShowNewService(false);
                                         setEditingIndex(index);
@@ -748,6 +815,7 @@ function Services_Queues() {
                                     ) && (
                                         <button
                                             type="button"
+                                            aria-label={`Delete service ${service.name}`}
                                             onClick={() => deleteService(service)}
                                         >
                                             Delete
@@ -908,8 +976,9 @@ function Services_Queues() {
                                 <h3>Edit Queue</h3>
 
                                 {/* Lets the selected queue name be changed while editing */}
-                                <label>Queue Name</label>
+                                <label htmlFor="edit-queue-name">Queue Name</label>
                                 <input
+                                    id="edit-queue-name"
                                     type="text"
                                     value={editQueueName}
                                     onChange={(e) => setEditQueueName(e.target.value)}
@@ -920,8 +989,9 @@ function Services_Queues() {
                                 />
 
                                 {/* Lets the queue prefix be changed while editing */}
-                                <label>Prefix</label>
+                                <label htmlFor="edit-queue-prefix">Prefix</label>
                                 <input
+                                    id="edit-queue-prefix"
                                     type="text"
                                     value={editQueuePrefix}
                                     onChange={(e) => setEditQueuePrefix(e.target.value)}
@@ -932,8 +1002,9 @@ function Services_Queues() {
                                 />
 
                                 {/* Lets the queue description be changed while editing */}
-                                <label>Description</label>
+                                <label htmlFor="edit-queue-description">Description</label>
                                 <input
+                                    id="edit-queue-description"
                                     type="text"
                                     value={editQueueDescription}
                                     onChange={(e) => setEditQueueDescription(e.target.value)}
@@ -1004,6 +1075,7 @@ function Services_Queues() {
 
                                     {/* Shows the queue's current status */}
                                     <select
+                                        aria-label={`Status for queue ${queue.name} (${queue.queueCode})`}
                                         value={
                                             queue.pendingDisable
                                                 ? "pending"
@@ -1044,6 +1116,7 @@ function Services_Queues() {
                                     <button
                                         // Loads this queue's saved values into the Edit Queue form above
                                         type="button"
+                                        aria-label={`Edit queue ${queue.name} (${queue.queueCode})`}
                                         onClick={() => {
                                             setShowNewQueue(false);
                                             setEditingQueueIndex(index);
@@ -1059,6 +1132,7 @@ function Services_Queues() {
                                     {!queue.active && !queue.pendingDisable && (
                                         <button
                                             type="button"
+                                            aria-label={`Delete queue ${queue.name} (${queue.queueCode})`}
                                             onClick={() => deleteQueue(queue)}
                                         >
                                             Delete

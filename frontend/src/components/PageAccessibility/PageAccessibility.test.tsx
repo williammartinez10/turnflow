@@ -106,7 +106,7 @@ describe("PageAccessibility", () => {
   });
 
 
-  it("does not manage headings or titles on the excluded dashboard pages", () => {
+  it("sets the Admin dashboard title and focuses its heading", () => {
     document.title = "Existing dashboard title";
 
     render(
@@ -121,8 +121,8 @@ describe("PageAccessibility", () => {
 
     const heading = screen.getByRole("heading", { name: "Admin Dashboard" });
 
-    expect(document.title).toBe("Existing dashboard title");
-    expect(heading).not.toHaveAttribute("tabindex");
-    expect(heading).not.toHaveFocus();
+    expect(document.title).toBe("Admin Dashboard | TurnFlow");
+    expect(heading).toHaveAttribute("tabindex", "-1");
+    expect(heading).toHaveFocus();
   });
 });

@@ -101,6 +101,11 @@
     cursor: pointer;
 }
 
+.staff-access-queue-option input:focus-visible {
+    outline: 3px solid #303030;
+    outline-offset: 3px;
+}
+
 .staff-access-queue-option span {
     padding: 0;
     background: transparent;

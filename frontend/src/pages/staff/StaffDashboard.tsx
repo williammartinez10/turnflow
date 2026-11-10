@@ -20,6 +20,7 @@ function StaffDashboard() {
     const [organizationName, setOrganizationName] = useState("Loading...");
     const [isActive, setIsActive] = useState(false);
     const [assignedQueues, setAssignedQueues] = useState<AssignedQueue[]>([]);
+    const [statusMessage, setStatusMessage] = useState("");
 
     useEffect(() => {
         const apiBaseUrl =
@@ -67,6 +68,8 @@ function StaffDashboard() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Updating your status. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/staff/set_active?active=${!isActive}`,
             {
@@ -76,11 +79,15 @@ function StaffDashboard() {
         );
 
         if (!response.ok) {
+            setStatusMessage("Your status could not be updated.");
             return;
         }
 
         const data = await response.json();
         setIsActive(data.active);
+        setStatusMessage(
+            `Your status is now ${data.active ? "Active" : "Inactive"}.`
+        );
     }
 
 
@@ -95,6 +102,10 @@ function StaffDashboard() {
                     <h1 className="staff-dashboard-title">
                         Staff Dashboard
                     </h1>
+
+                    <p className="screen-reader-only" role="status" aria-atomic="true">
+                        {statusMessage}
+                    </p>
 
                     {/* Organization information */}
                     <section className="staff-organization">

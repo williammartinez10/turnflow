@@ -33,7 +33,7 @@ body {
 }
 
 
-/* ============= Public-page contrast ============= */
+/* ============= Page contrast ============= */
 
 :is(
     .home-page,
@@ -46,7 +46,11 @@ body {
     .customer-service-info-page,
     .customer-join-details-page,
     .customer-queue-status-page,
-    .queue-confirmation-overlay
+    .queue-confirmation-overlay,
+    .admin-dashboard-page,
+    .services-queues-page,
+    .staff-access-page,
+    .staff-dashboard-page
 ) {
     --color-carbon: #666666;
     --color-watermelon: #D92B30;
@@ -63,7 +67,13 @@ body {
     .customer-service-info-join-button,
     .customer-join-details-button,
     .customer-queue-join-another,
-    .queue-confirmation-button
+    .queue-confirmation-button,
+    .admin-invitation-code button,
+    .services-queues-content .services-button,
+    .services-queues-content .queues-button,
+    .services-form-actions button:last-child,
+    .queues-form-actions button:last-child,
+    .staff-status-section button
 ):hover:not(:disabled) {
     background: #C52227;
 }
@@ -75,7 +85,8 @@ body {
     .staff-signup-page,
     .customer-join-queue-page,
     .customer-find-ticket-page,
-    .customer-join-details-page
+    .customer-join-details-page,
+    .services-queues-page
 ) input::placeholder {
     color: #666666;
     opacity: 1;
@@ -91,7 +102,11 @@ body {
     .customer-find-ticket-page,
     .customer-service-info-page,
     .customer-join-details-page,
-    .customer-queue-status-page
+    .customer-queue-status-page,
+    .admin-dashboard-page,
+    .services-queues-page,
+    .staff-access-page,
+    .staff-dashboard-page
 ) [role="alert"],
 :is(
     .login-page,
@@ -103,6 +118,12 @@ body {
 
 .home-page [role="alert"] {
     color: #FFB4B4 !important;
+}
+
+/* Keep Delete button text readable on its light background. */
+.services-row > button:nth-child(3),
+.queues-row > button:nth-child(5) {
+    color: #B91C1C;
 }
 
 
@@ -135,7 +156,11 @@ body {
         .customer-find-ticket-page,
         .customer-service-info-page,
         .customer-join-details-page,
-        .customer-queue-status-page
+        .customer-queue-status-page,
+        .admin-dashboard-page,
+        .services-queues-page,
+        .staff-access-page,
+        .staff-dashboard-page
     ) .header {
         position: static;
     }
@@ -156,7 +181,11 @@ body {
         .customer-service-info-page,
         .customer-join-details-page,
         .customer-queue-status-page,
-        .queue-confirmation-overlay
+        .queue-confirmation-overlay,
+        .admin-dashboard-page,
+        .services-queues-page,
+        .staff-access-page,
+        .staff-dashboard-page
     ) * {
         animation: none !important;
         transition: none !important;
@@ -171,10 +200,14 @@ body {
         .staff-signup-page,
         .customer-join-queue-page,
         .customer-find-ticket-page,
-        .customer-service-info-page,
         .customer-join-details-page,
+        .customer-service-info-page,
         .customer-queue-status-page,
-        .queue-confirmation-overlay
+        .queue-confirmation-overlay,
+        .admin-dashboard-page,
+        .services-queues-page,
+        .staff-access-page,
+        .staff-dashboard-page
     ) :is(button, a):not(.password-input-toggle):hover {
         transform: none !important;
     }

@@ -20,6 +20,7 @@ function AdminDashboard() {
     const [activeQueues, setActiveQueues] = useState(0);
 
     const [invitationCode, setInvitationCode] = useState<string | null>(null);
+    const [statusMessage, setStatusMessage] = useState("");
 
     useEffect(() => {
         const apiBaseUrl =
@@ -75,6 +76,8 @@ function AdminDashboard() {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        setStatusMessage("Generating invitation code. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}/database/admin/generate_invitation_code`,
             {
@@ -84,12 +87,14 @@ function AdminDashboard() {
         );
 
         if (!response.ok) {
+            setStatusMessage("");
             alert("Could not generate invitation code.");
             return;
         }
 
         const data = await response.json();
         setInvitationCode(data.invitation_code);
+        setStatusMessage(`Staff invitation code: ${data.invitation_code}.`);
     }
 
     // Defines what the Admin Dashboard displays
@@ -109,6 +114,10 @@ function AdminDashboard() {
                     <h1 className="admin-dashboard-title">
                         Admin Dashboard
                     </h1>
+
+                    <p className="screen-reader-only" role="status" aria-atomic="true">
+                        {statusMessage}
+                    </p>
 
                     {/* Displays the organization information */}
                     <p><strong>Organization</strong></p>

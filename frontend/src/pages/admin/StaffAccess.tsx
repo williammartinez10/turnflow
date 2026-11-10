@@ -20,6 +20,7 @@ function StaffAccess() {
     const [staffList, setStaffList] = useState<StaffMember[]>([]);
     const [queueList, setQueueList] = useState<Queue[]>([]);
     const [assignedQueues, setAssignedQueues] = useState<Record<number, number[]>>({});
+    const [statusMessage, setStatusMessage] = useState("");
 
     useEffect(() => {
         const apiBaseUrl =
@@ -96,6 +97,8 @@ function StaffAccess() {
             ? "/database/staff/unassign_queue"
             : "/database/staff/assign_queue";
 
+        setStatusMessage("Updating queue assignment. Please wait.");
+
         const response = await fetch(
             `${apiBaseUrl}${endpoint}?staff_id=${staffId}&queue_id=${queueId}`,
             {
@@ -105,6 +108,7 @@ function StaffAccess() {
         );
 
         if (!response.ok) {
+            setStatusMessage("Queue assignment could not be updated.");
             return;
         }
 
@@ -118,6 +122,8 @@ function StaffAccess() {
                     : [...currentQueues, queueId],
             };
         });
+
+        setStatusMessage("Queue assignment updated.");
     }
 
     return (
@@ -127,6 +133,10 @@ function StaffAccess() {
             <main className="staff-access-main">
                 <section className="staff-access-content">
                     <h1>Staff Access</h1>
+
+                    <p className="screen-reader-only" role="status" aria-atomic="true">
+                        {statusMessage}
+                    </p>
 
                     {staffList.length === 0 ? (
                         <p>No staff members found.</p>
@@ -164,6 +174,7 @@ function StaffAccess() {
                                                 >
                                                     <input
                                                         type="checkbox"
+                                                        aria-label={`${queue.queue_name} for ${staff.full_name} (${staff.email})`}
                                                         checked={isAssigned}
                                                         onChange={() =>
                                                             void changeQueueAssignment(

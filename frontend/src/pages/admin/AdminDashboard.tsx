@@ -18,6 +18,9 @@ function AdminDashboard() {
     const [peopleWaiting, setPeopleWaiting] = useState(0);
     // Stores the number of active queues owned by the logged-in admin
     const [activeQueues, setActiveQueues] = useState(0);
+
+    const [invitationCode, setInvitationCode] = useState<string | null>(null);
+
     useEffect(() => {
         const apiBaseUrl =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -50,7 +53,7 @@ function AdminDashboard() {
             }
 
             setOrganizationName(account.organization_name);
-
+            setInvitationCode(account.invitation_code ?? null);
             // Gets the number of customers waiting in queues owned by this admin
             const waitingResponse = await fetch(
                 `${apiBaseUrl}/database/customer/count_waiting_${account.admin_id}`,
@@ -68,7 +71,26 @@ function AdminDashboard() {
         void loadCurrentAdmin();
     }, []);
 
+    async function generateInvitationCode() {
+        const apiBaseUrl =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+        const response = await fetch(
+            `${apiBaseUrl}/database/admin/generate_invitation_code`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
+
+        if (!response.ok) {
+            alert("Could not generate invitation code.");
+            return;
+        }
+
+        const data = await response.json();
+        setInvitationCode(data.invitation_code);
+    }
 
     // Defines what the Admin Dashboard displays
     return (
@@ -91,6 +113,20 @@ function AdminDashboard() {
                     {/* Displays the organization information */}
                     <p><strong>Organization</strong></p>
                     <p>{organizationName}</p>
+                    <div className="admin-invitation-code">
+                        <p><strong>Staff Invitation Code</strong></p>
+
+                        <p>
+                            {invitationCode ?? "No invitation code generated yet."}
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={generateInvitationCode}
+                        >
+                            {invitationCode ? "Regenerate Code" : "Generate Code"}
+                        </button>
+                    </div>
 
                 </section> {/* End organization information */}
 
@@ -134,7 +170,9 @@ function AdminDashboard() {
                         {" · "}
 
                         {/* Plain text until the Staff Access page is available */}
-                        <span>Staff Access</span>
+                        <Link to="/admin/StaffAccess">
+                            Staff Access
+                        </Link>
 
                         {" · "}
 

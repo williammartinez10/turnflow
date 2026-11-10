@@ -1,7 +1,6 @@
 /* ============= Page ============= */
 
 .staff-dashboard-page {
-    min-height: 100vh;
     min-height: 100dvh;
     background: var(--color-neutral);
     color: #303030;
@@ -48,6 +47,45 @@
     margin: 0;
     font-size: 16px;
     overflow-wrap: anywhere;
+}
+
+/* ============= Staff Status ============= */
+
+.staff-status-section {
+    margin: 32px 0;
+    text-align: center;
+}
+
+.staff-status-section h2 {
+    margin: 0 0 8px;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.staff-status-section p {
+    margin: 0 0 16px;
+    font-size: 16px;
+}
+
+.staff-status-section button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #303030;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.staff-status-section button:hover {
+    background: var(--color-watermelon);
+}
+
+.staff-status-section button:focus-visible {
+    outline: 3px solid var(--color-watermelon);
+    outline-offset: 3px;
 }
 
 

@@ -82,6 +82,11 @@ function Login() {
         return;
       }
 
+      if (data.role === "staff") {
+        navigate("/staff/StaffDashboard", { replace: true });
+        return;
+      }
+
       setSuccess("Logged in successfully.");
     } catch {
       setError("Could not complete login. Please try again.");

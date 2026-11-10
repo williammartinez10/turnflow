@@ -1,6 +1,6 @@
 import "./StaffSignup.css";
 import { useState, SyntheticEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
@@ -13,7 +13,11 @@ function StaffSignup() {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const[isFormValid, setIsFormValid] = useState(false);
-  
+  const location = useLocation();
+
+  const adminId = location.state?.adminId;
+  const organizationName = location.state?.organizationName;
+  const invitationCode = location.state?.invitationCode;
   /**
    * Updates submit-button availability from all required inputs, including PasswordInput.
    * Each value must contain non-whitespace text and satisfy native browser constraints.
@@ -59,6 +63,8 @@ function StaffSignup() {
           full_name: formData.get("full-name"),
           email: formData.get("email"),
           password: formData.get("password"),
+          admin_id: adminId,
+          invitation_code: invitationCode,
         }),
       });
 

@@ -12,6 +12,7 @@ class Admin(BaseModel):
   email: str
   password: str
   organization_name: str
+  invitation_code: Optional[str] = None
 
 
 class adminDAO:
@@ -46,7 +47,7 @@ class adminDAO:
     conn = self.pool.getconn()
     cur = conn.cursor(cursor_factory=DictCursor)
     query = """
-    SELECT admin_id, full_name, email, password, organization_name
+    SELECT admin_id, full_name, email, password, organization_name, invitation_code
     FROM admin
     WHERE email = %s
     """
@@ -81,3 +82,47 @@ class adminDAO:
 
     # Return the deleted account without its password hash.
     return dict(cashe)
+
+  def set_invitation_code3(self, admin_id: int, invitation_code: str):
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+
+    query = """
+            UPDATE admin
+            SET invitation_code = %s
+            WHERE admin_id = %s
+            RETURNING admin_id, invitation_code \
+            """
+
+    cur.execute(query, (
+      invitation_code,
+      admin_id,
+    ))
+
+    result = cur.fetchone()
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+
+    if result is None:
+      raise HTTPException(status_code=404, detail="Admin not found")
+
+    return dict(result)
+
+  def get_admin_by_invitation_code3(self, invitation_code: str):
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+
+    query = """
+            SELECT admin_id, organization_name
+            FROM admin
+            WHERE invitation_code = %s \
+            """
+
+    cur.execute(query, (invitation_code,))
+    result = cur.fetchone()
+
+    cur.close()
+    self.pool.putconn(conn)
+
+    return dict(result) if result is not None else None

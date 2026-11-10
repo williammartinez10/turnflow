@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Services_Queues from "./pages/admin/Services_Queues";
 import RequireAdmin from "./components/RequireAdmin/RequireAdmin";
 import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffAccess from "./pages/admin/StaffAccess";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
       <Route element={<RequireAdmin />}>
         <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/admin/Services_Queues" element={<Services_Queues />} />
+        <Route path="/admin/StaffAccess" element={<StaffAccess />} />
       </Route>
 
       <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />

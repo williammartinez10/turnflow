@@ -13,6 +13,7 @@ cur = conn.cursor()
 query = """
 DROP TABLE IF EXISTS customer CASCADE;
 DROP TABLE IF EXISTS next_customer CASCADE;
+DROP TABLE IF EXISTS staff_queue_assignment CASCADE;
 DROP TABLE IF EXISTS queue CASCADE;
 DROP TABLE IF EXISTS staff_privilege CASCADE;
 DROP TABLE IF EXISTS staff CASCADE;
@@ -24,7 +25,8 @@ admin_id serial PRIMARY KEY,
 full_name TEXT,
 email TEXT,
 password TEXT,
-organization_name TEXT
+organization_name TEXT,
+invitation_code TEXT UNIQUE
 );
 
 CREATE TABLE service(
@@ -90,7 +92,21 @@ CREATE TABLE staff(
 staff_id serial PRIMARY KEY,
 full_name TEXT,
 email TEXT,
-password TEXT
+password TEXT,
+admin_id INTEGER NOT NULL REFERENCES admin(admin_id),
+active BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE staff_queue_assignment(
+staff_id INTEGER NOT NULL
+REFERENCES staff(staff_id)
+ON DELETE CASCADE,
+
+queue_id INTEGER NOT NULL
+REFERENCES queue(queue_id)
+ON DELETE CASCADE,
+
+PRIMARY KEY (staff_id, queue_id)
 );
 """
 cur.execute(query)
@@ -98,6 +114,8 @@ conn.commit()
 cur.close()
 conn.close()
 print("Tables Created")
+
+
 
 # unused
 # DROP TABLE IF EXISTS user_log CASCADE;

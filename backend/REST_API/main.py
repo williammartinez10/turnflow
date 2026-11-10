@@ -227,6 +227,26 @@ def verify_admin1(
 def delete_admin1(new_admin: Admin, request: Request, status_code=201):
     return adminHandler().delete_admin2(new_admin, request.session.get("account"))
 
+@app.put("/database/admin/generate_invitation_code")
+def generate_invitation_code1(request: Request):
+    account = request.session.get("account")
+
+    result = adminHandler().generate_invitation_code2(account)
+
+    account["invitation_code"] = result["invitation_code"]
+    request.session["account"] = account
+
+    return result
+
+@app.post("/database/admin/validate_invitation_code")
+def validate_invitation_code1(
+        invitation_code: str = Body(...)
+):
+    return adminHandler().validate_invitation_code2(
+        invitation_code
+    )
+
+
 # ===== Service API Routes =====
 # These routes receive service-related requests from the frontend
 # and pass them to the service handler, where the backend logic is applied.
@@ -330,9 +350,8 @@ async def delete_queue1(queue_code: str, request: Request):
 # verifying, or deleting a staff account.
 
 @app.post("/database/staff/add_staff", status_code=201)
-def add_staff1(new_Staff: Staff, request: Request, status_code=201):
-    """ Register a staff account using signup validation and password hashing in handler. """
-    return staffHandler().add_staff2(new_Staff, request.session.get("account"))
+def add_staff1(new_Staff: Staff):
+    return staffHandler().add_staff2(new_Staff)
 
 @app.post("/database/staff/verify_staff", status_code=201)
 def verify_staff1(
@@ -375,6 +394,68 @@ async def delete_staff_privilege_staff1(staff_privilege: str, request: Request, 
         request.session.get("account")
     )
 
+@app.put("/database/staff/set_active")
+def set_staff_active1(
+        active: bool,
+        request: Request
+):
+    account = request.session.get("account")
+
+    result = staffHandler().set_active2(
+        active,
+        account
+    )
+
+    account["active"] = result["active"]
+    request.session["account"] = account
+
+    return result
+
+@app.get("/database/staff/get_staff_list")
+def get_staff_list1(request: Request):
+    return staffHandler().get_staff_list2(
+        request.session.get("account")
+    )
+
+@app.post("/database/staff/assign_queue")
+def assign_queue1(
+        staff_id: int,
+        queue_id: int,
+        request: Request
+):
+    return staffHandler().assign_queue2(
+        staff_id,
+        queue_id,
+        request.session.get("account")
+    )
+
+@app.delete("/database/staff/unassign_queue")
+def unassign_queue1(
+        staff_id: int,
+        queue_id: int,
+        request: Request
+):
+    return staffHandler().unassign_queue2(
+        staff_id,
+        queue_id,
+        request.session.get("account")
+    )
+
+@app.get("/database/staff/get_assigned_queues/{staff_id}")
+def get_assigned_queues1(
+        staff_id: int,
+        request: Request
+):
+    return staffHandler().get_assigned_queues2(
+        staff_id,
+        request.session.get("account")
+    )
+
+@app.get("/database/staff/get_my_assigned_queues")
+def get_my_assigned_queues1(request: Request):
+    return staffHandler().get_my_assigned_queues2(
+        request.session.get("account")
+    )
 
 ######################################### LOG IN / OUT #########################################
 

@@ -1,6 +1,6 @@
 import "./StaffSignup.css";
 import { useState, SyntheticEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
@@ -14,7 +14,10 @@ function StaffSignup() {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const[isFormValid, setIsFormValid] = useState(false);
-  
+  const location = useLocation();
+
+  const adminId = location.state?.adminId;
+  const invitationCode = location.state?.invitationCode;
   /**
    * Updates submit-button availability from all required inputs, including PasswordInput.
    * Each value must contain non-whitespace text and satisfy native browser constraints.
@@ -34,7 +37,7 @@ function StaffSignup() {
 
   /**
    * Sends the signup fields using the backend request names and displays the result.
-   * Account creation shows a login link; it does not sign the user in automatically.
+   * Signs the user in after account creation, with a login link if automatic login fails.
    *
    * @param e - The staff signup form submission event.
    */
@@ -61,6 +64,8 @@ function StaffSignup() {
           full_name: formData.get("full-name"),
           email: formData.get("email"),
           password: formData.get("password"),
+          admin_id: adminId,
+          invitation_code: invitationCode,
         }),
       });
 

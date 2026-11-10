@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from pwdlib import PasswordHash
 import re
 import unicodedata
+import secrets
 
 
 password_hash = PasswordHash.recommended()
@@ -119,3 +120,36 @@ class adminHandler:
       "message": "Admin " + result["email"] + " successfully deleted",
       "admin": result
     }
+
+  def generate_invitation_code2(self, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
+    invitation_code = secrets.token_hex(4).upper()
+
+    return adminDAO().set_invitation_code3(
+      account["admin_id"],
+      invitation_code
+    )
+
+  def validate_invitation_code2(self, invitation_code: str):
+    invitation_code = invitation_code.strip().upper()
+
+    if not invitation_code:
+      raise HTTPException(
+        status_code=400,
+        detail="Invitation code is required."
+      )
+
+    admin = adminDAO().get_admin_by_invitation_code3(invitation_code)
+
+    if admin is None:
+      raise HTTPException(
+        status_code=404,
+        detail="Invalid invitation code."
+      )
+
+    return admin

@@ -46,7 +46,7 @@ class customerDAO:
 
   def add_customer3(self, new_customer: Customer):
       ticket_id = customerDAO().list_customers3(new_customer.queue_code)
-      if ticket_id == []:
+      if ticket_id == 0:
          ticket_id = 1
       else:
         ticket_id = ticket_id[0].ticket_id+1

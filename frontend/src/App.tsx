@@ -36,13 +36,16 @@ function App() {
         <Route path="/signup/staff" element={<StaffSignup />} />
 
         {/* Check the Admin session before displaying these pages. */}
-        <Route element={<RequireAdmin />}>
+        <Route element={<RequireAdmin key="admin" />}>
           <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
           <Route path="/admin/Services_Queues" element={<Services_Queues />} />
           <Route path="/admin/StaffAccess" element={<StaffAccess />} />
         </Route>
 
-        <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />
+        {/* Check the Staff session before displaying this page. */}
+        <Route element={<RequireAdmin key="staff" requiredRole="staff" />}>
+          <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />
+        </Route>
 
         {import.meta.env.DEV && (
           <Route path="/dev" element={<DevPage />} />

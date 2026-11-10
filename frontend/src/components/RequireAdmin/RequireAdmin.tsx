@@ -77,10 +77,14 @@ function useIdleLogout(onLogout: () => void) {
 }
 
 /**
- * Checks Admin access before displaying protected pages.
+ * Checks the required role before displaying protected pages.
  * Rechecks the session every minute and when the window regains focus.
  */
-function RequireAdmin() {
+function RequireAdmin({
+  requiredRole = "admin",
+}: {
+  requiredRole?: "admin" | "staff";
+}) {
   const [status, setStatus] = useState<
     "checking" | "allowed" | "denied" | "error"
   >("checking");
@@ -133,7 +137,7 @@ function RequireAdmin() {
         const account = await response.json();
 
         if (!controller.signal.aborted && !idleExpired.current) {
-          setStatus(account.role === "admin" ? "allowed" : "denied");
+          setStatus(account.role === requiredRole ? "allowed" : "denied");
         }
       } catch {
         if (!controller.signal.aborted && !idleExpired.current) {
@@ -154,7 +158,7 @@ function RequireAdmin() {
       window.clearInterval(interval);
       window.removeEventListener("focus", checkSession);
     };
-  }, [denied]);
+  }, [denied, requiredRole]);
 
   if (status === "checking") {
     return <p role="status">Checking your session...</p>;

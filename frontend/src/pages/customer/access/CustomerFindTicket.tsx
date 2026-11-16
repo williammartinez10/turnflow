@@ -60,12 +60,12 @@ function CustomerFindTicket() {
 
       const ticket = await response.json();
 
-      // If the ticket exists, navigate to its Queue Status page.
+      // Map the backend's service field to the shared router-state field.
       navigate("/queue-status", {
         state: {
           ticketNumber: String(ticket.ticket_number),
           queueCode: ticket.queue_code,
-          service: ticket.service,
+          serviceName: ticket.service,
           status: ticket.status,
           organizationName: ticket.organization_name,
         },
@@ -87,7 +87,10 @@ function CustomerFindTicket() {
             Find My Ticket
           </h1>
 
-          <p className="customer-find-ticket-description">
+          <p
+            className="customer-find-ticket-description"
+            id="customer-find-ticket-description"
+          >
             Enter your queue code and ticket number to view your queue status.
           </p>
 
@@ -108,6 +111,7 @@ function CustomerFindTicket() {
               name="queue-code"
               type="text"
               placeholder="Enter your queue code"
+              aria-describedby="customer-find-ticket-description"
               required
             />
 
@@ -126,10 +130,14 @@ function CustomerFindTicket() {
               inputMode="numeric"
               pattern="[0-9]+"
               placeholder="Enter your ticket number"
+              aria-describedby="ticket-number-help"
               required
             />
 
-            <p className="ticket-number-help">
+            <p
+              className="ticket-number-help"
+              id="ticket-number-help"
+            >
               Enter the ticket number you received when joining the queue.
             </p>
 
@@ -138,6 +146,10 @@ function CustomerFindTicket() {
                 {error}
               </p>
             )}
+
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Finding your ticket. Please wait." : ""}
+            </p>
 
             <button
               className="find-ticket-submit-button"

@@ -1,6 +1,6 @@
 import "./StaffSignup.css";
 import { useState, SyntheticEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
 
@@ -9,11 +9,15 @@ import PasswordInput from "../../../../components/PasswordInput/PasswordInput";
  * Applies browser validation and presents account-creation feedback from the backend.
  */
 function StaffSignup() {
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const[isFormValid, setIsFormValid] = useState(false);
-  
+  const location = useLocation();
+
+  const adminId = location.state?.adminId;
+  const invitationCode = location.state?.invitationCode;
   /**
    * Updates submit-button availability from all required inputs, including PasswordInput.
    * Each value must contain non-whitespace text and satisfy native browser constraints.
@@ -33,7 +37,7 @@ function StaffSignup() {
 
   /**
    * Sends the signup fields using the backend request names and displays the result.
-   * Account creation shows a login link; it does not sign the user in automatically.
+   * Signs the user in after account creation, with a login link if automatic login fails.
    *
    * @param e - The staff signup form submission event.
    */
@@ -43,6 +47,7 @@ function StaffSignup() {
     const formData = new FormData(e.currentTarget);
     const apiBaseUrl =
       import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    let accountCreated = false;
 
     setError("");
     setSuccess("");
@@ -59,12 +64,13 @@ function StaffSignup() {
           full_name: formData.get("full-name"),
           email: formData.get("email"),
           password: formData.get("password"),
+          admin_id: adminId,
+          invitation_code: invitationCode,
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         setError(
           typeof data.detail === "string"
             ? data.detail
@@ -73,9 +79,33 @@ function StaffSignup() {
         return;
       }
 
-      setSuccess("Staff account created successfully.");
+      accountCreated = true;
+
+      const loginResponse = await fetch(`${apiBaseUrl}/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: String(formData.get("email") ?? "").trim().toLowerCase(),
+          password: formData.get("password"),
+        }),
+      });
+
+      if (!loginResponse.ok) {
+        setSuccess("Account created. Please log in to continue.");
+        return;
+      }
+
+      window.dispatchEvent(new Event("session-changed"));
+      navigate("/staff/StaffDashboard", { replace: true });
     } catch {
-      setError("Could not create the account. Please try again.");
+      if (accountCreated) {
+        setSuccess("Account created. Please log in to continue.");
+      } else {
+        setError("Could not create the account. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -159,6 +189,10 @@ function StaffSignup() {
                 </Link>
               </p>
             )}
+
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Creating your staff account. Please wait." : ""}
+            </p>
 
             <button
               className="staff-signup-form-button"

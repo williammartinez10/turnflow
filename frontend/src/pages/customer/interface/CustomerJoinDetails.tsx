@@ -1,5 +1,5 @@
 import "./CustomerJoinDetails.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import Header from "../../../components/Header/Header";
@@ -17,10 +17,11 @@ function CustomerJoinDetails() {
 
   // Queue information passed from the previous page.
   const queueCode = location.state?.queueCode;
-  const service = location.state?.service;
+  const serviceName: string = location.state?.serviceName ?? "";
   const organizationName = location.state?.organizationName;
 
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [ticketNumber, setTicketNumber] = useState("");
   const [ticketStatus, setTicketStatus] = useState<string | undefined>();
@@ -28,6 +29,9 @@ function CustomerJoinDetails() {
   const [hasActiveTicket, setHasActiveTicket] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
+
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+  const continueButtonRef = useRef<HTMLButtonElement>(null);
 
   /**
    * Keeps at most ten digits and progressively formats the displayed phone number.
@@ -54,9 +58,10 @@ function CustomerJoinDetails() {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   };
 
-  /** Updates the controlled input with the formatted value as the customer types. */
+  /** Updates the formatted input and clears its previous validation message. */
   const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPhoneNumber(formatPhoneNumber(e.target.value));
+    setPhoneError("");
   };
 
   /**
@@ -72,7 +77,13 @@ function CustomerJoinDetails() {
 
     const digits = phoneNumber.replace(/\D/g, "");
 
+    setPhoneError("");
+    setError("");
+    setHasActiveTicket(false);
+
     if (digits.length !== 10) {
+      setPhoneError("Enter a 10-digit phone number, including the area code.");
+      phoneInputRef.current?.focus();
       return;
     }
 
@@ -81,8 +92,6 @@ function CustomerJoinDetails() {
       return;
     }
 
-    setError("");
-    setHasActiveTicket(false);
     setIsLoading(true);
     setIsDemo(false);
 
@@ -91,7 +100,7 @@ function CustomerJoinDetails() {
       `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 
     try {
-      // Register the customer in the selected queue.
+      // The backend determines the service from the selected queue.
       const response = await fetch(
         "http://127.0.0.1:8000/database/customer/add_customer",
         {
@@ -145,8 +154,8 @@ function CustomerJoinDetails() {
     navigate("/queue-status", {
       state: {
         queueCode,
+        serviceName,
         ticketNumber,
-        service,
         status: ticketStatus,
         organizationName,
       },
@@ -186,12 +195,13 @@ function CustomerJoinDetails() {
             </label>
 
             <div className="customer-phone-input-wrapper">
-              <span className="customer-phone-prefix">
+              <span className="customer-phone-prefix" aria-hidden="true">
                 +1
               </span>
 
               <input
                 className="customer-phone-input"
+                ref={phoneInputRef}
                 id="phone-number"
                 name="phone-number"
                 type="tel"
@@ -199,14 +209,34 @@ function CustomerJoinDetails() {
                 value={phoneNumber}
                 onChange={handlePhoneChange}
                 placeholder="(###) ###-####"
-                autoComplete="tel"
+                autoComplete="tel-national"
+                aria-describedby={
+                  phoneError
+                    ? "customer-phone-help customer-phone-error"
+                    : "customer-phone-help"
+                }
+                aria-invalid={phoneError ? true : undefined}
                 required
               />
             </div>
 
-            <p className="customer-phone-help">
-              Used to send an SMS when your turn is approaching.
+            <p
+              className="customer-phone-help"
+              id="customer-phone-help"
+            >
+              Enter 10 digits, including the area code. The +1 country code is
+              included. Used for ticket confirmation and turn notifications.
             </p>
+
+            {phoneError && (
+              <p
+                id="customer-phone-error"
+                role="alert"
+                style={{ color: "#ff0000", textAlign: "left" }}
+              >
+                {phoneError}
+              </p>
+            )}
 
             {error && (
               <p role="alert" style={{ color: "#ff0000", textAlign: "left" }}>
@@ -222,8 +252,13 @@ function CustomerJoinDetails() {
               </p>
             )}
 
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Joining the queue. Please wait." : ""}
+            </p>
+
             <button
               className="customer-join-details-button"
+              ref={continueButtonRef}
               type="submit"
               disabled={isLoading}
             >
@@ -245,7 +280,9 @@ function CustomerJoinDetails() {
         <QueueConfirmationModal
           ticketNumber={ticketNumber}
           onViewStatus={handleViewStatus}
+          onClose={() => setShowConfirmation(false)}
           isDemo={isDemo}
+          returnFocusTo={continueButtonRef.current}
         />
       )}
     </div>

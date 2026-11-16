@@ -1,6 +1,6 @@
 import "./StaffCode.css";
-import { ClockCheck } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, SubmitEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../../../components/Header/Header";
 
 /**
@@ -10,6 +10,52 @@ import Header from "../../../../components/Header/Header";
  */
 function StaffCode() {
   const navigate = useNavigate();
+  const [invitationCode, setInvitationCode] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleInvitationCode(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+          `${apiBaseUrl}/database/admin/validate_invitation_code`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(invitationCode),
+          }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.detail || "Invalid invitation code.");
+        return;
+      }
+
+      const organization = await response.json();
+
+      navigate("/signup/staff", {
+        state: {
+          adminId: organization.admin_id,
+          organizationName: organization.organization_name,
+          invitationCode: invitationCode.trim().toUpperCase(),
+        },
+      });
+    } catch {
+      setError("Could not validate invitation code.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="staff-code-page">
@@ -25,27 +71,29 @@ function StaffCode() {
 
           <form
             className="staff-code-form"
-            onSubmit={(e) => {
-              // Prevent a page reload and continue to the staff account form.
-              // The entered code is not yet validated or passed to the next page.
-              e.preventDefault();
-              navigate("/signup/staff");
-            }}
+            onSubmit={handleInvitationCode}
           >
             <label className="staff-code-form-label" htmlFor="invitation-code">
               Organization / Invitation Code
             </label>
 
             <input
-              className="staff-code-form-input"
-              id="invitation-code"
-              type="text"
-              placeholder="Enter your invitation code"
-              // TODO: Require and validate the invitation code when integrated.
+                className="staff-code-form-input"
+                id="invitation-code"
+                type="text"
+                placeholder="Enter your invitation code"
+                value={invitationCode}
+                onChange={(e) => setInvitationCode(e.target.value)}
+                required
             />
+            {error && <p role="alert">{error}</p>}
 
-            <button className="staff-code-form-button" type="submit">
-              Continue
+            <button
+                className="staff-code-form-button"
+                type="submit"
+                disabled={isLoading}
+            >
+              {isLoading ? "Checking..." : "Continue"}
             </button>
           </form>
         </div>

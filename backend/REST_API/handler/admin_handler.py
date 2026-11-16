@@ -4,13 +4,14 @@ from fastapi import HTTPException
 from pwdlib import PasswordHash
 import re
 import unicodedata
+import secrets
 
 
 password_hash = PasswordHash.recommended()
-
+#password_hash.hash("Pa2sword")
 
 class adminHandler:
-  def add_admin2(self, new_admin: Admin):
+  def add_admin2(self, new_admin: Admin, account: dict | None):
     """
     Validate signup data and create an admin account with a password hash.
     
@@ -21,6 +22,12 @@ class adminHandler:
     new_admin.full_name = new_admin.full_name.strip()
     new_admin.email = new_admin.email.strip().lower()
     new_admin.organization_name = new_admin.organization_name.strip()
+
+#    if account is None:
+#      raise HTTPException(status_code=401, detail="Not logged in.")
+
+#    if account.get("role") != "admin":
+#      raise HTTPException(status_code=403, detail="Admin access required.")
 
     # Validate required fields explicitly
     if not new_admin.full_name:
@@ -97,7 +104,14 @@ class adminHandler:
     account["role"] = "admin"
     return account
 
-  def delete_admin2(self, admin: Admin):
+  def delete_admin2(self, admin: Admin, account: dict | None):
+
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
     if admin.admin_id is None:
       raise HTTPException(status_code=400, detail="admin_id is required")
 
@@ -106,3 +120,36 @@ class adminHandler:
       "message": "Admin " + result["email"] + " successfully deleted",
       "admin": result
     }
+
+  def generate_invitation_code2(self, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
+    invitation_code = secrets.token_hex(4).upper()
+
+    return adminDAO().set_invitation_code3(
+      account["admin_id"],
+      invitation_code
+    )
+
+  def validate_invitation_code2(self, invitation_code: str):
+    invitation_code = invitation_code.strip().upper()
+
+    if not invitation_code:
+      raise HTTPException(
+        status_code=400,
+        detail="Invitation code is required."
+      )
+
+    admin = adminDAO().get_admin_by_invitation_code3(invitation_code)
+
+    if admin is None:
+      raise HTTPException(
+        status_code=404,
+        detail="Invalid invitation code."
+      )
+
+    return admin

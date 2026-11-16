@@ -9,7 +9,7 @@ from fastapi import HTTPException
 class Staff_Privilege(BaseModel):
   staff_priv_id: Optional[int] = None
   staff_privilege: Optional[str] = None
-  staff_with_priv: Optional[list[int]] = None
+  staff_with_priv: Optional[list[str]] = None
 
 
 class staff_privilegeDAO:

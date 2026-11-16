@@ -82,6 +82,11 @@ function Login() {
         return;
       }
 
+      if (data.role === "staff") {
+        navigate("/staff/StaffDashboard", { replace: true });
+        return;
+      }
+
       setSuccess("Logged in successfully.");
     } catch {
       setError("Could not complete login. Please try again.");
@@ -140,6 +145,10 @@ function Login() {
             {success && <p role="status" style={{ textAlign: "center", color: "#008000" }}>
               {success}
             </p>}
+
+            <p className="screen-reader-only" role="status" aria-atomic="true">
+              {isLoading ? "Logging in. Please wait." : ""}
+            </p>
 
             <button
               className="login-form-button"

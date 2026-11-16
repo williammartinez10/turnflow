@@ -1,4 +1,3 @@
-
 /* ============= Overlay ============= */
 
 .queue-confirmation-overlay {
@@ -18,6 +17,8 @@
 .queue-confirmation-modal {
     width: 100%;
     max-width: 520px;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
     padding: 40px;
     border-radius: 12px;
     background: #ffffff;
@@ -97,7 +98,7 @@
 }
 
 
-/* ============= Button ============= */
+/* ============= Buttons ============= */
 
 .queue-confirmation-button {
     width: 75%;
@@ -119,7 +120,28 @@
     box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
 }
 
-.queue-confirmation-button:focus-visible {
+.queue-confirmation-close {
+    display: block;
+    min-height: 44px;
+    margin: 12px auto 0;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #303030;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.queue-confirmation-close:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.queue-confirmation-button:focus-visible,
+.queue-confirmation-close:focus-visible {
     outline: 3px solid var(--color-watermelon);
     outline-offset: 4px;
 }
@@ -148,6 +170,7 @@
     }
 
     .queue-confirmation-modal {
+        max-height: calc(100dvh - 36px);
         padding: 67px 20px;
     }
 

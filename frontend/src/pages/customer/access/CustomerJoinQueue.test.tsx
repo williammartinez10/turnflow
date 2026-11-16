@@ -15,8 +15,8 @@ vi.mock("react-router-dom", async () => {
 });
 
 /**
- * Checks queue-code entry, matching-queue navigation, missing-queue errors,
- * and the existing sample-data fallback using mocked backend responses.
+ * Checks queue-code entry, matching-queue navigation, missing or disabled queues,
+ * and connection errors using mocked backend responses.
  */
 describe("CustomerJoinQueue", () => {
   // Reset navigation mocks and any shared setup before each independent case.
@@ -27,14 +27,13 @@ describe("CustomerJoinQueue", () => {
       "fetch",
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => [
-          {
-            queue_id: 1,
-            service: "Medicine",
-            queue_code: "ABC-123-45",
-            organization_name: "William's Org",
-          },
-        ],
+        json: async () => ({
+          queue_id: 1,
+          service_id: 1,
+          service_name: "Medicine",
+          queue_code: "ABC-123-45",
+          organization_name: "William's Org",
+        }),
       })
     );
   });
@@ -75,8 +74,12 @@ describe("CustomerJoinQueue", () => {
     );
 
     fireEvent.change(screen.getByLabelText("Queue / Service Code"), {target: { value: "ABC-123-45" },});
-
     fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
+
+    expect(fetch).toHaveBeenCalledWith(
+      "http://127.0.0.1:8000/database/queue/get_active_withcode/ABC-123-45",
+      { method: "GET" }
+    );
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -84,7 +87,8 @@ describe("CustomerJoinQueue", () => {
         {
           state: {
             queueCode: "ABC-123-45",
-            service: "Medicine",
+            serviceId: 1,
+            serviceName: "Medicine",
             queueId: 1,
             organizationName: "William's Org",
           },
@@ -94,7 +98,15 @@ describe("CustomerJoinQueue", () => {
   });
 
 
-  it("shows an error when the queue does not exist", async () => {
+  it("shows an error when the queue does not exist or is disabled", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+      })
+    );
+
     render(
       <MemoryRouter>
         <CustomerJoinQueue />
@@ -104,13 +116,13 @@ describe("CustomerJoinQueue", () => {
     fireEvent.change(screen.getByLabelText("Queue / Service Code"), {target: { value: "XYZ-999-99" },});
     fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
 
-    expect(await screen.findByText("Queue not found. Please check the code and try again.")).toBeInTheDocument();
-
+    expect(await screen.findByRole("alert")).toHaveTextContent("Queue not found or currently disabled.");
     expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Find Queue" })).toBeEnabled();
   });
 
 
-  it("uses mock queues when the backend is unavailable", async () => {
+  it("shows a connection error when the backend is unavailable", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(
       new Error("Backend unavailable")
     ));
@@ -124,19 +136,9 @@ describe("CustomerJoinQueue", () => {
     fireEvent.change(screen.getByLabelText("Queue / Service Code"), {target: { value: "DEF-678-90" },});
     fireEvent.click(screen.getByRole("button", { name: "Find Queue" }));
 
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith(
-        "/service-information",
-        {
-          state: {
-            queueCode: "DEF-678-90",
-            service: "Lawyer",
-            queueId: 2,
-            organizationName: undefined,
-          },
-        }
-      );
-    });
+    expect(await screen.findByRole("alert")).toHaveTextContent("Could not connect to the server.");
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Find Queue" })).toBeEnabled();
   });
 
 });

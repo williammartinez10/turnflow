@@ -194,6 +194,57 @@
 }
 
 
+/* ============= Completed ticket navigation ============= */
+
+.customer-queue-completed-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.customer-queue-join-another {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    background: var(--color-watermelon);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.customer-queue-join-another:hover {
+    background: #e52e32;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 59, 63, 0.2);
+}
+
+.customer-queue-join-another:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.customer-queue-find-another {
+    color: #303030;
+    font-weight: 600;
+    text-align: center;
+}
+
+.customer-queue-join-another:focus-visible,
+.customer-queue-find-another:focus-visible {
+    outline: 2px solid #303030;
+    outline-offset: 4px;
+}
+
+
 /* ============= Update information ============= */
 
 .customer-queue-update-info {

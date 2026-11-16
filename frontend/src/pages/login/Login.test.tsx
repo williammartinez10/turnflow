@@ -46,7 +46,7 @@ describe("Login", () => {
   });
 
 
-  it("submits credentials and shows successful login", async () => {
+  it("submits credentials and opens the Staff dashboard", async () => {
     const email = "staff.test@example.com";
     const password = "LocalTestPass123!";
 
@@ -58,8 +58,14 @@ describe("Login", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(
-      <MemoryRouter>
-        <Login />
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/staff/StaffDashboard"
+            element={<h1>Staff Dashboard</h1>}
+          />
+        </Routes>
       </MemoryRouter>
     );
 
@@ -67,7 +73,7 @@ describe("Login", () => {
     fireEvent.change(screen.getByLabelText("Password"), {target: { value: password },});
     fireEvent.click(screen.getByRole("button", { name: "Log In" }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Logged in successfully.");
+    expect(await screen.findByRole("heading", { name: "Staff Dashboard" })).toBeInTheDocument();
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringMatching(/\/auth\/login$/),
@@ -136,7 +142,7 @@ describe("Login", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password.");
 
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
 

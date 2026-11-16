@@ -22,7 +22,7 @@
 /* ============= Header ============= */
 
 .home-header {
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
     z-index: 100;
@@ -55,9 +55,8 @@
 /* ============= Main section ============= */
 
 .home-main {
-    position: fixed;
-    inset: 99px 0 0;
-    overflow-y: auto;
+    min-height: calc(100vh - 99px);
+    min-height: calc(100dvh - 99px);
     display: flex;
     align-items: safe center;
     justify-content: center;
@@ -101,7 +100,8 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
-    min-width: 260px;
+    min-width: min(260px, 100%);
+    max-width: 100%;
     margin-top: 38px;
     padding: 17px 28px;
     border: none;
@@ -122,7 +122,7 @@
 }
 
 .customer-button:focus-visible {
-    outline: 3px solid var(--color-watermelon);
+    outline: 3px solid var(--color-sky);
     outline-offset: 4px;
 }
 
@@ -135,7 +135,7 @@
 /* ============= Staff / Admin ============= */
 
 .home-divider {
-    width: 280px;
+    width: min(280px, 100%);
     height: 1px;
     margin: 38px auto 25px;
     background: rgba(255, 255, 255, 0.5);
@@ -146,6 +146,10 @@
 }
 
 .staff-login-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 8px 4px;
     margin-left: 4px;
     color: var(--color-sky);
     font-weight: 700;
@@ -154,7 +158,7 @@
 }
 
 .staff-login-link:focus-visible {
-    outline: 3px solid var(--color-watermelon);
+    outline: 3px solid var(--color-sky);
     outline-offset: 4px;
 }
 

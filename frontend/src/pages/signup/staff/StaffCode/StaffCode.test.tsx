@@ -1,13 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import StaffCode from "./StaffCode";
 
 /**
  * Checks the invitation-code field, Continue button, and navigation to staff signup.
- * These tests cover the current frontend flow, not backend invitation validation.
+ * Backend invitation validation is mocked.
  */
 describe("StaffCode", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("renders the invitation code field and continue button", () => {
     render(
       <MemoryRouter>
@@ -19,8 +23,20 @@ describe("StaffCode", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
   });
 
+
   // A simple destination page verifies routing without rendering the signup form.
-  it("navigates to staff signup when continue is pressed", () => {
+  it("navigates to staff signup after validating the invitation code", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          admin_id: 1,
+          organization_name: "Test Organization",
+        }),
+      })
+    );
+
     render(
       <MemoryRouter initialEntries={["/signup/staff/staff_code"]}>
         <Routes>
@@ -36,8 +52,10 @@ describe("StaffCode", () => {
       </MemoryRouter>
     );
 
+    fireEvent.change(screen.getByLabelText("Organization / Invitation Code"), {target: { value: "ABC123" }});
+
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(screen.getByText("Staff Signup Page")).toBeInTheDocument();
+    expect(await screen.findByText("Staff Signup Page")).toBeInTheDocument();
   });
 });

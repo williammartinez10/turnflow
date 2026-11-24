@@ -1,5 +1,6 @@
 from backend.REST_API.DAO.customer_DAO import customerDAO, Customer
 from backend.REST_API.DAO.queue_DAO import queueDAO
+from backend.REST_API.handler.queue_handler import queueHandler
 from fastapi import HTTPException
 from backend.REST_API.DAO.staff_privilege_DAO import staff_privilegeDAO
 
@@ -36,17 +37,9 @@ class customerHandler:
       return customerDAO().get_ticket3(queue_code, ticket_number)
 
   def list_customers2(self, queue_code: str, account: dict | None):
-    if account is None:
-      raise HTTPException(status_code=401, detail="Not logged in.")
+    # Check Queue ownership or Staff assignment before returning Customers.
+    queueHandler().get_withcode_queue2(queue_code, account)
 
-    if account.get("role") != "staff" and account.get("role") != "admin":
-      raise HTTPException(status_code=403, detail="Staff or admin access required.")
-
-    if account.get("role" != "admin"):
-      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
-
-      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Staff missing privileges.")
     return customerDAO().list_customers3(queue_code)
 
   # ===== Dashboard Statistics =====
@@ -58,17 +51,9 @@ class customerHandler:
   # ===== End Dashboard Statistics =====
 
   def pop_customer2(self, queue_code: str, account: dict | None):
-    if account is None:
-      raise HTTPException(status_code=401, detail="Not logged in.")
+    # Check Queue ownership or Staff assignment before calling a Customer.
+    queueHandler().get_withcode_queue2(queue_code, account)
 
-    if account.get("role") != "staff" and account.get("role") != "admin":
-      raise HTTPException(status_code=403, detail="Staff or admin access required.")
-
-    if account.get("role" != "admin"):
-      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
-
-      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Staff missing privileges.")
     return customerDAO().pop_customer3(queue_code)
 
 #  def pop_customer2(self, queue_code: str, account: dict | None):

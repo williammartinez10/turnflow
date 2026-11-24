@@ -192,7 +192,31 @@ async def get_time_remaning1(
     return customerHandler().get_time_remaning2(phone_number, queue_code)
 
 @app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
-async def complete_customer1(queue_code: str, ticket_id: int):
+async def complete_customer1(
+    queue_code: str,
+    ticket_id: int,
+    request: Request,
+):
+    account = request.session.get("account")
+
+    if account is None:
+        raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") == "admin":
+        queues = queueHandler().get_queue_list2(account)
+
+        if not any(queue.queue_code == queue_code for queue in queues):
+            raise HTTPException(status_code=403, detail="Queue access denied.")
+
+    elif account.get("role") == "staff":
+        queues = staffHandler().get_my_assigned_queues2(account)
+
+        if not any(queue["queue_code"] == queue_code for queue in queues):
+            raise HTTPException(status_code=403, detail="Queue access denied.")
+
+    else:
+        raise HTTPException(status_code=403, detail="Staff or Admin access required.")
+
     return customerHandler().complete_customer2(
         queue_code,
         ticket_id

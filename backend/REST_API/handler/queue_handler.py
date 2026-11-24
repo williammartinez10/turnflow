@@ -1,6 +1,7 @@
 from backend.REST_API.DAO.queue_DAO import queueDAO, Queue
 
 from backend.REST_API.DAO.staff_privilege_DAO import staff_privilegeDAO
+from backend.REST_API.DAO.staff_DAO import staffDAO
 
 from fastapi import HTTPException
 import random
@@ -70,12 +71,26 @@ class queueHandler:
     if account.get("role") != "staff" and account.get("role") != "admin":
       raise HTTPException(status_code=403, detail="Staff or admin access required.")
 
-    if account.get("role") != "admin":
-      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
-      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Staff missing privileges.")
+    queue = queueDAO().get_withcode_queue3(queue_code)
 
-    return queueDAO().get_withcode_queue3(queue_code)
+    # The Queue must belong to the account's organization.
+    if account.get("admin_id") is None or queue.admin_id != account["admin_id"]:
+      raise HTTPException(status_code=403, detail="Queue access denied.")
+
+    # Staff may only access Queues assigned to them.
+    if account.get("role") == "staff":
+      if account.get("staff_id") is None:
+        raise HTTPException(status_code=403, detail="Queue access denied.")
+
+      assigned_queues = staffDAO().get_assigned_queues3(
+        account["staff_id"],
+        account["admin_id"]
+      )
+
+      if not any(assigned["queue_code"] == queue_code for assigned in assigned_queues):
+        raise HTTPException(status_code=403, detail="Queue access denied.")
+
+    return queue
 
   def get_active_withcode_queue2(self, queue_code: str):
     return queueDAO().get_active_withcode_queue3(queue_code)

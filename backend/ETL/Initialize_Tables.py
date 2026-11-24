@@ -1,5 +1,13 @@
 import psycopg2
 
+#DB_CONFIG = {
+#    "dbname": "TurnFlow_Database",
+#    "user": "dbuser",
+#    "password": "Medical@ffice20",
+#    "host": "localhost",
+#    "port": 8982,
+#}  # client config
+
 DB_CONFIG = {
     "dbname": "turnflow_database",
     "user": "turnflow_database_user",

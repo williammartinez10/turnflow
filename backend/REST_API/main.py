@@ -536,3 +536,16 @@ def logout1(request: Request):
   #admin login should b required to delete admin accounts
 
   #it appears the timeout runs out regardless of if your doing something or not
+
+
+
+
+
+
+  #######################################################
+                 ##Welcome to the Cloud##
+  #######################################################
+
+    #the REST API webservice is located at:
+      #https://turnflow-rest-api-varo.onrender.com
+      #and the Database at PG_DB_CONFIG in dbconfig.py

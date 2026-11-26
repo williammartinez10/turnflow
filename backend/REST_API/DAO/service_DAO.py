@@ -192,73 +192,88 @@ class serviceDAO:
             make_active: bool
     ):
         conn = self.pool.getconn()
-        cur = conn.cursor(cursor_factory=DictCursor)
 
-        cur.execute(
-            """
-            UPDATE service
-            SET active = %s
-            WHERE service_id = %s
-              AND admin_id = %s
-            RETURNING *
-            """,
-            (
-                make_active,
-                service_id,
-                admin_id
-            )
-        )
+        try:
+            with conn:
+                with conn.cursor(cursor_factory=DictCursor) as cur:
 
-        cashe = cur.fetchone()
+                    # Update the Service owned by this Admin.
+                    cur.execute("""
+                        UPDATE service
+                        SET active = %s
+                        WHERE service_id = %s
+                          AND admin_id = %s
+                        RETURNING *
+                    """, (
+                        make_active,
+                        service_id,
+                        admin_id
+                    ))
 
-        # When disabling the service, its queues must stop accepting new joins.
-        if cashe is not None and make_active is False:
+                    cashe = cur.fetchone()
 
-            # Queues with active tickets enter Pending Disable.
-            cur.execute(
-                """
-                UPDATE queue
-                SET pending_disable = TRUE
-                WHERE service_id = %s
-                  AND admin_id = %s
-                  AND EXISTS (
-                    SELECT 1
-                    FROM customer
-                    WHERE customer.queue_id = queue.queue_id
-                      AND customer.status IN ('waiting', 'called', 'skipped')
-                )
-                """,
-                (service_id, admin_id)
-            )
+                    if cashe is None:
+                        raise HTTPException(
+                            status_code=404,
+                            detail="Service not found."
+                        )
 
-            # Queues without active tickets disable immediately.
-            cur.execute(
-                """
-                UPDATE queue
-                SET
-                    active = FALSE,
-                    pending_disable = FALSE
-                WHERE service_id = %s
-                  AND admin_id = %s
-                  AND NOT EXISTS (
-                    SELECT 1
-                    FROM customer
-                    WHERE customer.queue_id = queue.queue_id
-                      AND customer.status IN ('waiting', 'called', 'skipped')
-                )
-                """,
-                (service_id, admin_id)
-            )
+                    if not make_active:
 
-        conn.commit()
-        cur.close()
-        self.pool.putconn(conn)
+                        # Lock all Queues belonging to this Service.
+                        cur.execute("""
+                            SELECT queue_id
+                            FROM queue
+                            WHERE service_id = %s
+                              AND admin_id = %s
+                            ORDER BY queue_id
+                            FOR UPDATE
+                        """, (service_id, admin_id))
 
-        if cashe is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Service not found."
-            )
+                        queues = cur.fetchall()
+
+                        for queue in queues:
+                            queue_id = queue["queue_id"]
+
+                            # Cancel skipped tickets and invalidate tokens.
+                            cur.execute("""
+                                UPDATE customer
+                                SET status = 'no_show',
+                                    return_token_hash = NULL
+                                WHERE queue_id = %s
+                                  AND status = 'skipped'
+                            """, (queue_id,))
+
+                            # Check for remaining eligible Customers.
+                            cur.execute("""
+                                SELECT EXISTS (
+                                    SELECT 1
+                                    FROM customer
+                                    WHERE queue_id = %s
+                                      AND status IN (
+                                          'waiting',
+                                          'called',
+                                          'attending'
+                                      )
+                                )
+                            """, (queue_id,))
+
+                            has_active_tickets = cur.fetchone()[0]
+
+                            # Disable immediately or allow service to finish.
+                            cur.execute("""
+                                UPDATE queue
+                                SET active = %s,
+                                    pending_disable = %s
+                                WHERE queue_id = %s
+                            """, (
+                                has_active_tickets,
+                                has_active_tickets,
+                                queue_id
+                            ))
+
+        finally:
+            self.pool.putconn(conn)
 
         return Service(**cashe)
 

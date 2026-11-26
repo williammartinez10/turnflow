@@ -166,6 +166,23 @@ class staffHandler:
       account["admin_id"]
     )
 
+  def count_active_staff2(self, account: dict | None):
+    if account is None:
+      raise HTTPException(
+        status_code=401,
+        detail="Not logged in."
+      )
+
+    if account.get("role") != "admin":
+      raise HTTPException(
+        status_code=403,
+        detail="Admin access required."
+      )
+
+    return staffDAO().count_active_staff3(
+      account["admin_id"]
+    )
+
   def assign_queue2(
           self,
           staff_id: int,

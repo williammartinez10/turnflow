@@ -40,10 +40,11 @@ class queueDAO:
 
       cur.execute(
           """
-          SELECT active
+          SELECT service.active, admin.organization_name
           FROM service
-          WHERE service_id = %s
-            AND admin_id = %s
+          JOIN admin ON service.admin_id = admin.admin_id
+          WHERE service.service_id = %s
+            AND service.admin_id = %s
           """,
           (
               new_queue.service_id,
@@ -71,7 +72,8 @@ class queueDAO:
               status_code=409,
               detail="An active queue cannot be created under a disabled service."
           )
-
+      # Retrieve the organization name from the Queue's Admin.
+      new_queue.organization_name = service["organization_name"]
       query = """
       INSERT INTO queue
       (queue_code, queue_name, prefix, description, service_id, active, admin_id, organization_name, time_list)
@@ -372,13 +374,11 @@ class queueDAO:
     # Changing the Queue name starts a new history for this Queue.
     if name_is_changing:
         cur.execute(
-        """
-        DELETE FROM next_customer
-        WHERE next_customer_id = (
-          SELECT next_customer_id FROM next_customer
-          WHERE queue_id = %s
-        )
-        """, (current_queue["queue_id"],)
+            """
+            DELETE FROM next_customer
+            WHERE queue_id = %s
+            """,
+            (current_queue["queue_id"],)
         )
         cur.execute(
             """
@@ -432,123 +432,99 @@ class queueDAO:
         make_active: bool
     ):
     conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
 
-    # Reactivating a queue is immediate, but only if its Service is Active.
-    if make_active:
+    try:
+        with conn:
+            with conn.cursor(cursor_factory=DictCursor) as cur:
 
-        # Check whether the Queue's Service is Active.
-        cur.execute(
-            """
-            SELECT service.active
-            FROM queue
-                     JOIN service
-                          ON queue.service_id = service.service_id
-            WHERE queue.queue_code = %s
-              AND queue.admin_id = %s
-            """,
-            (queue_code, admin_id)
-        )
+                # Retrieve and lock the Queue.
+                cur.execute("""
+                    SELECT queue_id, service_id
+                    FROM queue
+                    WHERE queue_code = %s
+                      AND admin_id = %s
+                    FOR UPDATE
+                """, (queue_code, admin_id))
 
-        service_status = cur.fetchone()
+                queue = cur.fetchone()
 
-        if service_status is None:
-            cur.close()
-            self.pool.putconn(conn)
+                if queue is None:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Queue not found."
+                    )
 
-            raise HTTPException(
-                status_code=404,
-                detail="Queue not found."
-            )
+                queue_id = queue["queue_id"]
 
-        if service_status["active"] is False:
-            cur.close()
-            self.pool.putconn(conn)
+                if make_active:
 
-            raise HTTPException(
-                status_code=409,
-                detail="Queue cannot be activated while its service is disabled."
-            )
+                    # Verify that the Queue's Service is Active.
+                    cur.execute("""
+                        SELECT active
+                        FROM service
+                        WHERE service_id = %s
+                    """, (queue["service_id"],))
 
-        # Service is Active, so the Queue can be activated.
-        cur.execute(
-            """
-            UPDATE queue
-            SET
-                active = TRUE,
-                pending_disable = FALSE
-            WHERE queue_code = %s
-              AND admin_id = %s
-            RETURNING *
-            """,
-            (queue_code, admin_id)
-        )
+                    service_status = cur.fetchone()
 
-    else:
+                    if service_status is None or not service_status["active"]:
+                        raise HTTPException(
+                            status_code=409,
+                            detail="Queue cannot be activated while its service is disabled."
+                        )
 
-        # Check whether this specific Queue still has active tickets.
-        cur.execute(
-            """
-            SELECT EXISTS (
-                SELECT 1
-                FROM customer
-                         JOIN queue
-                              ON customer.queue_id = queue.queue_id
-                WHERE queue.queue_code = %s
-                  AND queue.admin_id = %s
-                  AND customer.status IN ('waiting', 'called', 'skipped')
-            )
-            """,
-            (queue_code, admin_id)
-        )
+                    active = True
+                    pending_disable = False
 
-        has_active_tickets = cur.fetchone()[0]
+                else:
 
-        if has_active_tickets:
+                    # Cancel skipped tickets and invalidate return tokens.
+                    cur.execute("""
+                        UPDATE customer
+                        SET status = 'no_show',
+                            return_token_hash = NULL
+                        WHERE queue_id = %s
+                          AND status = 'skipped'
+                    """, (queue_id,))
 
-            # Stop accepting new customers, but let current tickets finish.
-            cur.execute(
-                """
-                UPDATE queue
-                SET pending_disable = TRUE
-                WHERE queue_code = %s
-                  AND admin_id = %s
-                RETURNING *
-                """,
-                (queue_code, admin_id)
-            )
+                    # Check for remaining eligible Customers.
+                    cur.execute("""
+                        SELECT EXISTS (
+                            SELECT 1
+                            FROM customer
+                            WHERE queue_id = %s
+                              AND status IN (
+                                  'waiting', 'called', 'attending'
+                              )
+                        )
+                    """, (queue_id,))
 
-        else:
+                    has_active_tickets = cur.fetchone()[0]
 
-            # Nobody depends on the Queue, so disable immediately.
-            cur.execute(
-                """
-                UPDATE queue
-                SET
-                    active = FALSE,
-                    pending_disable = FALSE
-                WHERE queue_code = %s
-                  AND admin_id = %s
-                RETURNING *
-                """,
-                (queue_code, admin_id)
-            )
+                    active = has_active_tickets
+                    pending_disable = has_active_tickets
 
-    cashe = cur.fetchone()
+                # Apply the Queue's resulting status.
+                cur.execute("""
+                    UPDATE queue
+                    SET active = %s,
+                        pending_disable = %s
+                    WHERE queue_id = %s
+                    RETURNING *
+                """, (
+                    active,
+                    pending_disable,
+                    queue_id
+                ))
 
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+                cashe = cur.fetchone()
 
-    if cashe is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Queue not found."
-        )
+    finally:
+        self.pool.putconn(conn)
 
     return Queue(**cashe)
 
-  def update_wait_time(self, new_wait_time: datetime.datetime, queue_code: str):
+  def update_wait_time(self, new_wait_time: datetime.timedelta, queue_code: str):
       
       conn = self.pool.getconn()
       cur = conn.cursor(cursor_factory=DictCursor)

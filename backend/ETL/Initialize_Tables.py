@@ -54,33 +54,33 @@ time_list INTERVAL[]
 );
 
 CREATE TABLE customer(
-customer_id serial PRIMARY KEY,
-ticket_id integer,
-phone_number TEXT,
-queue_id integer,
-FOREIGN KEY (queue_id)
-    REFERENCES queue(queue_id)
-    ON DELETE CASCADE,
+    customer_id serial PRIMARY KEY,
+    ticket_id integer,
+    phone_number TEXT,
+    queue_id integer,
+    staff_id integer,
+    status TEXT NOT NULL DEFAULT 'waiting',
+    waiting_time INTERVAL NOT NULL DEFAULT INTERVAL '0 seconds',
+    service_time INTERVAL,
+    waiting_started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    called_time TIMESTAMPTZ,
+    service_started_at TIMESTAMPTZ,
+    completed_time TIMESTAMPTZ,
+    return_token_hash TEXT,
 
-time TIMESTAMPTZ,
-called_time TIMESTAMPTZ,
-completed_time TIMESTAMPTZ,
-
-status TEXT NOT NULL DEFAULT 'waiting'
+    FOREIGN KEY (queue_id) REFERENCES queue(queue_id) ON DELETE CASCADE
 );
-
 CREATE TABLE next_customer(
 next_customer_id integer PRIMARY KEY,
 FOREIGN KEY (next_customer_id) REFERENCES customer(customer_id),
 queue_id integer,
-FOREIGN KEY (queue_id) REFERENCES queue(queue_id),
-time TIMESTAMPTZ
+FOREIGN KEY (queue_id) REFERENCES queue(queue_id)
 );
 
 -- Allow only one active ticket per phone number in each queue.
 CREATE UNIQUE INDEX customer_unique_active_phone_per_queue
 ON customer (queue_id, phone_number)
-WHERE status IN ('waiting', 'called', 'skipped');
+WHERE status IN ('waiting', 'called', 'attending', 'skipped');
 
 CREATE TABLE staff_privilege(
 staff_priv_id serial PRIMARY KEY,
@@ -108,6 +108,18 @@ ON DELETE CASCADE,
 
 PRIMARY KEY (staff_id, queue_id)
 );
+
+-- Associates a Customer with the Staff serving the ticket.
+ALTER TABLE customer
+ADD CONSTRAINT customer_staff_id_fkey
+FOREIGN KEY (staff_id) REFERENCES staff(staff_id)
+ON DELETE SET NULL;
+
+-- Prevents a Staff member from handling multiple Customers simultaneously.
+CREATE UNIQUE INDEX customer_unique_busy_per_staff
+ON customer (staff_id)
+WHERE status IN ('called', 'attending')
+  AND staff_id IS NOT NULL;
 """
 cur.execute(query)
 conn.commit()

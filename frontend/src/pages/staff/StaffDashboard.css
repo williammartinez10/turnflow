@@ -116,6 +116,14 @@
     border: 1px solid #cfcfcf;
     border-radius: 8px;
     background: #ffffff;
+
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.staff-assigned-row:hover {
+    background: #f3f3f3;
 }
 
 .staff-assigned-row span:first-child {

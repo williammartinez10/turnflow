@@ -28,15 +28,19 @@ class queueHandler:
     new_queue.admin_id = account["admin_id"]
 
     # Validate required fields explicitly
-    # if not new_queue.queue_code:
-    #   raise HTTPException(status_code=401, detail="queue_code is required")
+    # _queue.queue_code:
+    #   raise HTTPExif not newception(status_code=401, detail="queue_code is required")
     # if queueDAO().check_withcode_queue3(new_queue.queue_code) != None:
     #   raise HTTPException(status_code=401, detail="queue_code in use")
 
-    if not new_queue.organization_name:
-      raise HTTPException(status_code=401, detail="organization_name is required")
-    if not new_queue.time_list:
-      raise HTTPException(status_code=401, detail="initial time_list is required")
+    # if not new_queue.organization_name:
+    #   raise HTTPException(status_code=401, detail="organization_name is required")
+    # if not new_queue.time_list:
+    #   raise HTTPException(status_code=401, detail="initial time_list is required")
+
+    # Initialize the waiting time history for a new Queue.
+    if new_queue.time_list is None:
+      new_queue.time_list = []
 
     # Generate a unique queue code.
     queue_code = self.generate_queue_code()

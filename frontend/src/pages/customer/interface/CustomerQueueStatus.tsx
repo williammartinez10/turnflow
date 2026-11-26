@@ -35,6 +35,9 @@ function CustomerQueueStatus() {
   const [ticket, setTicket] = useState<TicketStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [returnToken, setReturnToken] = useState("");
+  const [returningToQueue, setReturningToQueue] = useState(false);
+  const [returnError, setReturnError] = useState("");
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -77,7 +80,9 @@ function CustomerQueueStatus() {
         if (!controller.signal.aborted) {
           setTicket(retrievedTicket);
           setError("");
-          shouldRefresh = retrievedTicket.status !== "completed";
+          shouldRefresh =
+            retrievedTicket.status !== "completed" &&
+            retrievedTicket.status !== "no_show";
         }
       } catch {
         if (!controller.signal.aborted) {
@@ -119,17 +124,21 @@ function CustomerQueueStatus() {
       title: "It's Your Turn",
       description: "Please proceed to the service area.",
     },
+    attending: {
+      title: "Service in Progress",
+      description: "You are currently receiving service.",
+    },
     completed: {
       title: "Completed",
       description: "Your service has been completed.",
     },
     skipped: {
-      title: "Skipped",
-      description: "Your ticket was skipped. Please check with Staff.",
+      title: "Ticket Skipped",
+      description: "Your turn was temporarily postponed. Return to the Queue when you are ready to receive service.",
     },
     no_show: {
-      title: "No Show",
-      description: "Staff marked you as absent. Please check with Staff.",
+      title: "Ticket Canceled",
+      description: "Your ticket was canceled because you did not arrive for your turn.",
     },
   };
 
@@ -140,6 +149,8 @@ function CustomerQueueStatus() {
 
   // Show the completion view only after confirmation from the backend.
   const isCompleted = ticket?.status === "completed";
+  const isNoShow = ticket?.status === "no_show";
+  const isSkipped = ticket?.status === "skipped";
   const unavailable = isLoading ? "Loading..." : "Unavailable";
 
 
@@ -169,8 +180,61 @@ function CustomerQueueStatus() {
           : "Not applicable",
     estimatedWait: ticket?.status === "called"
       ? "Your turn"
-      : "Not available yet",
+      : ticket?.status === "attending"
+        ? "In service"
+        : "Not available yet",
   };
+
+  // Allows a skipped Customer to return to the Queue.
+  async function returnToQueue() {
+    if (!isSkipped || returningToQueue || !ticket) {
+      return;
+    }
+
+    const token = returnToken.trim();
+
+    if (token.length !== 43) {
+      setReturnError("Please enter the valid return token received through SMS.");
+      return;
+    }
+
+    setReturningToQueue(true);
+    setReturnError("");
+
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/database/customer/return_to_queue/${ticket.queue_code}/${ticket.ticket_number}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            return_token: token,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+
+        setReturnError(
+          typeof result.detail === "string"
+            ? result.detail
+            : "Could not return to the Queue."
+        );
+        return;
+      }
+
+      setReturnToken("");
+
+    } catch {
+      setReturnError("Unable to communicate with the server.");
+
+    } finally {
+      setReturningToQueue(false);
+    }
+  }
 
 
   return (
@@ -213,7 +277,7 @@ function CustomerQueueStatus() {
             </div>
           </div>
 
-          {!isCompleted && (
+          {!isCompleted && !isNoShow && (
             <div className="customer-queue-status-grid">
               <div className="customer-queue-status-item">
                 <span className="customer-queue-status-label">
@@ -279,7 +343,7 @@ function CustomerQueueStatus() {
             </div>
           </div>
 
-          {isCompleted && (
+          {(isCompleted || isNoShow) && (
             <div className="customer-queue-completed-actions">
               <Link
                 className="customer-queue-join-another"
@@ -297,13 +361,52 @@ function CustomerQueueStatus() {
             </div>
           )}
 
+          {isSkipped && (
+            <div className="customer-queue-return">
+              <h3>Return to Queue</h3>
+
+              <p>
+                Enter the return token sent to your phone when
+                you are ready to receive service.
+              </p>
+
+              <input
+                type="text"
+                placeholder="Enter return token"
+                aria-label="Return token"
+                value={returnToken}
+                onChange={(event) => setReturnToken(event.target.value)}
+                disabled={returningToQueue}
+                autoComplete="off"
+                spellCheck={false}
+              />
+
+              <button
+                type="button"
+                onClick={returnToQueue}
+                disabled={
+                  returningToQueue ||
+                  returnToken.trim().length !== 43
+                }
+              >
+                {returningToQueue
+                  ? "Returning..."
+                  : "Return to Queue"}
+              </button>
+
+              {returnError && (
+                <p role="alert">{returnError}</p>
+              )}
+            </div>
+          )}
+
           {error && (
             <p role="alert">
               {error}
             </p>
           )}
 
-          {!isCompleted && (
+          {!isCompleted && !isNoShow && (
             <div className="customer-queue-update-info">
               <Info size={18} strokeWidth={2} />
 

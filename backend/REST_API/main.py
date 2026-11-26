@@ -143,6 +143,14 @@ async def list_customers1(queue_code: str, request: Request, status_code=201):
 async def count_waiting_customers1(admin_id: int):
     return customerHandler().count_waiting_customers2(admin_id)
 
+# Gets the Customer currently being served in the selected Queue.
+@app.get("/database/customer/get_current_customer/{queue_code}")
+async def get_current_customer1(queue_code: str, request: Request):
+    return customerHandler().get_current_customer2(
+        queue_code,
+        request.session.get("account")
+    )
+
 # Calls the next waiting Customer and schedules a turn-notification SMS.
 @app.delete("/database/customer/pop_customer_from_{queue_code}")
 async def pop_customer(
@@ -191,12 +199,12 @@ async def get_time_remaning1(
 ):
     return customerHandler().get_time_remaning2(phone_number, queue_code)
 
-@app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
-async def complete_customer1(queue_code: str, ticket_id: int):
-    return customerHandler().complete_customer2(
-        queue_code,
-        ticket_id
-    )
+# @app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
+# async def complete_customer1(queue_code: str, ticket_id: int):
+#     return customerHandler().complete_customer2(
+#         queue_code,
+#         ticket_id
+#     )
 
 # ===== Admin API Routes =====
 # These routes handle admin account requests such as creating,
@@ -456,6 +464,98 @@ def get_my_assigned_queues1(request: Request):
     return staffHandler().get_my_assigned_queues2(
         request.session.get("account")
     )
+
+@app.get("/database/staff/count_active")
+def count_active_staff1(request: Request):
+    return staffHandler().count_active_staff2(
+        request.session.get("account")
+    )
+
+# Starts service for the Customer assigned to the logged-in Staff.
+@app.put("/database/customer/start_service/{queue_code}/{ticket_id}")
+async def start_service1(
+    queue_code: str,
+    ticket_id: int,
+    request: Request
+):
+    return customerHandler().start_service2(
+        queue_code,
+        ticket_id,
+        request.session.get("account")
+    )
+
+# Completes the Customer being served by the logged-in Staff.
+@app.put("/database/customer/complete_customer/{queue_code}/{ticket_id}")
+async def complete_customer1(
+    queue_code: str,
+    ticket_id: int,
+    request: Request
+):
+    return customerHandler().complete_customer2(
+        queue_code,
+        ticket_id,
+        request.session.get("account")
+    )
+
+# Cancels the ticket of a Customer who did not arrive.
+@app.put("/database/customer/no_show/{queue_code}/{ticket_id}")
+async def no_show_customer1(
+    queue_code: str,
+    ticket_id: int,
+    request: Request
+):
+    return customerHandler().no_show_customer2(
+        queue_code,
+        ticket_id,
+        request.session.get("account")
+    )
+
+# Temporarily postpones a Customer and sends their secure return token.
+@app.put("/database/customer/skip_customer/{queue_code}/{ticket_id}")
+async def skip_customer1(
+    queue_code: str,
+    ticket_id: int,
+    request: Request,
+    background_tasks: BackgroundTasks
+):
+    customer, return_token = customerHandler().skip_customer2(
+        queue_code,
+        ticket_id,
+        request.session.get("account")
+    )
+
+    background_tasks.add_task(
+        send_sms,
+        customer.phone_number,
+        "TurnFlow: Your ticket has been temporarily skipped.\n\n"
+        f"Ticket: #{customer.ticket_id}\n"
+        f"Queue code: {customer.queue_code}\n\n"
+        "When you are ready, return to your queue through "
+        "the TurnFlow website using this return token:\n\n"
+        f"{return_token}\n\n"
+        "Do not share this token."
+    )
+
+    return customer
+
+# Allows a skipped Customer to return using their secure token.
+@app.put("/database/customer/return_to_queue/{queue_code}/{ticket_id}")
+async def return_customer1(
+    queue_code: str,
+    ticket_id: int,
+    return_token: str = Body(..., embed=True)
+):
+    customer = customerHandler().return_customer2(
+        queue_code,
+        ticket_id,
+        return_token
+    )
+
+    return {
+        "ticket_number": customer.ticket_id,
+        "queue_code": customer.queue_code,
+        "status": customer.status
+    }
 
 ######################################### LOG IN / OUT #########################################
 

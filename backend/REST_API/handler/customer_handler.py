@@ -2,6 +2,7 @@ from backend.REST_API.DAO.customer_DAO import customerDAO, Customer
 from backend.REST_API.DAO.queue_DAO import queueDAO
 from fastapi import HTTPException
 from backend.REST_API.DAO.staff_privilege_DAO import staff_privilegeDAO
+from backend.REST_API.DAO.staff_DAO import staffDAO
 
 class customerHandler:
   def add_customer2(self, new_customer: Customer):
@@ -57,19 +58,45 @@ class customerHandler:
 
   # ===== End Dashboard Statistics =====
 
+  def get_current_customer2(self, queue_code: str, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Staff access required.")
+
+    # Retrieve the Queues assigned to the logged-in Staff member.
+    assigned_queues = staffDAO().get_assigned_queues3(
+      account["staff_id"],
+      account["admin_id"]
+    )
+
+    # Verify that the requested Queue is assigned to this Staff member.
+    selected_queue = next(
+      (queue for queue in assigned_queues
+       if queue["queue_code"] == queue_code),
+      None
+    )
+
+    if selected_queue is None:
+      raise HTTPException(status_code=403, detail="Queue not assigned to Staff.")
+
+    return customerDAO().get_current_customer3(
+      selected_queue["queue_id"],
+      account["staff_id"]
+    )
+
   def pop_customer2(self, queue_code: str, account: dict | None):
     if account is None:
       raise HTTPException(status_code=401, detail="Not logged in.")
 
-    if account.get("role") != "staff" and account.get("role") != "admin":
-      raise HTTPException(status_code=403, detail="Staff or admin access required.")
+    if account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Staff access required.")
 
-    if account.get("role" != "admin"):
-      staff_with_priv = staff_privilegeDAO().get_with_staff_privilege_staff_list3(queue_code)
-
-      if account["full_name"] not in staff_with_priv and account.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Staff missing privileges.")
-    return customerDAO().pop_customer3(queue_code)
+    return customerDAO().pop_customer3(
+      queue_code,
+      account["staff_id"]
+    )
 
 #  def pop_customer2(self, queue_code: str, account: dict | None):
 #    if account is None:
@@ -89,10 +116,99 @@ class customerHandler:
 #      }
 # commented out for future storage
 
-  def complete_customer2(self, queue_code: str, ticket_id: int):
+  # Starts service for the Customer assigned to the logged-in Staff.
+  def start_service2(
+      self,
+      queue_code: str,
+      ticket_id: int,
+      account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Staff access required.")
+
+    return customerDAO().start_service3(
+      queue_code,
+      ticket_id,
+      account["staff_id"]
+    )
+
+  # Completes the Customer currently assigned to the Staff.
+  def complete_customer2(
+      self,
+      queue_code: str,
+      ticket_id: int,
+      account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Staff access required.")
+
     return customerDAO().complete_customer3(
       queue_code,
-      ticket_id
+      ticket_id,
+      account["staff_id"]
+    )
+
+    # Cancels the ticket of a Customer who did not arrive.
+  def no_show_customer2(
+      self,
+      queue_code: str,
+      ticket_id: int,
+      account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Staff access required.")
+
+    return customerDAO().no_show_customer3(
+      queue_code,
+      ticket_id,
+      account["staff_id"]
+    )
+
+  # Temporarily postpones the Customer assigned to the logged-in Staff.
+  def skip_customer2(
+      self,
+      queue_code: str,
+      ticket_id: int,
+      account: dict | None
+  ):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Staff access required.")
+
+    return customerDAO().skip_customer3(
+      queue_code,
+      ticket_id,
+      account["staff_id"]
+    )
+
+  # Allows a skipped Customer to return using their secure token.
+  def return_customer2(
+      self,
+      queue_code: str,
+      ticket_id: int,
+      return_token: str
+  ):
+    if not return_token or len(return_token) != 43:
+      raise HTTPException(
+        status_code=403,
+        detail="Invalid return token."
+      )
+
+    return customerDAO().return_customer3(
+      queue_code,
+      ticket_id,
+      return_token
     )
   
   def get_time_remaning2(self, phone_number: str, queue_code: str):

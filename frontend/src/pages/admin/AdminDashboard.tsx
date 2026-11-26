@@ -18,6 +18,8 @@ function AdminDashboard() {
     const [peopleWaiting, setPeopleWaiting] = useState(0);
     // Stores the number of active queues owned by the logged-in admin
     const [activeQueues, setActiveQueues] = useState(0);
+    // Stores the number of active staff members in this admin's organization
+    const [activeStaff, setActiveStaff] = useState(0);
 
     const [invitationCode, setInvitationCode] = useState<string | null>(null);
 
@@ -46,6 +48,19 @@ function AdminDashboard() {
                     credentials: "include",
                 }
             );
+
+            // Gets the number of active staff members in this admin's organization
+            const activeStaffResponse = await fetch(
+                `${apiBaseUrl}/database/staff/count_active`,
+                {
+                    credentials: "include",
+                }
+            );
+
+            if (activeStaffResponse.ok) {
+                const activeStaffCount = await activeStaffResponse.json();
+                setActiveStaff(activeStaffCount);
+            }
 
             if (activeQueuesResponse.ok) {
                 const activeQueueCount = await activeQueuesResponse.json();
@@ -147,7 +162,7 @@ function AdminDashboard() {
 
                         <div className="admin-dashboard-item">
                             <strong>Active Staff</strong>
-                            <p>&lt;Count&gt;</p>
+                            <p>{activeStaff}</p>
                         </div>
 
                         <div className="admin-dashboard-item">

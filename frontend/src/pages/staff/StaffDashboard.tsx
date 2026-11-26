@@ -3,6 +3,7 @@ import "./StaffDashboard.css";
 
 // Reuses the shared website header
 import Header from "../../components/Header/Header";
+import { Link } from "react-router-dom";
 
 type AssignedQueue = {
     queue_id: number;
@@ -133,13 +134,14 @@ function StaffDashboard() {
                                 </p>
                             ) : (
                                 assignedQueues.map((queue) => (
-                                    <div
+                                    <Link
+                                        to={`/staff/queue-console/${queue.queue_id}`}
                                         className="staff-assigned-row"
                                         key={queue.queue_id}
                                     >
-                                        <span>{queue.queue_name}</span>
-                                        <span>{queue.waiting_count} waiting</span>
-                                    </div>
+                                      <span>{queue.queue_name}</span>
+                                      <span>{queue.waiting_count} waiting</span>
+                                    </Link>
                                 ))
                             )}
                         </div>

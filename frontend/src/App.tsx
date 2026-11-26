@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import DevPage from "./pages/dev/DevPage";
 
 import Home from "./pages/Home/Home";
@@ -16,35 +16,37 @@ import Services_Queues from "./pages/admin/Services_Queues";
 import RequireAdmin from "./components/RequireAdmin/RequireAdmin";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffAccess from "./pages/admin/StaffAccess";
+import QueueConsole from "./pages/staff/QueueConsole";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/join-queue" element={<CustomerJoinQueue />} />
-      <Route path="/find-ticket" element={<CustomerFindTicket />} />
-      <Route path="/service-information" element={<CustomerServiceInfo />} />
-      <Route path="/join-details" element={<CustomerJoinDetails />} />
-      <Route path="/queue-status" element={<CustomerQueueStatus />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup/admin" element={<AdminSignup />} />
-      <Route path="/signup/staff/staff_code" element={<StaffCode />} />
-      <Route path="/signup/staff" element={<StaffSignup />} />
+      <Routes>
+        <Route path="/" element={<Home/>}/>
+        <Route path="/join-queue" element={<CustomerJoinQueue/>}/>
+        <Route path="/find-ticket" element={<CustomerFindTicket/>}/>
+        <Route path="/service-information" element={<CustomerServiceInfo/>}/>
+        <Route path="/join-details" element={<CustomerJoinDetails/>}/>
+        <Route path="/queue-status" element={<CustomerQueueStatus/>}/>
+        <Route path="/login" element={<Login/>}/>
+        <Route path="/signup/admin" element={<AdminSignup/>}/>
+        <Route path="/signup/staff/staff_code" element={<StaffCode/>}/>
+        <Route path="/signup/staff" element={<StaffSignup/>}/>
 
-      {/* Check the Admin session before displaying these pages. */}
-      <Route element={<RequireAdmin />}>
-        <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
-        <Route path="/admin/Services_Queues" element={<Services_Queues />} />
-        <Route path="/admin/StaffAccess" element={<StaffAccess />} />
-      </Route>
+        {/* Check the Admin session before displaying these pages. */}
+        <Route element={<RequireAdmin/>}>
+          <Route path="/admin/AdminDashboard" element={<AdminDashboard/>}/>
+          <Route path="/admin/Services_Queues" element={<Services_Queues/>}/>
+          <Route path="/admin/StaffAccess" element={<StaffAccess/>}/>
+        </Route>
 
-      <Route path="/staff/StaffDashboard" element={<StaffDashboard />} />
+        <Route path="/staff/StaffDashboard" element={<StaffDashboard/>}/>
+        <Route path="/staff/queue-console/:queueId" element={<QueueConsole/>}/>
 
-      {import.meta.env.DEV && (
-        <Route path="/dev" element={<DevPage />} />
-      )}
+        {import.meta.env.DEV && (
+            <Route path="/dev" element={<DevPage/>}/>
+        )}
 
-    </Routes>
+      </Routes>
   );
 }
 

@@ -188,45 +188,76 @@ class staffDAO:
           admin_id: int
   ):
     conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
 
-    query = """
-            DELETE FROM staff_queue_assignment
-            WHERE staff_id = %s
-              AND queue_id = %s
-              AND staff_id IN (
+    try:
+      with conn:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+
+          # Lock the Staff to prevent conflicts with Call Next.
+          cur.execute("""
               SELECT staff_id
               FROM staff
-              WHERE admin_id = %s
+              WHERE staff_id = %s
+                AND admin_id = %s
+              FOR UPDATE
+          """, (staff_id, admin_id))
+
+          if cur.fetchone() is None:
+            raise HTTPException(
+              status_code=404,
+              detail="Staff not found."
             )
-              AND queue_id IN (
-              SELECT queue_id
-              FROM queue
-              WHERE admin_id = %s
+
+          # Verify that the Queue assignment belongs to this Admin.
+          cur.execute("""
+              SELECT staff_queue_assignment.staff_id
+              FROM staff_queue_assignment
+              JOIN queue USING (queue_id)
+              WHERE staff_id = %s
+                AND queue_id = %s
+                AND queue.admin_id = %s
+          """, (staff_id, queue_id, admin_id))
+
+          if cur.fetchone() is None:
+            raise HTTPException(
+              status_code=404,
+              detail="Assignment not found."
             )
-            RETURNING staff_id, queue_id \
-            """
 
-    cur.execute(query, (
-      staff_id,
-      queue_id,
-      admin_id,
-      admin_id,
-    ))
+          # Prevent removing a Queue while the Staff is handling a Customer.
+          cur.execute("""
+              SELECT customer_id
+              FROM customer
+              WHERE staff_id = %s
+                AND queue_id = %s
+                AND status IN ('called', 'attending')
+          """, (staff_id, queue_id))
 
-    result = cur.fetchone()
+          if cur.fetchone() is not None:
+            raise HTTPException(
+              status_code=409,
+              detail="Staff is currently serving a customer in this queue."
+            )
 
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+          cur.execute("""
+              DELETE FROM staff_queue_assignment
+              WHERE staff_id = %s
+                AND queue_id = %s
+              RETURNING staff_id, queue_id
+          """, (staff_id, queue_id))
 
-    if result is None:
-      raise HTTPException(
-        status_code=404,
-        detail="Assignment not found."
-      )
+          result = cur.fetchone()
 
-    return dict(result)
+          if result is None:
+            raise HTTPException(
+              status_code=404,
+              detail="Assignment not found."
+            )
+
+          return dict(result)
+
+    finally:
+      self.pool.putconn(conn)
 
   def get_assigned_queues3(
           self,
@@ -247,7 +278,15 @@ class staffDAO:
                 FROM customer
                 WHERE customer.queue_id = queue.queue_id
                   AND customer.status = 'waiting'
-              ) AS waiting_count
+              ) AS waiting_count,
+              (
+                SELECT customer.ticket_id
+                FROM customer
+                WHERE customer.queue_id = queue.queue_id
+                  AND customer.status = 'waiting'
+                ORDER BY customer.ticket_id ASC
+                LIMIT 1
+              ) AS next_ticket
             FROM staff_queue_assignment
                    JOIN queue
                         ON staff_queue_assignment.queue_id = queue.queue_id
@@ -271,3 +310,22 @@ class staffDAO:
     self.pool.putconn(conn)
 
     return [dict(row) for row in results]
+
+  def count_active_staff3(self, admin_id: int):
+    conn = self.pool.getconn()
+    cur = conn.cursor()
+
+    query = """
+            SELECT COUNT(*)
+            FROM staff
+            WHERE admin_id = %s
+              AND active = TRUE \
+            """
+
+    cur.execute(query, (admin_id,))
+    result = cur.fetchone()[0]
+
+    cur.close()
+    self.pool.putconn(conn)
+
+    return result

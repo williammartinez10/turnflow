@@ -324,7 +324,9 @@ function Services_Queues() {
         );
 
         if (!response.ok) {
-            console.error("Could not create queue.");
+            const error = await response.text();
+            console.error("Could not create queue:", error);
+            alert(`Could not create queue: ${error}`);
             return;
         }
 

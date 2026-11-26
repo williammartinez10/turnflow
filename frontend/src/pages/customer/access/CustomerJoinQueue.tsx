@@ -39,6 +39,7 @@ interface Queue {
  */
 function CustomerJoinQueue() {
   const navigate = useNavigate();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
   const [queueCode, setQueueCode] = useState("");
   const [error, setError] = useState("");
@@ -61,7 +62,7 @@ function CustomerJoinQueue() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/database/queue/get_active_withcode/${queueCode.trim()}`,
+        `${apiBaseUrl}/database/queue/get_active_withcode/${queueCode.trim()}`,
         {
           method: "GET",
         }

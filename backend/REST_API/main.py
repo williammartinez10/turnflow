@@ -61,8 +61,8 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=os.environ["SESSION_SECRET_KEY"],
     max_age=1800,
-    same_site="lax",
-    https_only=False,  # Local HTTP development.
+    same_site="none" if os.environ.get("SESSION_HTTPS_ONLY", "false").lower() == "true" else "lax",
+    https_only=os.environ.get("SESSION_HTTPS_ONLY", "false").lower() == "true",
 )
 
 # Permit local frontend origins to make cookie-based authentication requests.
@@ -75,6 +75,11 @@ origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+origins.extend(
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("FRONTEND_ORIGINS", "").split(",")
+    if origin.strip()
+)
 
 app.add_middleware(
     CORSMiddleware,

@@ -102,7 +102,7 @@ function CustomerJoinDetails() {
     try {
       // The backend determines the service from the selected queue.
       const response = await fetch(
-        "http://127.0.0.1:8000/database/customer/add_customer",
+        `${import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"}/database/customer/add_customer`,
         {
           method: "POST",
           headers: {

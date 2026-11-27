@@ -1,4 +1,4 @@
-from backend.REST_API.DAO.admin_DAO import adminDAO, Admin
+from backend.REST_API.DAO.admin_DAO import adminDAO, Admin, Admin_and_old
 from backend.REST_API.DAO.staff_DAO import staffDAO
 from fastapi import HTTPException
 from pwdlib import PasswordHash
@@ -22,11 +22,13 @@ class adminHandler:
     new_admin.email = new_admin.email.strip().lower()
     new_admin.organization_name = new_admin.organization_name.strip()
 
-#    if account is None:
-#      raise HTTPException(status_code=401, detail="Not logged in.")
+    dao = adminDAO()
+    if dao.count_admin3() > 0:
+      if account is None:
+        raise HTTPException(status_code=401, detail="Not logged in.")
 
-#    if account.get("role") != "admin":
-#      raise HTTPException(status_code=403, detail="Admin access required.")
+      if account.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required.")
 
     # Validate required fields explicitly
     if not new_admin.full_name:
@@ -66,8 +68,6 @@ class adminHandler:
           "an uppercase letter, a number, and a symbol."
         )
       )
-    
-    dao = adminDAO()
 
     # Check both account types because they share the login form.
     if (
@@ -90,6 +90,12 @@ class adminHandler:
     Return None when the account is absent or the password does not match.
     The added role identifies the account for the login/session response.
     """
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+    
     account = adminDAO().get_admin3(email.strip().lower())
 
     if account is None:
@@ -119,3 +125,19 @@ class adminHandler:
       "message": "Admin " + result["email"] + " successfully deleted",
       "admin": result
     }
+
+  def update_admin2(self, updated_admin: Admin_and_old, account: dict | None):
+    # Require an Admin session.
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
+    if not updated_admin.email_old:
+      raise HTTPException(status_code=400, detail="old email is required")
+
+    if not updated_admin.password_old:
+      raise HTTPException(status_code=400, detail="old password is required")
+
+    return adminDAO().update_queue3(updated_admin)

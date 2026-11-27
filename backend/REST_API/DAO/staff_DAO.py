@@ -11,6 +11,14 @@ class Staff(BaseModel):
   full_name: str
   email: str
   password: str
+class Staff_and_old(BaseModel):
+  admin_id: Optional[int] = None
+  full_name: str
+  email: str
+  email_old: str
+  password: str
+  password_old: str
+  organization_name: str
 
 
 class staffDAO:
@@ -79,3 +87,42 @@ class staffDAO:
 
     # Return the deleted account without its password hash.
     return dict(cashe)
+
+  def update_staff3(self, updated_queue: Staff_and_old):
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+
+    query = """
+            UPDATE staff
+            SET
+                full_name = %s,
+                email = %s,
+                password = %s,
+                organization_name = %s
+            WHERE email_old = %s
+              AND password_old = %s
+            RETURNING *
+            """
+
+    cur.execute(query, (
+        updated_queue.full_name,
+        updated_queue.email,
+        updated_queue.password,
+        updated_queue.organization_name,
+        updated_queue.email_old,
+        updated_queue.password_old
+    ))
+
+    cashe = cur.fetchone()
+
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+
+    if cashe is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Staff not found."
+        )
+
+    return Staff(**cashe)

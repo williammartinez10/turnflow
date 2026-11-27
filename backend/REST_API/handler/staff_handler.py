@@ -1,4 +1,4 @@
-from backend.REST_API.DAO.staff_DAO import staffDAO, Staff
+from backend.REST_API.DAO.staff_DAO import staffDAO, Staff, Staff_and_old
 from backend.REST_API.DAO.admin_DAO import adminDAO
 from fastapi import HTTPException
 from pwdlib import PasswordHash
@@ -115,3 +115,19 @@ class staffHandler:
       "message": "Staff " + result["email"] + " successfully deleted",
       "staff": result
     }
+
+  def update_staff2(self, updated_staff: Staff_and_old, account: dict | None):
+    # Require an Admin session.
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+
+    if account.get("role") != "admin" or account.get("role") != "staff":
+      raise HTTPException(status_code=403, detail="Admin or Staff access required.")
+
+    if not updated_staff.email_old:
+      raise HTTPException(status_code=400, detail="old email is required")
+
+    if not updated_staff.password_old:
+      raise HTTPException(status_code=400, detail="old password is required")
+
+    return adminDAO().update_queue3(updated_staff)

@@ -13,6 +13,15 @@ class Admin(BaseModel):
   password: str
   organization_name: str
 
+class Admin_and_old(BaseModel):
+  admin_id: Optional[int] = None
+  full_name: str
+  email: str
+  email_old: str
+  password: str
+  password_old: str
+  organization_name: str
+
 
 class adminDAO:
   def __init__(self):
@@ -81,3 +90,59 @@ class adminDAO:
 
     # Return the deleted account without its password hash.
     return dict(cashe)
+
+  def count_admin3(self):
+    conn = self.pool.getconn()
+    cur = conn.cursor()
+
+    query = """
+        SELECT COUNT(*)
+        FROM admin
+        """
+
+    cur.execute(query,)
+    count = cur.fetchone()[0]
+
+    cur.close()
+    self.pool.putconn(conn)
+
+    return count
+  
+  def update_admin3(self, updated_queue: Admin_and_old):
+    conn = self.pool.getconn()
+    cur = conn.cursor(cursor_factory=DictCursor)
+
+    query = """
+            UPDATE admin
+            SET
+                full_name = %s,
+                email = %s,
+                password = %s,
+                organization_name = %s
+            WHERE email_old = %s
+              AND password_old = %s
+            RETURNING *
+            """
+
+    cur.execute(query, (
+        updated_queue.full_name,
+        updated_queue.email,
+        updated_queue.password,
+        updated_queue.organization_name,
+        updated_queue.email_old,
+        updated_queue.password_old
+    ))
+
+    cashe = cur.fetchone()
+
+    conn.commit()
+    cur.close()
+    self.pool.putconn(conn)
+
+    if cashe is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Admin not found."
+        )
+
+    return Admin(**cashe)

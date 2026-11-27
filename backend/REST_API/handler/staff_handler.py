@@ -1,4 +1,4 @@
-from backend.REST_API.DAO.staff_DAO import staffDAO, Staff
+from backend.REST_API.DAO.staff_DAO import staffDAO, Staff, Staff_and_old
 from backend.REST_API.DAO.admin_DAO import adminDAO
 from fastapi import HTTPException
 from pwdlib import PasswordHash
@@ -250,4 +250,60 @@ class staffHandler:
     return staffDAO().get_assigned_queues3(
       account["staff_id"],
       account["admin_id"]
+    )
+
+  def update_staff2(self, updated: Staff_and_old, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+    role = account.get("role")
+    if role not in ("admin", "staff"):
+      raise HTTPException(status_code=403, detail="Admin or staff access required.")
+
+    updated.full_name = updated.full_name.strip()
+    updated.email = updated.email.strip().lower()
+    updated.email_old = updated.email_old.strip().lower()
+
+    if len(updated.full_name.split()) < 2:
+      raise HTTPException(status_code=400, detail="Enter your first and last name.")
+    if re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", updated.email) is None:
+      raise HTTPException(status_code=400, detail="Enter a valid email address.")
+    if not updated.email_old or not updated.password_old:
+      raise HTTPException(status_code=400, detail="Current email and password are required.")
+
+    password = updated.password
+    categories = [unicodedata.category(character) for character in password]
+    if (
+      len(password) < 8
+      or "Lu" not in categories
+      or "Nd" not in categories
+      or not any(category.startswith(("P", "S")) for category in categories)
+    ):
+      raise HTTPException(
+        status_code=400,
+        detail="Password must contain at least 8 characters, an uppercase letter, a number, and a symbol."
+      )
+
+    dao = staffDAO()
+    current = dao.get_staff3(updated.email_old)
+    if current is None:
+      raise HTTPException(status_code=401, detail="Invalid current email or password.")
+    if current["admin_id"] != account.get("admin_id") or (
+      role == "staff" and current["staff_id"] != account.get("staff_id")
+    ):
+      raise HTTPException(status_code=403, detail="Staff account is outside your access.")
+    if not password_hash.verify(updated.password_old, current["password"]):
+      raise HTTPException(status_code=401, detail="Invalid current email or password.")
+
+    if updated.email != updated.email_old and (
+      dao.get_staff3(updated.email) is not None
+      or adminDAO().get_admin3(updated.email) is not None
+    ):
+      raise HTTPException(status_code=409, detail="Email is already registered.")
+
+    return dao.update_staff3(
+      updated,
+      current["staff_id"],
+      current["admin_id"],
+      current["password"],
+      password_hash.hash(password),
     )

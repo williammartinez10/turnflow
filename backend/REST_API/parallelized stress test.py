@@ -18,11 +18,11 @@ class stressTestWrapper:
 threads = []
 phone_num_gen = 111
 customer= {
-          "phone_number": str(phone_num_gen) + "-" + str(phone_num_gen) + "-" + str(phone_num_gen)+ "5",
-          "queue_code": "games division",
+          "phone_number": str(phone_num_gen) + "-" + str(phone_num_gen) + "-" + str(phone_num_gen)+ "2",
+          "queue_code": "NUU-979-46",
 }
 for i in range(40):
-  customer["phone_number"] = str(phone_num_gen) + "-" + str(phone_num_gen) + "-" + str(phone_num_gen)+ "5"
+  customer["phone_number"] = str(phone_num_gen) + "-" + str(phone_num_gen) + "-" + str(phone_num_gen)+ "2"
   phone_num_gen += 1
   c_thread = threading.Thread(target=stressTestWrapper.Thread_func, kwargs=customer)
   threads.append(c_thread)

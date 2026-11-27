@@ -16,6 +16,14 @@ class Staff(BaseModel):
   active: Optional[bool] = False
 
 
+class Staff_and_old(BaseModel):
+  full_name: str
+  email: str
+  email_old: str
+  password: str
+  password_old: str
+
+
 class staffDAO:
   def __init__(self):
     self.pool = SimpleConnectionPool(
@@ -271,3 +279,30 @@ class staffDAO:
     self.pool.putconn(conn)
 
     return [dict(row) for row in results]
+
+  def update_staff3(self, updated: Staff_and_old, staff_id: int, admin_id: int,
+                    old_password_hash: str, new_password_hash: str):
+    conn = self.pool.getconn()
+    try:
+      with conn:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+          cur.execute("""
+            UPDATE staff
+            SET full_name = %s, email = %s, password = %s
+            WHERE staff_id = %s AND admin_id = %s AND email = %s AND password = %s
+            RETURNING staff_id, full_name, email, admin_id, active
+          """, (
+            updated.full_name,
+            updated.email,
+            new_password_hash,
+            staff_id,
+            admin_id,
+            updated.email_old,
+            old_password_hash,
+          ))
+          result = cur.fetchone()
+          if result is None:
+            raise HTTPException(status_code=409, detail="Account changed. Retry the update.")
+          return dict(result)
+    finally:
+      self.pool.putconn(conn)

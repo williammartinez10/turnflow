@@ -21,11 +21,13 @@ from backend.REST_API.DAO.queue_DAO import (
 from backend.REST_API.handler.admin_handler import adminHandler
 from backend.REST_API.DAO.admin_DAO import (
     Admin,
+    Admin_and_old
 )
 
 from backend.REST_API.handler.staff_handler import staffHandler
 from backend.REST_API.DAO.staff_DAO import (
     Staff,
+    Staff_and_old
 )
 
 from backend.REST_API.handler.staff_privilege_handler import staff_privilegeHandler
@@ -234,10 +236,17 @@ def add_admin1(new_admin: Admin, request: Request, status_code=201):
 # Credential verification uses POST; get-prefixed routes retrieve data.
 @app.post("/database/admin/verify_admin", status_code=201)
 def verify_admin1(
+    request: Request,
     email: str = Body(...),
     password: str = Body(...), status_code=201
 ):
     """ Verify admin credentials and return safe account details without creating a session. """
+    session_account = request.session.get("account")
+    if session_account is None:
+        raise HTTPException(status_code=401, detail="Not logged in.")
+    if session_account.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required.")
+
     account = adminHandler().get_admin2(email, password)
 
     if account is None:
@@ -250,6 +259,14 @@ def verify_admin1(
 @app.delete("/database/admin/delete_admin")
 def delete_admin1(new_admin: Admin, request: Request, status_code=201):
     return adminHandler().delete_admin2(new_admin, request.session.get("account"))
+
+@app.put("/database/admin/update_admin")
+def update_admin1(updated_admin: Admin_and_old, request: Request):
+    account = request.session.get("account")
+    result = adminHandler().update_admin2(updated_admin, account)
+    request.session["account"] = {**account, **result}
+    return result
+
 
 @app.put("/database/admin/generate_invitation_code")
 def generate_invitation_code1(request: Request):
@@ -391,6 +408,15 @@ def verify_staff1(
             detail="Invalid email or password."
         )
     return account
+
+@app.put("/database/staff/update_staff")
+def update_staff1(updated_staff: Staff_and_old, request: Request):
+    account = request.session.get("account")
+    result = staffHandler().update_staff2(updated_staff, account)
+    if account.get("role") == "staff":
+        request.session["account"] = {**account, **result}
+    return result
+
 
 @app.delete("/database/staff/delete_staff")
 def delete_staff1(new_Staff: Staff, request: Request, status_code=201):
@@ -560,3 +586,16 @@ def logout1(request: Request):
   #admin login should b required to delete admin accounts
 
   #it appears the timeout runs out regardless of if your doing something or not
+
+
+
+
+
+
+  #######################################################
+                 ##Welcome to the Cloud##
+  #######################################################
+
+    #the REST API webservice is located at:
+      #https://turnflow-rest-api-varo.onrender.com
+      #and the Database at PG_DB_CONFIG in dbconfig.py

@@ -14,6 +14,15 @@ class Admin(BaseModel):
   organization_name: str
   invitation_code: Optional[str] = None
 
+class Admin_and_old(BaseModel):
+  admin_id: Optional[int] = None
+  full_name: str
+  email: str
+  email_old: str
+  password: str
+  password_old: str
+  organization_name: str
+
 
 class adminDAO:
   def __init__(self):
@@ -126,3 +135,41 @@ class adminDAO:
     self.pool.putconn(conn)
 
     return dict(result) if result is not None else None
+
+  def count_admin3(self):
+    conn = self.pool.getconn()
+    try:
+      with conn:
+        with conn.cursor() as cur:
+          cur.execute("SELECT COUNT(*) FROM admin")
+          return cur.fetchone()[0]
+    finally:
+      self.pool.putconn(conn)
+
+  def update_admin3(self, updated: Admin_and_old, admin_id: int,
+                    old_password_hash: str, new_password_hash: str):
+    conn = self.pool.getconn()
+    try:
+      with conn:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+          cur.execute("""
+            UPDATE admin
+            SET full_name = %s, email = %s, password = %s,
+                organization_name = %s
+            WHERE admin_id = %s AND email = %s AND password = %s
+            RETURNING admin_id, full_name, email, organization_name
+          """, (
+            updated.full_name,
+            updated.email,
+            new_password_hash,
+            updated.organization_name,
+            admin_id,
+            updated.email_old,
+            old_password_hash,
+          ))
+          result = cur.fetchone()
+          if result is None:
+            raise HTTPException(status_code=409, detail="Account changed. Retry the update.")
+          return dict(result)
+    finally:
+      self.pool.putconn(conn)

@@ -1,4 +1,4 @@
-from backend.REST_API.DAO.admin_DAO import adminDAO, Admin
+from backend.REST_API.DAO.admin_DAO import adminDAO, Admin, Admin_and_old
 from backend.REST_API.DAO.staff_DAO import staffDAO
 from fastapi import HTTPException
 from pwdlib import PasswordHash
@@ -23,11 +23,13 @@ class adminHandler:
     new_admin.email = new_admin.email.strip().lower()
     new_admin.organization_name = new_admin.organization_name.strip()
 
-#    if account is None:
-#      raise HTTPException(status_code=401, detail="Not logged in.")
+    dao = adminDAO()
+    if dao.count_admin3() > 0:
+      if account is None:
+        raise HTTPException(status_code=401, detail="Not logged in.")
 
-#    if account.get("role") != "admin":
-#      raise HTTPException(status_code=403, detail="Admin access required.")
+      if account.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required.")
 
     # Validate required fields explicitly
     if not new_admin.full_name:
@@ -67,8 +69,6 @@ class adminHandler:
           "an uppercase letter, a number, and a symbol."
         )
       )
-    
-    dao = adminDAO()
 
     # Check both account types because they share the login form.
     if (
@@ -153,3 +153,59 @@ class adminHandler:
       )
 
     return admin
+
+  def update_admin2(self, updated: Admin_and_old, account: dict | None):
+    if account is None:
+      raise HTTPException(status_code=401, detail="Not logged in.")
+    if account.get("role") != "admin":
+      raise HTTPException(status_code=403, detail="Admin access required.")
+
+    updated.full_name = updated.full_name.strip()
+    updated.email = updated.email.strip().lower()
+    updated.email_old = updated.email_old.strip().lower()
+
+    updated.organization_name = updated.organization_name.strip()
+    if not updated.organization_name:
+      raise HTTPException(status_code=400, detail="Organization is required.")
+
+    if len(updated.full_name.split()) < 2:
+      raise HTTPException(status_code=400, detail="Enter your first and last name.")
+    if re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", updated.email) is None:
+      raise HTTPException(status_code=400, detail="Enter a valid email address.")
+    if not updated.email_old or not updated.password_old:
+      raise HTTPException(status_code=400, detail="Current email and password are required.")
+
+    password = updated.password
+    categories = [unicodedata.category(character) for character in password]
+    if (
+      len(password) < 8
+      or "Lu" not in categories
+      or "Nd" not in categories
+      or not any(category.startswith(("P", "S")) for category in categories)
+    ):
+      raise HTTPException(
+        status_code=400,
+        detail="Password must contain at least 8 characters, an uppercase letter, a number, and a symbol."
+      )
+
+    dao = adminDAO()
+    current = dao.get_admin3(updated.email_old)
+    if current is None:
+      raise HTTPException(status_code=401, detail="Invalid current email or password.")
+    if current["admin_id"] != account.get("admin_id"):
+      raise HTTPException(status_code=403, detail="Admin account is outside your access.")
+    if not password_hash.verify(updated.password_old, current["password"]):
+      raise HTTPException(status_code=401, detail="Invalid current email or password.")
+
+    if updated.email != updated.email_old and (
+      dao.get_admin3(updated.email) is not None
+      or staffDAO().get_staff3(updated.email) is not None
+    ):
+      raise HTTPException(status_code=409, detail="Email is already registered.")
+
+    return dao.update_admin3(
+      updated,
+      current["admin_id"],
+      current["password"],
+      password_hash.hash(password),
+    )

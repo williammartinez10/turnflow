@@ -1,8 +1,7 @@
-from backend.REST_API.dbconfig import PG_DB_CONFIG, POOL_CONFIG
+from backend.REST_API.dbpool import database_cursor
 from pydantic import BaseModel
 from typing import Optional
 from psycopg2.extras import DictCursor
-from psycopg2.pool import SimpleConnectionPool
 from fastapi import HTTPException
 
 
@@ -25,68 +24,54 @@ class Staff_and_old(BaseModel):
 
 
 class staffDAO:
-  def __init__(self):
-    self.pool = SimpleConnectionPool(
-      POOL_CONFIG["minconn"], POOL_CONFIG["maxconn"], **PG_DB_CONFIG
-    )
-
   def add_staff3(self, new_staff: Staff, password_hash: str):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
-    query = """
-    INSERT INTO staff
-    (full_name, email, password, admin_id)
-    VALUES (%s, %s, %s, %s)
-    RETURNING staff_id, full_name, email, admin_id
-    """
-    # Store the password hash supplied by the signup handler.
-    cur.execute(query, (
-      new_staff.full_name,
-      new_staff.email,
-      password_hash,
-      new_staff.admin_id,
-    ))
-    cashe = cur.fetchone()
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
+      query = """
+      INSERT INTO staff
+      (full_name, email, password, admin_id)
+      VALUES (%s, %s, %s, %s)
+      RETURNING staff_id, full_name, email, admin_id
+      """
+      # Store the password hash supplied by the signup handler.
+      cur.execute(query, (
+        new_staff.full_name,
+        new_staff.email,
+        password_hash,
+        new_staff.admin_id,
+      ))
+      cashe = cur.fetchone()
+      conn.commit()
     return dict(cashe)
 
   def get_staff3(self, email: str):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
-    query = """
-    SELECT staff.staff_id, staff.full_name, staff.email, staff.password, staff.admin_id, staff.active, admin.organization_name
-    FROM staff
-    JOIN admin
-    ON staff.admin_id = admin.admin_id
-    WHERE staff.email = %s
-    """
-    # The handler verifies the stored hash against the entered password.
-    cur.execute(query, (email,))
-    cashe = cur.fetchone()
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
+      query = """
+      SELECT staff.staff_id, staff.full_name, staff.email, staff.password, staff.admin_id, staff.active, admin.organization_name
+      FROM staff
+      JOIN admin
+      ON staff.admin_id = admin.admin_id
+      WHERE staff.email = %s
+      """
+      # The handler verifies the stored hash against the entered password.
+      cur.execute(query, (email,))
+      cashe = cur.fetchone()
+      conn.commit()
     return dict(cashe) if cashe is not None else None
 
   def delete_staff3(self, staff: Staff):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
-    query = """
-    DELETE FROM staff
-    WHERE staff_id = (
-      SELECT staff_id FROM staff
-      WHERE staff_id = %s
-      LIMIT 1
-    )
-    RETURNING staff_id, full_name, email
-    """
-    cur.execute(query, (staff.staff_id,))
-    cashe = cur.fetchone()
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
+      query = """
+      DELETE FROM staff
+      WHERE staff_id = (
+        SELECT staff_id FROM staff
+        WHERE staff_id = %s
+        LIMIT 1
+      )
+      RETURNING staff_id, full_name, email
+      """
+      cur.execute(query, (staff.staff_id,))
+      cashe = cur.fetchone()
+      conn.commit()
 
     if cashe is None:
       raise HTTPException(status_code=404, detail="staff missing")
@@ -95,26 +80,23 @@ class staffDAO:
     return dict(cashe)
 
   def set_active3(self, staff_id: int, active: bool):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
 
-    query = """
-            UPDATE staff
-            SET active = %s
-            WHERE staff_id = %s
-            RETURNING staff_id, active \
-            """
+      query = """
+              UPDATE staff
+              SET active = %s
+              WHERE staff_id = %s
+              RETURNING staff_id, active \
+              """
 
-    cur.execute(query, (
-      active,
-      staff_id,
-    ))
+      cur.execute(query, (
+        active,
+        staff_id,
+      ))
 
-    result = cur.fetchone()
+      result = cur.fetchone()
 
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+      conn.commit()
 
     if result is None:
       raise HTTPException(
@@ -125,25 +107,21 @@ class staffDAO:
     return dict(result)
 
   def get_staff_list3(self, admin_id: int):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
 
-    query = """
-            SELECT
-              staff_id,
-              full_name,
-              email,
-              active
-            FROM staff
-            WHERE admin_id = %s
-            ORDER BY full_name \
-            """
+      query = """
+              SELECT
+                staff_id,
+                full_name,
+                email,
+                active
+              FROM staff
+              WHERE admin_id = %s
+              ORDER BY full_name \
+              """
 
-    cur.execute(query, (admin_id,))
-    results = cur.fetchall()
-
-    cur.close()
-    self.pool.putconn(conn)
+      cur.execute(query, (admin_id,))
+      results = cur.fetchall()
 
     return [dict(row) for row in results]
 
@@ -153,33 +131,30 @@ class staffDAO:
           queue_id: int,
           admin_id: int
   ):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
 
-    query = """
-            INSERT INTO staff_queue_assignment (staff_id, queue_id)
-            SELECT staff.staff_id, queue.queue_id
-            FROM staff, queue
-            WHERE staff.staff_id = %s
-              AND staff.admin_id = %s
-              AND queue.queue_id = %s
-              AND queue.admin_id = %s
-            ON CONFLICT (staff_id, queue_id) DO NOTHING
-            RETURNING staff_id, queue_id \
-            """
+      query = """
+              INSERT INTO staff_queue_assignment (staff_id, queue_id)
+              SELECT staff.staff_id, queue.queue_id
+              FROM staff, queue
+              WHERE staff.staff_id = %s
+                AND staff.admin_id = %s
+                AND queue.queue_id = %s
+                AND queue.admin_id = %s
+              ON CONFLICT (staff_id, queue_id) DO NOTHING
+              RETURNING staff_id, queue_id \
+              """
 
-    cur.execute(query, (
-      staff_id,
-      admin_id,
-      queue_id,
-      admin_id,
-    ))
+      cur.execute(query, (
+        staff_id,
+        admin_id,
+        queue_id,
+        admin_id,
+      ))
 
-    result = cur.fetchone()
+      result = cur.fetchone()
 
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+      conn.commit()
 
     if result is None:
       raise HTTPException(
@@ -195,38 +170,35 @@ class staffDAO:
           queue_id: int,
           admin_id: int
   ):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
 
-    query = """
-            DELETE FROM staff_queue_assignment
-            WHERE staff_id = %s
-              AND queue_id = %s
-              AND staff_id IN (
-              SELECT staff_id
-              FROM staff
-              WHERE admin_id = %s
-            )
-              AND queue_id IN (
-              SELECT queue_id
-              FROM queue
-              WHERE admin_id = %s
-            )
-            RETURNING staff_id, queue_id \
-            """
+      query = """
+              DELETE FROM staff_queue_assignment
+              WHERE staff_id = %s
+                AND queue_id = %s
+                AND staff_id IN (
+                SELECT staff_id
+                FROM staff
+                WHERE admin_id = %s
+              )
+                AND queue_id IN (
+                SELECT queue_id
+                FROM queue
+                WHERE admin_id = %s
+              )
+              RETURNING staff_id, queue_id \
+              """
 
-    cur.execute(query, (
-      staff_id,
-      queue_id,
-      admin_id,
-      admin_id,
-    ))
+      cur.execute(query, (
+        staff_id,
+        queue_id,
+        admin_id,
+        admin_id,
+      ))
 
-    result = cur.fetchone()
+      result = cur.fetchone()
 
-    conn.commit()
-    cur.close()
-    self.pool.putconn(conn)
+      conn.commit()
 
     if result is None:
       raise HTTPException(
@@ -241,68 +213,59 @@ class staffDAO:
           staff_id: int,
           admin_id: int
   ):
-    conn = self.pool.getconn()
-    cur = conn.cursor(cursor_factory=DictCursor)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur):
 
-    query = """
-            SELECT
-              queue.queue_id,
-              queue.queue_name,
-              queue.queue_code,
-              queue.active,
-              (
-                SELECT COUNT(*)
-                FROM customer
-                WHERE customer.queue_id = queue.queue_id
-                  AND customer.status = 'waiting'
-              ) AS waiting_count
-            FROM staff_queue_assignment
-                   JOIN queue
-                        ON staff_queue_assignment.queue_id = queue.queue_id
-                   JOIN staff
-                        ON staff_queue_assignment.staff_id = staff.staff_id
-            WHERE staff.staff_id = %s
-              AND staff.admin_id = %s
-              AND queue.admin_id = %s
-            ORDER BY queue.queue_name \
-            """
+      query = """
+              SELECT
+                queue.queue_id,
+                queue.queue_name,
+                queue.queue_code,
+                queue.active,
+                (
+                  SELECT COUNT(*)
+                  FROM customer
+                  WHERE customer.queue_id = queue.queue_id
+                    AND customer.status = 'waiting'
+                ) AS waiting_count
+              FROM staff_queue_assignment
+                     JOIN queue
+                          ON staff_queue_assignment.queue_id = queue.queue_id
+                     JOIN staff
+                          ON staff_queue_assignment.staff_id = staff.staff_id
+              WHERE staff.staff_id = %s
+                AND staff.admin_id = %s
+                AND queue.admin_id = %s
+              ORDER BY queue.queue_name \
+              """
 
-    cur.execute(query, (
-      staff_id,
-      admin_id,
-      admin_id,
-    ))
+      cur.execute(query, (
+        staff_id,
+        admin_id,
+        admin_id,
+      ))
 
-    results = cur.fetchall()
-
-    cur.close()
-    self.pool.putconn(conn)
+      results = cur.fetchall()
 
     return [dict(row) for row in results]
 
   def update_staff3(self, updated: Staff_and_old, staff_id: int, admin_id: int,
                     old_password_hash: str, new_password_hash: str):
-    conn = self.pool.getconn()
-    try:
-      with conn:
-        with conn.cursor(cursor_factory=DictCursor) as cur:
-          cur.execute("""
-            UPDATE staff
-            SET full_name = %s, email = %s, password = %s
-            WHERE staff_id = %s AND admin_id = %s AND email = %s AND password = %s
-            RETURNING staff_id, full_name, email, admin_id, active
-          """, (
-            updated.full_name,
-            updated.email,
-            new_password_hash,
-            staff_id,
-            admin_id,
-            updated.email_old,
-            old_password_hash,
-          ))
-          result = cur.fetchone()
-          if result is None:
-            raise HTTPException(status_code=409, detail="Account changed. Retry the update.")
-          return dict(result)
-    finally:
-      self.pool.putconn(conn)
+    with database_cursor(cursor_factory=DictCursor) as (conn, cur), conn:
+      cur.execute("""
+        UPDATE staff
+        SET full_name = %s, email = %s, password = %s
+        WHERE staff_id = %s AND admin_id = %s AND email = %s AND password = %s
+        RETURNING staff_id, full_name, email, admin_id, active
+      """, (
+        updated.full_name,
+        updated.email,
+        new_password_hash,
+        staff_id,
+        admin_id,
+        updated.email_old,
+        old_password_hash,
+      ))
+      result = cur.fetchone()
+      if result is None:
+        raise HTTPException(status_code=409, detail="Account changed. Retry the update.")
+      return dict(result)

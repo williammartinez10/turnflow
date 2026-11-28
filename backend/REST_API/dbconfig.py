@@ -1,6 +1,6 @@
 POOL_CONFIG = {
     "minconn": 5,
-    "maxconn": 100,
+    "maxconn": 20,
 }
 
 PG_DB_CONFIG = {
